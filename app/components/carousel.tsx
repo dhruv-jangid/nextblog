@@ -1,10 +1,10 @@
 import Button from "@/components/button";
 import Image from "next/image";
-import User from "@/app/components/user";
+import User from "@/components/user";
 
 export default function Carousel() {
   return (
-    <div className="relative h-[550px]">
+    <div className="relative h-[550px] mb-10">
       <Image
         src="/images/urban-gardening/urban-gardening-1.jpg"
         alt="Urban Gardening"

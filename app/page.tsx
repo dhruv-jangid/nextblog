@@ -1,11 +1,22 @@
+"use client";
+
 import Carousel from "@/app/components/carousel";
-import BlogGrid from "@/app/components/bloggrid";
+import BlogGrid from "@/components/bloggrid";
+
+type Blog = {
+  blogImage: string;
+  blogTitle: string;
+  blogDate: string;
+  blogCategory: string;
+  userName: string;
+  userImage: string;
+}[];
 
 export default function Home() {
   return (
     <>
       <Carousel />
-      <BlogGrid />
+      {/* <BlogGrid blogs={blogs} /> */}
     </>
   );
 }

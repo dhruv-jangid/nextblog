@@ -1,10 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { MdOutlineEmail } from "react-icons/md";
 import { FaGithub, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <div className="py-16 bg-[#191919] rounded-t-2xl flex justify-around">
+    <div className="py-16 bg-[#191919] rounded-t-2xl flex justify-around mt-10">
       <div className="flex flex-col gap-2 w-1/4">
         <h1 className="text-2xl font-bold pb-2">About</h1>
         <div className="flex gap-2 items-center">
@@ -15,7 +17,7 @@ export default function Footer() {
         </div>
         <div className="flex gap-2 items-center">
           <FaInstagram size={20} />
-          <Link href="https://www.instagram.com/toxic_lmao/" target="_blank">
+          <Link href="https://www.instagram.com/toxic.lmao/" target="_blank">
             Instagram
           </Link>
         </div>
