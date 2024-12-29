@@ -9,7 +9,7 @@ export const pool = new Pool({
   // },
 });
 
-export const query = async (text, params) => {
+export const query = async (text: string, params: any) => {
   try {
     const result = await pool.query(text, params);
     return result.rows;
@@ -18,3 +18,10 @@ export const query = async (text, params) => {
     throw error;
   }
 };
+
+process.on("SIGTERM", async () => {
+  console.log("Closing database pool...");
+  await pool.end();
+  console.log("Database pool closed.");
+  process.exit(0);
+});

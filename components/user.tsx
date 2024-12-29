@@ -26,6 +26,7 @@ export default function User({
             alt={name}
             width={42}
             height={42}
+            placeholder="blur"
             className="rounded-full"
           />
         </div>

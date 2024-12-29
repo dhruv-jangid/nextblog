@@ -1,6 +1,6 @@
 "use client";
 
-import Carousel from "@/app/components/carousel";
+import Carousel from "@/components/carousel";
 import BlogGrid from "@/components/bloggrid";
 
 type Blog = {

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import login2 from "@/public/images/login2.jpg";
 
 export default function Login() {
   return (
@@ -51,13 +52,13 @@ export default function Login() {
       </div>
       <div className="rounded-full rounded-tr-none overflow-hidden">
         <Image
-          src="/images/login2.jpg"
+          src={login2}
           alt="The adventure begins"
           width={600}
           height={600}
           priority={true}
+          placeholder="blur"
           sizes="(max-width: 768px) 100vw, 50vw"
-          className=""
         />
       </div>
     </div>
