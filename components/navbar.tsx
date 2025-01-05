@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import Button from "./button";
+import Image from "next/image";
+import { useContext } from "react";
+import { UserContext } from "@/context/userContext";
+import userImg from "@/public/images/users/user1.jpg";
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const user = useContext(UserContext);
 
   return (
     <div className="text-2xl flex justify-between items-center p-8 sticky top-0 z-50 backdrop-blur-lg rounded-b-2xl">
@@ -14,9 +17,21 @@ export default function Navbar() {
         <Link href="/">Home</Link>
         <Link href="/blogs">Blogs</Link>
         <Link href="/contact">Contact</Link>
-        <Link href="/login">
-          <Button>Login</Button>
-        </Link>
+        {user?.user.isLoggedIn ? (
+          <div>
+            <Image
+              src={userImg}
+              width="42"
+              height="42"
+              alt="User Image"
+              className="rounded-full"
+            />
+          </div>
+        ) : (
+          <Link href="/login">
+            <Button>Login</Button>
+          </Link>
+        )}
       </div>
     </div>
   );

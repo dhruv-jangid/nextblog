@@ -4,9 +4,10 @@ import Image from "next/image";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import login2 from "@/public/images/login2.jpg";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { handleSubmit } from "./handleSubmit";
 import { permanentRedirect } from "next/navigation";
+import { UserContext } from "@/context/userContext";
 
 interface userType {
   username: string;
@@ -17,6 +18,7 @@ interface userType {
 }
 
 export default function Login() {
+  const user = useContext(UserContext);
   const [data, setData] = useState<userType>({
     username: "",
     password: "",
@@ -35,6 +37,10 @@ export default function Login() {
     const result = await handleSubmit(data);
 
     if (result.success) {
+      user?.setUser({
+        isLoggedIn: true,
+        name: "Toxic Lmao",
+      });
       permanentRedirect("/");
     } else {
       setData({ ...data, message: result.message });

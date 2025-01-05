@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import localFont from "next/font/local";
+import { UserProvider } from "@/context/userContext";
 
 const degular = localFont({
   src: "../public/fonts/DegularVariable.ttf",
@@ -21,9 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={degular.className}>
       <body className="bg-[#0F0F0F] text-white w-[70vw] mx-auto">
-        <Navbar />
-        {children}
-        <Footer />
+        <UserProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </UserProvider>
       </body>
     </html>
   );
