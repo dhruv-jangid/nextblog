@@ -39,8 +39,9 @@ export default function Login() {
     if (result.success) {
       user?.setUser({
         isLoggedIn: true,
-        name: "Toxic Lmao",
+        userData: result.userData,
       });
+
       permanentRedirect("/");
     } else {
       setData({ ...data, message: result.message });

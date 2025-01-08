@@ -18,15 +18,22 @@ export default function Navbar() {
         <Link href="/blogs">Blogs</Link>
         <Link href="/contact">Contact</Link>
         {user?.user.isLoggedIn ? (
-          <div>
-            <Image
-              src={userImg}
-              width="42"
-              height="42"
-              alt="User Image"
-              className="rounded-full"
-            />
-          </div>
+          <>
+            <Link href="/createblog">
+              <button className="bg-[#EEEEEE] px-3 py-1 rounded-lg w-max text-black hover:bg-[#EEEEEE]/80 transition-all duration-300">
+                Create Blog
+              </button>
+            </Link>
+            <div className="cursor-pointer">
+              <Image
+                src={userImg}
+                width="42"
+                height="42"
+                alt="User Image"
+                className="rounded-full"
+              />
+            </div>
+          </>
         ) : (
           <Link href="/login">
             <Button>Login</Button>

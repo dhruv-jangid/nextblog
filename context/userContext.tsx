@@ -9,7 +9,7 @@ import React, {
 
 interface User {
   isLoggedIn: boolean;
-  name: string;
+  userData: object;
 }
 
 export const UserContext = createContext<
@@ -18,8 +18,8 @@ export const UserContext = createContext<
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>({
-    isLoggedIn: false,
-    name: "Toxic Lmao",
+    isLoggedIn: true,
+    userData: {},
   });
 
   return (

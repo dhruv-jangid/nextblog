@@ -13,6 +13,14 @@ export const query = async (
   return result.rows;
 };
 
+export const allBlogs = async () => {
+  const allBlogs = await query(
+    "SELECT blogid, title, date, category, userid, name FROM users JOIN blogs ON users.userid = blogs.user_id;"
+  );
+
+  return allBlogs;
+};
+
 const shutdown = async (signal: string) => {
   console.log(`Received ${signal}, closing database pool...`);
   await pool.end();

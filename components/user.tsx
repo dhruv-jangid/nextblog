@@ -1,3 +1,4 @@
+import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 
 export default function User({
@@ -21,12 +22,11 @@ export default function User({
             </h3>
             <h6 className="text-gray-300 leading-none self-end">{date}</h6>
           </div>
-          <Image
+          <CldImage
             src={src}
             alt={name}
             width={42}
             height={42}
-            placeholder="blur"
             className="rounded-full"
           />
         </div>

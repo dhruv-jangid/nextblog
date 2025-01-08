@@ -13,13 +13,12 @@ export const handleSubmit = async (formData: formDataProps) => {
   const { username, password, email, login } = formData;
 
   if (login) {
-    const result = await query(
-      "SELECT name, password FROM users WHERE name = $1;",
-      [username]
-    );
+    const result = await query("SELECT * FROM users WHERE name = $1;", [
+      username,
+    ]);
 
     if (result.length > 0 && result[0].password === password) {
-      return { success: true, message: "Login successful!" };
+      return { success: true, userData: result[0] };
     }
 
     return { success: false, message: "Invalid username or password." };
