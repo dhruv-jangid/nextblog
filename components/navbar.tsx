@@ -5,14 +5,14 @@ import Button from "./button";
 import Image from "next/image";
 import { useContext } from "react";
 import { UserContext } from "@/context/userContext";
-import userImg from "@/public/images/users/user1.jpg";
+import { VscAccount } from "react-icons/vsc";
 
 export default function Navbar() {
   const user = useContext(UserContext);
 
   return (
     <div className="text-2xl flex justify-between items-center p-8 sticky top-0 z-50 backdrop-blur-lg rounded-b-2xl">
-      <h1 className="font-semibold text-2xl">BlogLust</h1>
+      <h1 className="font-semibold text-2xl">MetaPress</h1>
       <div className="flex gap-8 items-center text-xl">
         <Link href="/">Home</Link>
         <Link href="/blogs">Blogs</Link>
@@ -25,13 +25,17 @@ export default function Navbar() {
               </button>
             </Link>
             <div className="cursor-pointer">
-              <Image
-                src={userImg}
-                width="42"
-                height="42"
-                alt="User Image"
-                className="rounded-full"
-              />
+              {/* {user?.user.isLoggedIn ? (
+                <Image
+                  src={user?.user.isLoggedIn}
+                  width="42"
+                  height="42"
+                  alt="User Image"
+                  className="rounded-full"
+                />
+              ) : ( */}
+              <VscAccount size={28} />
+              {/* )}  */}
             </div>
           </>
         ) : (

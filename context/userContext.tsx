@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from "react";
+import { createContext, ReactNode, SetStateAction, useState } from "react";
 
 interface User {
   isLoggedIn: boolean;
@@ -18,7 +13,7 @@ export const UserContext = createContext<
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>({
-    isLoggedIn: true,
+    isLoggedIn: false,
     userData: {},
   });
 

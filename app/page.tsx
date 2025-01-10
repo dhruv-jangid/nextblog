@@ -1,13 +1,14 @@
-"use client";
-
 import Carousel from "@/components/carousel";
 import BlogGrid from "@/components/bloggrid";
+import { allBlogs } from "./actions/db";
 
-export default function Home() {
+export default async function Home() {
+  const blogs = await allBlogs();
+
   return (
     <>
-      <Carousel />
-      {/* <BlogGrid blogs={blogs} /> */}
+      <Carousel blog={blogs[0]} />
+      <BlogGrid blogs={blogs} />
     </>
   );
 }

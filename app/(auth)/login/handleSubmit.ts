@@ -1,6 +1,7 @@
 "use server";
 
-import { query } from "../actions/db";
+import { cookies } from "next/headers";
+import { query } from "../../actions/db";
 
 interface formDataProps {
   username: string;
@@ -41,11 +42,17 @@ export const handleSubmit = async (formData: formDataProps) => {
       return { success: false, message: "Email already registered!" };
     }
 
-    await query(
-      "INSERT INTO users(name, pet_name, password, email) VALUES($1, $1, $2, $3);",
+    const userData = await query(
+      "INSERT INTO users(username, name, password, email) VALUES($1, $1, $2, $3) RETURNING userid;",
       [username, password, email]
     );
 
-    return { success: true, message: "Registration successful!" };
+    (await cookies()).set("metapress", userData[0].userid, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 3600,
+    });
+
+    return { success: true, photo: true, message: "Registration successful!" };
   }
 };
