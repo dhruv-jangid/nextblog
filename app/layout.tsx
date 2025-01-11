@@ -3,15 +3,14 @@ import "./globals.css";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import localFont from "next/font/local";
-import { UserProvider } from "@/context/userContext";
 
 const degular = localFont({
   src: "../public/fonts/DegularVariable.ttf",
 });
 
 export const metadata: Metadata = {
-  title: "BlogLust",
-  description: "Blog Website",
+  title: "MetaPress",
+  description: "MetaPress: The Pulse of Creativity",
 };
 
 export default function RootLayout({
@@ -22,11 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={degular.className}>
       <body className="bg-[#0F0F0F] text-white w-[70vw] mx-auto">
-        <UserProvider>
-          <Navbar />
-          {children}
-          <Footer />
-        </UserProvider>
+        <Navbar />
+        {children}
+        <Footer />
       </body>
     </html>
   );

@@ -39,11 +39,11 @@ const Card = ({
           />
         </div>
         <Button>{category}</Button>
-        <div className="flex flex-col gap-1">
-          <h3 className="text-2xl font-medium line-clamp-2 w-4/5 font-[Degular Variable Text]">
+        <div className="flex flex-col gap-2">
+          <h3 className="text-xl font-medium line-clamp-2 w-4/5 font-[Degular Variable Text]">
             {title}
           </h3>
-          <p className="line-clamp-2">{description}</p>
+          <p className="line-clamp-1">{description}</p>
         </div>
         <User publicId={userid} name={name} date={date} />
       </div>

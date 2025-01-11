@@ -4,9 +4,12 @@ import { getCldImageUrl } from "next-cloudinary";
 
 export default async function Blog({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const blog = await query("SELECT * FROM blogs WHERE blogid = $1;", [id]);
+  const blog = await query(
+    "SELECT blogid, title, description, date, category, userid, name FROM users JOIN blogs ON userid = user_id WHERE blogid = $1;",
+    [id]
+  );
   const imgUrl = getCldImageUrl({
-    src: `nextblog/blogs/${blog[0].blogid}_${blog[0].category}_${blog[0].user_id}`,
+    src: `nextblog/blogs/${blog[0].blogid}_${blog[0].category}_${blog[0].userid}`,
   });
 
   return (
@@ -27,12 +30,13 @@ export default async function Blog({ params }: { params: { id: string } }) {
           className="object-cover"
         />
       </div>
-      <div className="flex justify-end">
-        <h2 className="text-lg mr-8 bg-[#191919] rounded-lg py-2 px-4">
-          {blog[0].date}
-        </h2>
+      <div className="flex justify-end gap-4 text-lg">
+        <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog[0].date}</h2>
+        <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog[0].name}</h2>
       </div>
-      <div className="bg-[#191919] p-4 rounded-lg">{blog[0].description}</div>
+      <p className="text-xl bg-[#191919] p-4 rounded-lg">
+        {blog[0].description}
+      </p>
     </div>
   );
 }

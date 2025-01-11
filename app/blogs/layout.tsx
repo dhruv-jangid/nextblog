@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Blogs",
-  description: "BlogLust Blogs Page",
+  description: "MetaPress Blogs",
 };
 
 export default function BlogsLayout({
