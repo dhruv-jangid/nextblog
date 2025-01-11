@@ -1,12 +1,16 @@
-import { query } from "@/app/actions/db";
+import { query } from "@/actions/db";
 import Image from "next/image";
 import { getCldImageUrl } from "next-cloudinary";
 
-export default async function Blog({ params }: { params: { id: string } }) {
-  const { id } = await params;
+export default async function Blog({
+  params,
+}: {
+  params: { username: string; id: number };
+}) {
+  const { username, id } = await params;
   const blog = await query(
-    "SELECT blogid, title, description, date, category, userid, name FROM users JOIN blogs ON userid = user_id WHERE blogid = $1;",
-    [id]
+    "SELECT blogid, title, description, date, category, userid, name FROM users JOIN blogs ON userid = user_id WHERE username = $1 AND blogid = $2;",
+    [username, id]
   );
   const imgUrl = getCldImageUrl({
     src: `nextblog/blogs/${blog[0].blogid}_${blog[0].category}_${blog[0].userid}`,

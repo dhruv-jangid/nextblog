@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Button from "./button";
 import Image from "next/image";
-import { VscAccount } from "react-icons/vsc";
 import { cookies } from "next/headers";
-import { query } from "@/app/actions/db";
+import { query } from "@/actions/db";
 import { getCldImageUrl } from "next-cloudinary";
+import { logoutUser } from "@/actions/handleAuth";
 
 export default async function Navbar() {
   let user = null;
@@ -50,7 +50,10 @@ export default async function Navbar() {
                   <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
                     Settings
                   </li>
-                  <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
+                  <li
+                    className="px-4 py-1 hover:bg-gray-200 cursor-pointer"
+                    onClick={logoutUser}
+                  >
                     Logout
                   </li>
                 </ul>

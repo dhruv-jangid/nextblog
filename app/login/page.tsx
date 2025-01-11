@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import login2 from "@/public/images/login2.jpg";
 import { useState, useActionState } from "react";
-import { handleAuth } from "./handleAuth";
+import { handleAuth } from "@/actions/handleAuth";
 
 export default function Login() {
   const [error, formAction, isPending] = useActionState(handleAuth, null);

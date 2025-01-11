@@ -1,8 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { query } from "../../actions/db";
 import { redirect } from "next/navigation";
+import { query } from "@/actions/db";
 
 export async function handleAuth(prevState, formData: FormData) {
   const isLogin = formData.get("login") === "1";
@@ -61,3 +61,8 @@ export async function handleAuth(prevState, formData: FormData) {
     return "Authentication failed";
   }
 }
+
+export const logoutUser = async () => {
+  (await cookies()).delete("metapress");
+  redirect("/");
+};

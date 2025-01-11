@@ -15,7 +15,7 @@ export const query = async (
 
 export const allBlogs = async () => {
   const allBlogs = await query(
-    "SELECT blogid, title, description, date, category, userid, name FROM users JOIN blogs ON users.userid = blogs.user_id;"
+    "SELECT blogid, title, description, date, category, userid, username, name FROM users JOIN blogs ON users.userid = blogs.user_id;"
   );
 
   return allBlogs;

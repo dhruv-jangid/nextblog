@@ -12,6 +12,7 @@ export interface BlogType {
   date: string;
   category: string;
   userid: number;
+  username: string;
   name: string;
 }
 
@@ -22,10 +23,11 @@ const Card = ({
   date,
   category,
   userid,
+  username,
   name,
 }: BlogType) => {
   return (
-    <Link href={`/blogs/${blogid}`}>
+    <Link href={`/blogs/${username}/${blogid}`}>
       <div className="cursor-pointer rounded-2xl p-6 border border-gray-600 flex flex-col h-[30rem] justify-between bg-[#191919]">
         <div className="relative h-1/2 rounded-lg overflow-hidden">
           <CldImage
@@ -63,6 +65,7 @@ export default function BlogGrid({ blogs }: { blogs: BlogType[] }) {
           date={blog.date}
           category={blog.category}
           userid={blog.userid}
+          username={blog.username}
           name={blog.name}
         />
       ))}
