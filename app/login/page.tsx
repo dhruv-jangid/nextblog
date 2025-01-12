@@ -83,7 +83,13 @@ export default function Login() {
             disabled={isPending}
             className="bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-md hover:bg-[#EEEEEE]/80 transition-all duration-300"
           >
-            {isPending ? "Processing..." : isLogin ? "Login" : "Register"}
+            {isPending
+              ? isLogin
+                ? "Logging in..."
+                : "Registering..."
+              : isLogin
+              ? "Login"
+              : "Register"}
           </button>
           <div className="grid grid-cols-5 place-items-center w-full">
             <hr className="col-span-2 w-full border-gray-500" />
