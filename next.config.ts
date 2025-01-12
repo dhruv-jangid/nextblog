@@ -6,7 +6,15 @@ const nextConfig: NextConfig = {
 
 module.exports = {
   images: {
-    domains: ["res.cloudinary.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/dkzj1yg2n/**",
+        search: "?_a=BAVAZGBz0",
+      },
+    ],
   },
 };
 

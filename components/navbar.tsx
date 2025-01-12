@@ -42,7 +42,7 @@ export default async function Navbar() {
                 className="rounded-full"
               />
 
-              <div className="absolute right-0 mt-2 w-40 bg-white text-black shadow-md rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 invisible group-hover:visible">
+              <div className="absolute right-0 mt-2 w-40 bg-[#EEEEEE] text-black shadow-md rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 invisible group-hover:visible">
                 <ul className="py-2">
                   <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
                     Profile

@@ -37,38 +37,36 @@ export default function Login() {
               Register
             </label>
           </div>
-
           {error && (
             <div className="bg-red-500 bg-opacity-50 px-3 py-1.5 rounded-md">
               {error}
             </div>
           )}
-
-          <div className="flex flex-col gap-2 w-full">
-            <label htmlFor="username" className="text-lg font-medium">
-              Username
-            </label>
-            <input
-              type="text"
-              className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-md focus:-outline-offset-2"
-              name="username"
-              required
-            />
-          </div>
-
           {!isLogin && (
             <div className="flex flex-col gap-2 w-full">
-              <label htmlFor="email" className="text-lg font-medium">
-                Email
+              <label htmlFor="username" className="text-lg font-medium">
+                Username
               </label>
               <input
-                type="email"
+                type="text"
                 className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-md focus:-outline-offset-2"
-                name="email"
+                name="username"
                 required
               />
             </div>
           )}
+
+          <div className="flex flex-col gap-2 w-full">
+            <label htmlFor="email" className="text-lg font-medium">
+              Email
+            </label>
+            <input
+              type="email"
+              className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-md focus:-outline-offset-2"
+              name="email"
+              required
+            />
+          </div>
 
           <div className="flex flex-col gap-2 w-full">
             <label htmlFor="password" className="text-lg font-medium">
@@ -81,20 +79,17 @@ export default function Login() {
               required
             />
           </div>
-
           <button
             disabled={isPending}
             className="bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-md hover:bg-[#EEEEEE]/80 transition-all duration-300"
           >
             {isPending ? "Processing..." : isLogin ? "Login" : "Register"}
           </button>
-
           <div className="grid grid-cols-5 place-items-center w-full">
             <hr className="col-span-2 w-full border-gray-500" />
             <h3 className="text-lg font-medium">or</h3>
             <hr className="col-span-2 w-full border-gray-500" />
           </div>
-
           <div className="flex items-center justify-center gap-2 w-full">
             <button className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-md hover:bg-[#EEEEEE]/80 transition-all duration-300">
               <FcGoogle />
