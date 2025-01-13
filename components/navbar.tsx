@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { query } from "@/actions/db";
 import { getCldImageUrl } from "next-cloudinary";
 import { logoutUser } from "@/actions/handleAuth";
+import logo from "@/public/images/logo.png";
 
 export default async function Navbar() {
   let user = null;
@@ -21,7 +22,10 @@ export default async function Navbar() {
 
   return (
     <div className="text-2xl flex justify-between items-center p-8 sticky top-0 z-50 backdrop-blur-lg rounded-b-2xl">
-      <h1 className="font-semibold text-2xl">MetaPress</h1>
+      <div className="flex w-6 gap-2">
+        <Image src={logo} alt="Logo" className="invert" />
+        <h1 className="font-semibold text-2xl">MetaPress</h1>
+      </div>
       <div className="flex gap-8 items-center text-xl">
         <Link href="/">Home</Link>
         <Link href="/blogs">Blogs</Link>
