@@ -34,13 +34,19 @@ export default async function Blog({
           className="object-cover"
         />
       </div>
-      <div className="flex justify-end gap-4 text-lg">
-        <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog[0].date}</h2>
-        <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog[0].name}</h2>
+      <div className="flex justify-between text-lg">
+        <h2 className="bg-[#191919] rounded-lg py-2 px-4">
+          {blog[0].category}
+        </h2>
+        <div className="flex gap-4">
+          <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog[0].date}</h2>
+          <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog[0].name}</h2>
+        </div>
       </div>
-      <p className="text-xl bg-[#191919] p-4 rounded-lg">
-        {blog[0].description}
-      </p>
+      <div
+        className="text-xl bg-[#191919] p-4 rounded-lg"
+        dangerouslySetInnerHTML={{ __html: blog[0].description }}
+      ></div>
     </div>
   );
 }
