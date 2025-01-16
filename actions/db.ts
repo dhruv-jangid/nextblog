@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { postCover } from "./postCover";
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -19,6 +20,31 @@ export const allBlogs = async () => {
   );
 
   return allBlogs;
+};
+
+export const insertBlog = async (
+  title: string,
+  description: string,
+  date: string,
+  user_id: number,
+  category: string,
+  blogCover: File
+) => {
+  try {
+    const blogId = await query(
+      "INSERT INTO blogs (title, description, date, user_id, category) VALUES ($1, $2, $3, $4, $5) RETURNING blogid",
+      [title, description, date, user_id, category]
+    );
+    const result = await postCover(
+      blogCover,
+      `${blogId[0].blogid}_${category}_${user_id}`
+    );
+    console.log(result);
+
+    return blogId;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const shutdown = async (signal: string) => {

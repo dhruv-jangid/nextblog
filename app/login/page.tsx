@@ -6,6 +6,7 @@ import { FaGithub } from "react-icons/fa";
 import login2 from "@/public/images/login2.jpg";
 import { useState, useActionState } from "react";
 import { handleAuth } from "@/actions/handleAuth";
+import Button from "@/components/button";
 
 export default function Login() {
   const [error, formAction, isPending] = useActionState(handleAuth, null);
@@ -79,10 +80,7 @@ export default function Login() {
               required
             />
           </div>
-          <button
-            disabled={isPending}
-            className="bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-md hover:bg-[#EEEEEE]/80 transition-all duration-300"
-          >
+          <Button disabled={isPending}>
             {isPending
               ? isLogin
                 ? "Logging in..."
@@ -90,7 +88,7 @@ export default function Login() {
               : isLogin
               ? "Login"
               : "Register"}
-          </button>
+          </Button>
           <div className="grid grid-cols-5 place-items-center w-full">
             <hr className="col-span-2 w-full border-gray-500" />
             <h3 className="text-lg font-medium">or</h3>

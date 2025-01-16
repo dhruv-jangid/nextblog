@@ -44,7 +44,8 @@ export default async function Blog({
         </div>
       </div>
       <div
-        className="text-xl bg-[#191919] p-4 rounded-lg"
+        className="text-lg bg-[#191919] p-6 rounded-lg"
+        id="blogdesc"
         dangerouslySetInnerHTML={{ __html: blog[0].description }}
       ></div>
     </div>

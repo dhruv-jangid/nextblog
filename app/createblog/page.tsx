@@ -18,7 +18,7 @@ import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import Youtube from "@tiptap/extension-youtube";
-import { useState, useCallback } from "react";
+import { useState, useActionState, startTransition } from "react";
 import {
   FaBold,
   FaItalic,
@@ -37,14 +37,20 @@ import {
   FaCode,
   FaQuoteLeft,
 } from "react-icons/fa";
+import Button from "@/components/button";
+import { postBlog } from "@/actions/postBlog";
 
 export default function CreateBlog({ content = "", onChange }) {
-  const [linkUrl, setLinkUrl] = useState("");
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
-  const [showImageInput, setShowImageInput] = useState(false);
-  const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  // const [linkUrl, setLinkUrl] = useState("");
+  // const [showLinkInput, setShowLinkInput] = useState(false);
+  // const [imageUrl, setImageUrl] = useState("");
+  // const [showImageInput, setShowImageInput] = useState(false);
+  // const [youtubeUrl, setYoutubeUrl] = useState("");
+  // const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [title, setTitle] = useState("");
+  const [state, formAction, isPending] = useActionState(postBlog, null);
+  const [category, setCategory] = useState("");
+  const [blogCover, setBlogCover] = useState<File | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -95,53 +101,53 @@ export default function CreateBlog({ content = "", onChange }) {
     immediatelyRender: false,
   });
 
-  const addLink = () => {
-    if (linkUrl) {
-      editor?.chain().focus().setLink({ href: linkUrl }).run();
-      setLinkUrl("");
-      setShowLinkInput(false);
-    }
-  };
+  // const addLink = () => {
+  //   if (linkUrl) {
+  //     editor?.chain().focus().setLink({ href: linkUrl }).run();
+  //     setLinkUrl("");
+  //     setShowLinkInput(false);
+  //   }
+  // };
 
-  const addImage = () => {
-    if (imageUrl) {
-      editor?.chain().focus().setImage({ src: imageUrl }).run();
-      setImageUrl("");
-      setShowImageInput(false);
-    }
-  };
+  // const addImage = () => {
+  //   if (imageUrl) {
+  //     editor?.chain().focus().setImage({ src: imageUrl }).run();
+  //     setImageUrl("");
+  //     setShowImageInput(false);
+  //   }
+  // };
 
-  const addYoutubeVideo = () => {
-    if (youtubeUrl) {
-      editor?.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run();
-      setYoutubeUrl("");
-      setShowYoutubeInput(false);
-    }
-  };
+  // const addYoutubeVideo = () => {
+  //   if (youtubeUrl) {
+  //     editor?.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run();
+  //     setYoutubeUrl("");
+  //     setShowYoutubeInput(false);
+  //   }
+  // };
 
-  const handleImageUpload = useCallback(
-    (event) => {
-      if (event.target.files?.length) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === "string") {
-            editor?.chain().focus().setImage({ src: reader.result }).run();
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    [editor]
-  );
+  // const handleImageUpload = useCallback(
+  //   (event) => {
+  //     if (event.target.files?.length) {
+  //       const file = event.target.files[0];
+  //       const reader = new FileReader();
+  //       reader.onload = () => {
+  //         if (typeof reader.result === "string") {
+  //           editor?.chain().focus().setImage({ src: reader.result }).run();
+  //         }
+  //       };
+  //       reader.readAsDataURL(file);
+  //     }
+  //   },
+  //   [editor]
+  // );
 
-  const insertTable = () => {
-    editor
-      ?.chain()
-      .focus()
-      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-      .run();
-  };
+  // const insertTable = () => {
+  //   editor
+  //     ?.chain()
+  //     .focus()
+  //     .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+  //     .run();
+  // };
 
   const MenuButton = ({ onClick, isActive = null, children }) => (
     <button
@@ -155,238 +161,253 @@ export default function CreateBlog({ content = "", onChange }) {
   );
 
   return (
-    <div className="w-full border rounded-lg">
-      <div className="p-2 border-b flex flex-wrap">
-        {/* Text Formatting */}
-        <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleBold().run()}
-            isActive={editor?.isActive("bold")}
-          >
-            <FaBold />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleItalic().run()}
-            isActive={editor?.isActive("italic")}
-          >
-            <FaItalic />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleUnderline().run()}
-            isActive={editor?.isActive("underline")}
-          >
-            <FaUnderline />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleStrike().run()}
-            isActive={editor?.isActive("strike")}
-          >
-            <FaStrikethrough />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleSuperscript().run()}
-            isActive={editor?.isActive("superscript")}
-          >
-            <FaSuperscript />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleSubscript().run()}
-            isActive={editor?.isActive("subscript")}
-          >
-            <FaSubscript />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleHighlight().run()}
-            isActive={editor?.isActive("highlight")}
-          >
-            <span className="text-yellow-400">H</span>
-          </MenuButton>
+    <form action={formAction}>
+      <h1 className="text-lg">Title</h1>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => {
+          setTitle(e.target.value);
+        }}
+        placeholder="Blog Title"
+        className="py-1.5 px-3 rounded-lg mb-4 bg-transparent border w-full"
+        required
+      />
+      <h1 className="text-lg">Blog Cover</h1>
+      <input
+        type="file"
+        accept="image/*"
+        name="blogcover"
+        className="mb-4"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            setBlogCover(file);
+          }
+        }}
+      />
+      <div className="w-full border rounded-lg">
+        <div className="p-2 border-b flex flex-wrap">
+          <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleBold().run()}
+              isActive={editor?.isActive("bold")}
+            >
+              <FaBold />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleItalic().run()}
+              isActive={editor?.isActive("italic")}
+            >
+              <FaItalic />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleUnderline().run()}
+              isActive={editor?.isActive("underline")}
+            >
+              <FaUnderline />
+            </MenuButton>
+            {/* <MenuButton
+              onClick={() => editor?.chain().focus().toggleStrike().run()}
+              isActive={editor?.isActive("strike")}
+            >
+              <FaStrikethrough />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleSuperscript().run()}
+              isActive={editor?.isActive("superscript")}
+            >
+              <FaSuperscript />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleSubscript().run()}
+              isActive={editor?.isActive("subscript")}
+            >
+              <FaSubscript />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleHighlight().run()}
+              isActive={editor?.isActive("highlight")}
+            >
+              <span className="text-yellow-400">H</span>
+            </MenuButton>
 
-          <select
-            onChange={(e) =>
-              editor?.chain().focus().setColor(e.target.value).run()
-            }
-            className="px-2 py-1 mr-2 mb-2 rounded border"
-          >
-            <option value="">Text Color</option>
-            <option value="#FF0000">Red</option>
-            <option value="#00FF00">Green</option>
-            <option value="#0000FF">Blue</option>
-          </select>
+            <select
+              onChange={(e) =>
+                editor?.chain().focus().setColor(e.target.value).run()
+              }
+              className="px-2 py-1 mr-2 mb-2 rounded border"
+            >
+              <option value="">Text Color</option>
+              <option value="#FF0000">Red</option>
+              <option value="#00FF00">Green</option>
+              <option value="#0000FF">Blue</option>
+            </select> */}
+          </div>
+
+          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
+            <MenuButton
+              onClick={() =>
+                editor?.chain().focus().toggleHeading({ level: 1 }).run()
+              }
+              isActive={editor?.isActive("heading", { level: 1 })}
+            >
+              H1
+            </MenuButton>
+            <MenuButton
+              onClick={() =>
+                editor?.chain().focus().toggleHeading({ level: 2 }).run()
+              }
+              isActive={editor?.isActive("heading", { level: 2 })}
+            >
+              H2
+            </MenuButton>
+            <MenuButton
+              onClick={() =>
+                editor?.chain().focus().toggleHeading({ level: 3 }).run()
+              }
+              isActive={editor?.isActive("heading", { level: 3 })}
+            >
+              H3
+            </MenuButton>
+
+            <MenuButton
+              onClick={() => editor?.chain().focus().setTextAlign("left").run()}
+              isActive={editor?.isActive({ textAlign: "left" })}
+            >
+              Left
+            </MenuButton>
+            <MenuButton
+              onClick={() =>
+                editor?.chain().focus().setTextAlign("center").run()
+              }
+              isActive={editor?.isActive({ textAlign: "center" })}
+            >
+              Center
+            </MenuButton>
+            <MenuButton
+              onClick={() =>
+                editor?.chain().focus().setTextAlign("right").run()
+              }
+              isActive={editor?.isActive({ textAlign: "right" })}
+            >
+              Right
+            </MenuButton>
+          </div> */}
+
+          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleBulletList().run()}
+              isActive={editor?.isActive("bulletList")}
+            >
+              <FaListUl />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+              isActive={editor?.isActive("orderedList")}
+            >
+              <FaListOl />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+              isActive={editor?.isActive("blockquote")}
+            >
+              <FaQuoteLeft />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
+              isActive={editor?.isActive("codeBlock")}
+            >
+              <FaCode />
+            </MenuButton>
+          </div> */}
+
+          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
+            <MenuButton onClick={insertTable}>
+              <FaTable />
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().addColumnBefore().run()}
+            >
+              Add Column
+            </MenuButton>
+            <MenuButton
+              onClick={() => editor?.chain().focus().addRowBefore().run()}
+            >
+              Add Row
+            </MenuButton>
+          </div> */}
+
+          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
+            <MenuButton onClick={() => setShowImageInput(!showImageInput)}>
+              <FaImage />
+            </MenuButton>
+          </div> */}
+
+          <div className="w-full flex flex-wrap">
+            <MenuButton onClick={() => editor?.chain().focus().undo().run()}>
+              <FaUndo />
+            </MenuButton>
+            <MenuButton onClick={() => editor?.chain().focus().redo().run()}>
+              <FaRedo />
+            </MenuButton>
+          </div>
         </div>
 
-        {/* Headings and Alignment */}
-        <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-          <MenuButton
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            isActive={editor?.isActive("heading", { level: 1 })}
-          >
-            H1
-          </MenuButton>
-          <MenuButton
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            isActive={editor?.isActive("heading", { level: 2 })}
-          >
-            H2
-          </MenuButton>
-          <MenuButton
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 3 }).run()
-            }
-            isActive={editor?.isActive("heading", { level: 3 })}
-          >
-            H3
-          </MenuButton>
+        {/* {showImageInput && (
+          <div className="p-2 border-b flex">
+            <input
+              type="url"
+              placeholder="Enter image URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="flex-1 px-2 py-1 border rounded mr-2"
+            />
+            <button
+              onClick={addImage}
+              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Add Image
+            </button>
+          </div>
+        )} */}
 
-          <MenuButton
-            onClick={() => editor?.chain().focus().setTextAlign("left").run()}
-            isActive={editor?.isActive({ textAlign: "left" })}
-          >
-            Left
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().setTextAlign("center").run()}
-            isActive={editor?.isActive({ textAlign: "center" })}
-          >
-            Center
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().setTextAlign("right").run()}
-            isActive={editor?.isActive({ textAlign: "right" })}
-          >
-            Right
-          </MenuButton>
-        </div>
-
-        {/* Lists and Blocks */}
-        <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleBulletList().run()}
-            isActive={editor?.isActive("bulletList")}
-          >
-            <FaListUl />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-            isActive={editor?.isActive("orderedList")}
-          >
-            <FaListOl />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-            isActive={editor?.isActive("blockquote")}
-          >
-            <FaQuoteLeft />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-            isActive={editor?.isActive("codeBlock")}
-          >
-            <FaCode />
-          </MenuButton>
-        </div>
-
-        {/* Table Controls */}
-        <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-          <MenuButton onClick={insertTable}>
-            <FaTable />
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().addColumnBefore().run()}
-          >
-            Add Column
-          </MenuButton>
-          <MenuButton
-            onClick={() => editor?.chain().focus().addRowBefore().run()}
-          >
-            Add Row
-          </MenuButton>
-        </div>
-
-        {/* Media Controls */}
-        <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-          <MenuButton onClick={() => setShowLinkInput(!showLinkInput)}>
-            <FaLink />
-          </MenuButton>
-          <MenuButton onClick={() => setShowImageInput(!showImageInput)}>
-            <FaImage />
-          </MenuButton>
-          <MenuButton onClick={() => setShowYoutubeInput(!showYoutubeInput)}>
-            <FaVideo />
-          </MenuButton>
-        </div>
-
-        {/* History Controls */}
-        <div className="w-full flex flex-wrap">
-          <MenuButton onClick={() => editor?.chain().focus().undo().run()}>
-            <FaUndo />
-          </MenuButton>
-          <MenuButton onClick={() => editor?.chain().focus().redo().run()}>
-            <FaRedo />
-          </MenuButton>
-        </div>
+        <EditorContent editor={editor} className="p-4 min-h-[200px]" />
       </div>
-
-      {/* Input Fields */}
-      {showLinkInput && (
-        <div className="p-2 border-b flex">
-          <input
-            type="url"
-            placeholder="Enter URL"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            className="flex-1 px-2 py-1 border rounded mr-2"
-          />
-          <button
-            onClick={addLink}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Add Link
-          </button>
-        </div>
-      )}
-
-      {showImageInput && (
-        <div className="p-2 border-b flex">
-          <input
-            type="url"
-            placeholder="Enter image URL"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="flex-1 px-2 py-1 border rounded mr-2"
-          />
-          <button
-            onClick={addImage}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Add Image
-          </button>
-        </div>
-      )}
-
-      {showYoutubeInput && (
-        <div className="p-2 border-b flex">
-          <input
-            type="url"
-            placeholder="Enter YouTube URL"
-            value={youtubeUrl}
-            onChange={(e) => setYoutubeUrl(e.target.value)}
-            className="flex-1 px-2 py-1 border rounded mr-2"
-          />
-          <button
-            onClick={addYoutubeVideo}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Add YouTube Video
-          </button>
-        </div>
-      )}
-
-      <EditorContent editor={editor} className="p-4 min-h-[200px]" />
-    </div>
+      <select
+        value={category}
+        onChange={(e) => {
+          setCategory(e.target.value);
+        }}
+        className="py-1.5 px-3 rounded-lg border bg-transparent mt-4"
+        required
+      >
+        <option value="" disabled>
+          Select a category
+        </option>
+        <option value="Agriculture">Agriculture</option>
+        <option value="Collectibles">Collectibles</option>
+        <option value="Education">Education</option>
+        <option value="Food">Food</option>
+        <option value="Technology">Technology</option>
+      </select>
+      <div className="flex justify-center mt-4 text-xl">
+        <Button
+          disabled={isPending}
+          onClick={() => {
+            startTransition(() => {
+              formAction({
+                title,
+                blogCover,
+                content: editor.getHTML(),
+                category,
+              });
+            });
+          }}
+        >
+          {isPending ? "Posting..." : "Post"}
+        </Button>
+      </div>
+    </form>
   );
 }

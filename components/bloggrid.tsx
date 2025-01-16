@@ -19,7 +19,6 @@ export interface BlogType {
 const Card = ({
   blogid,
   title,
-  description,
   date,
   category,
   userid,
@@ -28,7 +27,7 @@ const Card = ({
 }: BlogType) => {
   return (
     <Link href={`/blogs/${username}/${blogid}`}>
-      <div className="cursor-pointer rounded-2xl p-6 border border-gray-600 flex flex-col h-[30rem] justify-between bg-[#191919]">
+      <div className="cursor-pointer rounded-2xl p-6 border border-gray-600 flex flex-col h-[28rem] justify-between bg-[#191919]">
         <div className="relative h-1/2 rounded-lg overflow-hidden">
           <CldImage
             src={`nextblog/blogs/${blogid}_${category}_${userid}`}
@@ -41,12 +40,9 @@ const Card = ({
           />
         </div>
         <Button>{category}</Button>
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-medium line-clamp-2 w-4/5 font-[Degular Variable Text]">
-            {title}
-          </h3>
-          <p className="line-clamp-1">{description}</p>
-        </div>
+        <h3 className="text-xl font-medium line-clamp-2 w-10/12 font-[Degular Variable Text]">
+          {title}
+        </h3>
         <User publicId={userid} name={name} date={date} />
       </div>
     </Link>

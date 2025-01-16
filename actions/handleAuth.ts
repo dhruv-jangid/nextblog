@@ -63,6 +63,7 @@ export async function handleAuth(prevState, formData: FormData) {
       httpOnly: true,
       path: "/",
       maxAge: 3600,
+      sameSite: true,
     });
 
     permanentRedirect("/");
@@ -72,6 +73,6 @@ export async function handleAuth(prevState, formData: FormData) {
 export const logoutUser = async () => {
   (await cookies()).delete("metapress");
 
-  revalidatePath("/");
-  permanentRedirect("/");
+  revalidatePath("/login");
+  permanentRedirect("/login");
 };
