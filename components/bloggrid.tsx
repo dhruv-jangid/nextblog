@@ -21,7 +21,7 @@ const Card = ({
     <div
       className="cursor-pointer rounded-2xl p-6 border border-gray-600 flex flex-col h-[30rem] justify-between bg-[#191919]"
       onClick={() => {
-        router.push(`/blogs/${username}/${slug}`);
+        router.push(`/${username}/${slug}`);
       }}
     >
       <div className="relative h-1/2 rounded-lg overflow-hidden">
@@ -35,14 +35,7 @@ const Card = ({
           className="object-cover"
         />
       </div>
-      <Button
-        onClick={(e) => {
-          e.stopPropagation();
-          router.push(`/blogs/${category}`);
-        }}
-      >
-        {category}
-      </Button>
+      <Button>{category}</Button>
       <h3 className="text-xl font-medium line-clamp-3 w-10/12 font-[Degular Variable Text]">
         {title}
       </h3>

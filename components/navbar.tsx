@@ -32,7 +32,6 @@ export default async function Navbar() {
       </div>
       <div className="flex gap-8 items-center text-xl">
         <Link href="/">Home</Link>
-        <Link href="/blogs">Blogs</Link>
         <Link href="/contact">Contact</Link>
         {profileUrl ? (
           <>
@@ -51,12 +50,16 @@ export default async function Navbar() {
               />
               <div className="absolute right-0 mt-2 w-40 bg-[#EEEEEE] text-black shadow-md rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 invisible group-hover:visible">
                 <ul className="py-2">
-                  <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
-                    Profile
-                  </li>
-                  <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
-                    Settings
-                  </li>
+                  <Link href={`/${user.slug}`}>
+                    <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
+                      Profile
+                    </li>
+                  </Link>
+                  <Link href={`/${user.slug}/settings`}>
+                    <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">
+                      Settings
+                    </li>
+                  </Link>
                   <li
                     className="px-4 py-1 hover:bg-gray-200 cursor-pointer"
                     onClick={logoutUser}

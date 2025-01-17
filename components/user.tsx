@@ -15,7 +15,7 @@ export default function User({ publicId, name, slug, date }) {
       className="flex gap-2 items-center justify-end text-end"
       onClick={(e) => {
         e.stopPropagation();
-        router.push(`/profile/${slug}`);
+        router.push(`/${slug}`);
       }}
     >
       <div className="flex flex-col gap-1">

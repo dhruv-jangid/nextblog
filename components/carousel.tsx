@@ -10,7 +10,7 @@ export default function Carousel({ blog }) {
     <div
       className="relative h-[550px] mb-10 cursor-pointer"
       onClick={() => {
-        router.push(`/blogs/${blog.author.slug}/${blog.slug}`);
+        router.push(`/${blog.author.slug}/${blog.slug}`);
       }}
     >
       <CldImage
@@ -21,14 +21,7 @@ export default function Carousel({ blog }) {
         className="mx-auto rounded-2xl object-cover"
       />
       <div className="absolute left-14 bottom-14 flex flex-col gap-4">
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            router.push(`/blogs/${blog.category}`);
-          }}
-        >
-          {blog.category}
-        </Button>
+        <Button>{blog.category}</Button>
         <h1 className="text-white text-4xl font-bold w-3/5">{blog.title}</h1>
         <div
           className="flex gap-2 items-center"

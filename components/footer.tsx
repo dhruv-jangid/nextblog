@@ -25,15 +25,14 @@ export default function Footer() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold pb-2">Quick Links</h1>
         <Link href="/">Home</Link>
-        <Link href="/blogs">Blogs</Link>
         <Link href="/contact">Contact</Link>
       </div>
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold pb-2">Category</h1>
-        <Link href="/blogs/agriculture">Agriculture</Link>
-        <Link href="/blogs/technology">Technology</Link>
-        <Link href="/blogs/health">Health</Link>
-        <Link href="/blogs/science">Science</Link>
+        <Link href="/blogs/Agriculture">Agriculture</Link>
+        <Link href="/blogs/Technology">Technology</Link>
+        <Link href="/blogs/Health">Health</Link>
+        <Link href="/blogs/Science">Science</Link>
       </div>
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Newsletter</h1>

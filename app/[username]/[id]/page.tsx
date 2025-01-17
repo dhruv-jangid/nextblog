@@ -9,7 +9,6 @@ export default async function Blog({
   params: { username: string; id: string };
 }) {
   const { username, id } = await params;
-  console.log(username, id);
   const blog = await prisma.blog.findUnique({
     include: { author: { select: { name: true, slug: true } } },
     where: { slug: id, author: { slug: username } },
