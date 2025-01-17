@@ -38,7 +38,7 @@ import {
   FaQuoteLeft,
 } from "react-icons/fa";
 import Button from "@/components/button";
-import { postBlog } from "@/actions/postBlog";
+import { createBlog } from "@/actions/handleBlog";
 
 export default function CreateBlog({ content = "", onChange }) {
   // const [linkUrl, setLinkUrl] = useState("");
@@ -48,7 +48,7 @@ export default function CreateBlog({ content = "", onChange }) {
   // const [youtubeUrl, setYoutubeUrl] = useState("");
   // const [showYoutubeInput, setShowYoutubeInput] = useState(false);
   const [title, setTitle] = useState("");
-  const [state, formAction, isPending] = useActionState(postBlog, null);
+  const [state, formAction, isPending] = useActionState(createBlog, null);
   const [category, setCategory] = useState("");
   const [blogCover, setBlogCover] = useState<File | null>(null);
 

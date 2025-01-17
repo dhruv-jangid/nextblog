@@ -10,7 +10,7 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-img {
+* {
   user-select: none;
   -moz-user-select: none;
   -webkit-user-drag: none;

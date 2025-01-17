@@ -1,9 +1,11 @@
 import Carousel from "@/components/carousel";
 import BlogGrid from "@/components/bloggrid";
-import { allBlogs } from "../actions/db";
+import { prisma } from "@/lib/db";
 
 export default async function Home() {
-  const blogs = await allBlogs();
+  const blogs = await prisma.blog.findMany({
+    include: { author: { select: { name: true, slug: true } } },
+  });
 
   return (
     <>

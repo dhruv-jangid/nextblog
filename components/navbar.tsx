@@ -2,22 +2,26 @@ import Link from "next/link";
 import Button from "./button";
 import Image from "next/image";
 import { cookies } from "next/headers";
-import { query } from "@/actions/db";
 import { getCldImageUrl } from "next-cloudinary";
 import { logoutUser } from "@/actions/handleAuth";
 import logo from "@/public/images/logo.png";
+import { prisma } from "@/lib/db";
 
 export default async function Navbar() {
   let user = null;
   let profileUrl = null;
   const cookieSession = (await cookies()).get("metapress");
+
   if (cookieSession) {
-    user = await query("SELECT * FROM users WHERE userid = $1;", [
-      cookieSession.value,
-    ]);
-    profileUrl = getCldImageUrl({
-      src: `nextblog/authors/${user[0].userid}`,
+    user = await prisma.user.findUnique({
+      where: { id: cookieSession.value },
     });
+
+    if (user) {
+      profileUrl = getCldImageUrl({
+        src: `nextblog/authors/${user.id}`,
+      });
+    }
   }
 
   return (
@@ -42,10 +46,9 @@ export default async function Navbar() {
                 src={profileUrl}
                 width="32"
                 height="32"
-                alt="User Image"
+                alt="Profile Image"
                 className="rounded-full"
               />
-
               <div className="absolute right-0 mt-2 w-40 bg-[#EEEEEE] text-black shadow-md rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 invisible group-hover:visible">
                 <ul className="py-2">
                   <li className="px-4 py-1 hover:bg-gray-200 cursor-pointer">

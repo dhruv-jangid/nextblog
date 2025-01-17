@@ -2,9 +2,8 @@
 
 import { cookies } from "next/headers";
 import { permanentRedirect } from "next/navigation";
-import { query } from "@/actions/db";
 import argon2 from "argon2";
-import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/db";
 
 export async function handleAuth(prevState, formData: FormData) {
   const isLogin = formData.get("login") === "1";
@@ -13,15 +12,15 @@ export async function handleAuth(prevState, formData: FormData) {
   const email = formData.get("email") as string;
 
   if (isLogin) {
-    const result = await query("SELECT * FROM users WHERE email = $1;", [
-      email,
-    ]);
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    if (result.length > 0) {
-      const isPasswordValid = await argon2.verify(result[0].password, password);
+    if (user) {
+      const isPasswordValid = await argon2.verify(user.password, password);
 
       if (isPasswordValid) {
-        (await cookies()).set("metapress", result[0].userid, {
+        (await cookies()).set("metapress", user.id, {
           httpOnly: true,
           path: "/",
           maxAge: 3600,
@@ -35,35 +34,38 @@ export async function handleAuth(prevState, formData: FormData) {
       return "Invalid email or password.";
     }
   } else {
-    const usernameCheck = await query(
-      "SELECT username FROM users WHERE username = $1;",
-      [username]
-    );
+    const usernameExists = await prisma.user.findUnique({
+      where: { slug: username },
+    });
 
-    if (usernameCheck.length > 0) {
+    if (usernameExists) {
       return "Username already taken!";
     }
 
-    const emailCheck = await query(
-      "SELECT email FROM users WHERE email = $1;",
-      [email]
-    );
+    const emailExists = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    if (emailCheck.length > 0) {
+    if (emailExists) {
       return "Email already registered!";
     }
 
     const hashedPassword = await argon2.hash(password);
-    const userData = await query(
-      "INSERT INTO users(username, name, password, email) VALUES($1, $1, $2, $3) RETURNING userid;",
-      [username, hashedPassword, email]
-    );
 
-    (await cookies()).set("metapress", userData[0].userid, {
+    const newUser = await prisma.user.create({
+      data: {
+        slug: username,
+        name: username,
+        password: hashedPassword,
+        email,
+      },
+    });
+
+    (await cookies()).set("metapress", newUser.id, {
       httpOnly: true,
       path: "/",
       maxAge: 3600,
-      sameSite: true,
+      sameSite: "strict",
     });
 
     permanentRedirect("/");
@@ -73,6 +75,5 @@ export async function handleAuth(prevState, formData: FormData) {
 export const logoutUser = async () => {
   (await cookies()).delete("metapress");
 
-  revalidatePath("/login");
   permanentRedirect("/login");
 };

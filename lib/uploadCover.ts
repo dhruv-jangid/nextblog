@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const postCover = async (blogCover: File, publicId: string) => {
+export const uploadCover = async (blogCover: File, publicId: string) => {
   try {
     const fileBuffer = Buffer.from(await blogCover.arrayBuffer());
     const readableStream = Readable.from(fileBuffer);
