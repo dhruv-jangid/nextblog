@@ -1,6 +1,7 @@
 import { query } from "@/actions/db";
 import Image from "next/image";
 import { getCldImageUrl } from "next-cloudinary";
+import { IoMdHeartEmpty } from "react-icons/io";
 
 export default async function Blog({
   params,
@@ -48,6 +49,9 @@ export default async function Blog({
         id="blogdesc"
         dangerouslySetInnerHTML={{ __html: blog[0].description }}
       ></div>
+      <div className="flex justify-end">
+        <IoMdHeartEmpty size={36} className="cursor-pointer" />
+      </div>
     </div>
   );
 }

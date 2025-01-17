@@ -3,7 +3,7 @@
 import Button from "@/components/button";
 import User from "./user";
 import { CldImage } from "next-cloudinary";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export interface BlogType {
   blogid: number;
@@ -25,27 +25,39 @@ const Card = ({
   username,
   name,
 }: BlogType) => {
+  const router = useRouter();
+
   return (
-    <Link href={`/blogs/${username}/${blogid}`}>
-      <div className="cursor-pointer rounded-2xl p-6 border border-gray-600 flex flex-col h-[28rem] justify-between bg-[#191919]">
-        <div className="relative h-1/2 rounded-lg overflow-hidden">
-          <CldImage
-            src={`nextblog/blogs/${blogid}_${category}_${userid}`}
-            alt={title}
-            fill={true}
-            priority={false}
-            placeholder="empty"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover"
-          />
-        </div>
-        <Button>{category}</Button>
-        <h3 className="text-xl font-medium line-clamp-2 w-10/12 font-[Degular Variable Text]">
-          {title}
-        </h3>
-        <User publicId={userid} name={name} date={date} />
+    <div
+      className="cursor-pointer rounded-2xl p-6 border border-gray-600 flex flex-col h-[30rem] justify-between bg-[#191919]"
+      onClick={() => {
+        router.push(`/blogs/${username}/${blogid}`);
+      }}
+    >
+      <div className="relative h-1/2 rounded-lg overflow-hidden">
+        <CldImage
+          src={`nextblog/blogs/${blogid}_${category}_${userid}`}
+          alt={title}
+          fill={true}
+          priority={false}
+          placeholder="empty"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover"
+        />
       </div>
-    </Link>
+      <Button
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/blogs/${category}`);
+        }}
+      >
+        {category}
+      </Button>
+      <h3 className="text-xl font-medium line-clamp-3 w-10/12 font-[Degular Variable Text]">
+        {title}
+      </h3>
+      <User publicId={userid} name={name} username={username} date={date} />
+    </div>
   );
 };
 

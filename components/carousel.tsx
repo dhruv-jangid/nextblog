@@ -10,6 +10,10 @@ export default async function Carousel({ blog }: { blog: BlogType[] }) {
     src: `nextblog/blogs/${blog.blogid}_${blog.category}_${blog.userid}`,
   });
 
+  const authorUrl = getCldImageUrl({
+    src: `nextblog/authors/${blog.userid}`,
+  });
+
   return (
     <Link href={`/blogs/${blog.username}/${blog.blogid}`}>
       <div className="relative h-[550px] mb-10">
@@ -23,7 +27,21 @@ export default async function Carousel({ blog }: { blog: BlogType[] }) {
         <div className="absolute left-14 bottom-14 flex flex-col gap-4">
           <Button>{blog.category}</Button>
           <h1 className="text-white text-4xl font-bold w-3/5">{blog.title}</h1>
-          <User publicId={blog.userid} name={blog.name} date={blog.date} />
+          <div className="flex gap-2 items-center">
+            <Image
+              src={authorUrl}
+              alt={blog.name}
+              width={42}
+              height={42}
+              className="rounded-full"
+            />
+            <div className="flex flex-col gap-1">
+              <h3 className="text-white font-semibold leading-none">
+                {blog.name}
+              </h3>
+              <h6 className="text-gray-300 leading-none">{blog.date}</h6>
+            </div>
+          </div>
         </div>
       </div>
     </Link>
