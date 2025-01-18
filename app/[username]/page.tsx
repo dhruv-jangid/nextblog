@@ -1,8 +1,8 @@
 import { Button } from "@/components/button";
+import { CloudImage } from "@/components/cloudimage";
 import { prisma } from "@/lib/db";
-import { getCldImageUrl } from "next-cloudinary";
 import { cookies } from "next/headers";
-import Image from "next/image";
+import Link from "next/link";
 
 export default async function Profile({
   params,
@@ -23,36 +23,34 @@ export default async function Profile({
     throw new Error("User not found");
   }
 
-  const loggedInUser = (await cookies()).get("metapress")?.value;
-
-  const profileUrl = getCldImageUrl({
-    src: `nextblog/authors/${user.id}`,
-  });
-
   return (
-    <div className="flex flex-col gap-4 p-8">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-6 p-12">
+      <div className="flex justify-between items-center text-xl">
         <div className="flex justify-center items-center gap-4">
-          <Image
-            src={profileUrl}
-            width={100}
-            height={100}
-            alt="User Image"
-            className="rounded-xl"
+          <CloudImage
+            publicId={user.id}
+            width={112}
+            height={112}
+            alt={user.name}
+            className="rounded-full"
+            author
           />
           <div>
-            <h1 className="text-3xl">{user.name}</h1>
-            <p className="text-gray-400">@{user.slug}</p>
+            <h1 className="text-3xl font-semibold">{user.name}</h1>
+            <p className="text-gray-400 text-lg">
+              @{user.slug} ({user.role})
+            </p>
           </div>
         </div>
-        {loggedInUser === user.id && <Button>Edit Profile</Button>}
+        {(await cookies()).get("metapress")?.value === user.id && (
+          <Button>
+            <Link href={`/${user.slug}/settings`}>Edit Profile</Link>
+          </Button>
+        )}
       </div>
 
-      <div className="flex gap-4">
-        <div className="bg-[#191919] px-4 py-2 rounded-lg">
-          {user.blogs.length} blogs
-        </div>
-        <div className="bg-[#191919] px-4 py-2 rounded-lg">{user.role}</div>
+      <div className="flex flex-col gap-2 text-base">
+        <h2>Total Blogs: {user.blogs.length}</h2>
       </div>
 
       <div className="grid gap-4">

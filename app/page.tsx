@@ -6,11 +6,12 @@ export default async function Home() {
   const blogs = await prisma.blog.findMany({
     include: { author: { select: { name: true, slug: true } } },
   });
+  const [firstBlog, ...remainingBlogs] = blogs;
 
   return (
     <>
-      <Carousel blog={blogs[0]} />
-      <BlogGrid blogs={blogs} />
+      <Carousel blog={firstBlog} />
+      <BlogGrid blogs={remainingBlogs} />
     </>
   );
 }

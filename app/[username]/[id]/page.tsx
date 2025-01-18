@@ -1,8 +1,9 @@
-import Image from "next/image";
-import { getCldImageUrl } from "next-cloudinary";
 import { IoMdHeartEmpty } from "react-icons/io";
 import { prisma } from "@/lib/db";
 import type { Blog } from "@prisma/client";
+import { Button } from "@/components/button";
+import { Author } from "@/components/author";
+import { CloudImage } from "@/components/cloudimage";
 
 export default async function Blog({
   params,
@@ -23,20 +24,23 @@ export default async function Blog({
     return <div>Blog not found</div>;
   }
 
-  const imgUrl = getCldImageUrl({
-    src: `nextblog/blogs/${blog.id}_${blog.category}_${blog.authorId}`,
-  });
-
   return (
-    <div className="flex flex-col gap-4 px-8">
-      <div className="flex justify-center">
-        <h1 className="text-3xl bg-[#191919] rounded-lg py-2 px-4">
+    <div className="flex flex-col gap-10 px-16 py-12">
+      <div className="flex flex-col gap-6">
+        <Button>{blog.category}</Button>
+        <h1 className="text-3xl rounded-lg w-3/5 font-semibold">
           {blog.title}
         </h1>
+        <Author
+          date={blog.createdAt}
+          slug={blog.author.slug}
+          publicId={blog.authorId}
+          name={blog.author.name}
+        />
       </div>
       <div className="relative w-full h-[60vh] rounded-lg overflow-hidden">
-        <Image
-          src={imgUrl}
+        <CloudImage
+          publicId={`${blog.id}_${blog.category}_${blog.authorId}`}
           alt={blog.title}
           fill={true}
           priority={false}
@@ -44,21 +48,6 @@ export default async function Blog({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover"
         />
-      </div>
-      <div className="flex justify-between text-lg">
-        <h2 className="bg-[#191919] rounded-lg py-2 px-4">{blog.category}</h2>
-        <div className="flex gap-4">
-          <h2 className="bg-[#191919] rounded-lg py-2 px-4">
-            {new Date(blog.createdAt).toLocaleString("en-US", {
-              month: "short",
-              day: "2-digit",
-              year: "numeric",
-            })}
-          </h2>
-          <h2 className="bg-[#191919] rounded-lg py-2 px-4">
-            {blog.author.name}
-          </h2>
-        </div>
       </div>
       <div
         className="text-lg bg-[#191919] p-6 rounded-lg"

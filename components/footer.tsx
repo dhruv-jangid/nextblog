@@ -25,6 +25,7 @@ export const Footer = () => {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold pb-2">Quick Links</h1>
         <Link href="/">Home</Link>
+        <Link href="/about">About</Link>
         <Link href="/contact">Contact</Link>
       </div>
       <div className="flex flex-col gap-4">
