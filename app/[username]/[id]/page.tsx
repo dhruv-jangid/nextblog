@@ -3,16 +3,34 @@ import { getCldImageUrl } from "next-cloudinary";
 import { IoMdHeartEmpty } from "react-icons/io";
 import { prisma } from "@/lib/db";
 
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  authorId: string;
+  createdAt: Date;
+  author: {
+    name: string;
+    slug: string;
+  };
+}
+
 export default async function Blog({
   params,
 }: {
   params: { username: string; id: string };
 }) {
   const { username, id } = await params;
-  const blog = await prisma.blog.findUnique({
+  const blog = (await prisma.blog.findUnique({
     include: { author: { select: { name: true, slug: true } } },
     where: { slug: id, author: { slug: username } },
-  });
+  })) as BlogPost | null;
+
+  if (!blog) {
+    throw new Error("Blog not found");
+  }
+
   const imgUrl = getCldImageUrl({
     src: `nextblog/blogs/${blog.id}_${blog.category}_${blog.authorId}`,
   });

@@ -8,7 +8,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (!token && req.nextUrl.pathname !== "/login") {
+  if (
+    !token &&
+    req.nextUrl.pathname !== "/login" &&
+    !req.nextUrl.pathname.startsWith("/_next")
+  ) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -16,5 +20,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/blogs/:username/:id", "/profile", "/createblog"],
+  matcher: ["/login", "/createblog", "/:username", "/:username/:id"],
 };
