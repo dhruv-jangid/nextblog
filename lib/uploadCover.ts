@@ -7,15 +7,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const uploadCover = async (blogCover: File, publicId: string) => {
+export const uploadCover = async (
+  image: File,
+  publicId: string,
+  isAuthor: boolean = false
+) => {
   try {
-    const fileBuffer = Buffer.from(await blogCover.arrayBuffer());
+    const fileBuffer = Buffer.from(await image.arrayBuffer());
     const readableStream = Readable.from(fileBuffer);
 
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: "nextblog/blogs",
+          folder: !isAuthor ? "nextblog/blogs" : "nextblog/authors",
           public_id: publicId,
         },
         (error, result) => {

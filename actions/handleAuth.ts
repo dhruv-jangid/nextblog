@@ -4,62 +4,97 @@ import { cookies } from "next/headers";
 import { permanentRedirect } from "next/navigation";
 import argon2 from "argon2";
 import { prisma } from "@/lib/db";
+import { z } from "zod";
+import { uploadCover } from "@/lib/uploadCover";
 
-export async function handleAuth(prevState, formData: FormData) {
-  const isLogin = formData.get("login") === "1";
-  const username = formData.get("username") as string;
-  const password = formData.get("password") as string;
-  const email = formData.get("email") as string;
+const authSchema = z.object({
+  login: z.string().transform((val) => val === "true"),
+  username: z
+    .string()
+    .min(3, "Username must have at least 3 characters")
+    .regex(
+      /^[a-zA-Z][\w-_]*$/,
+      "Username must start with a letter and only contain letters, numbers, - and _"
+    )
+    .optional(),
+  email: z.string().email("Invalid email format"),
+  password: z
+    .string()
+    .min(8, "Password must have at least 8 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).*$/,
+      "Password must have at least 1 uppercase, 1 lowercase and 1 special character"
+    ),
+  authorImg: z
+    .instanceof(File)
+    .refine((file) => file.size > 0, "Profile image is required")
+    .refine(
+      (file) => file.size <= 5 * 1024 * 1024,
+      "File size should be less than 5MB"
+    )
+    .refine(
+      (file) => ["image/jpeg", "image/png", "image/gif"].includes(file.type),
+      "Invalid file type, only images allowed"
+    )
+    .optional(),
+});
 
-  if (isLogin) {
+export const handleAuth = async (prevState, formData: FormData) => {
+  const data = Object.fromEntries(formData.entries());
+  const parsedData = authSchema.safeParse(data);
+  if (!parsedData.success) {
+    return parsedData.error.errors.map((err) => err.message).join("<br>");
+  }
+
+  const { login, username, password, email, authorImg } = parsedData.data;
+
+  if (login) {
     const user = await prisma.user.findUnique({
       where: { email },
     });
+    if (user && (await argon2.verify(user.password, password))) {
+      (await cookies()).set("metapress", user.id, {
+        httpOnly: true,
+        path: "/",
+        maxAge: 3600,
+        sameSite: "strict",
+      });
 
-    if (user) {
-      const isPasswordValid = await argon2.verify(user.password, password);
-
-      if (isPasswordValid) {
-        (await cookies()).set("metapress", user.id, {
-          httpOnly: true,
-          path: "/",
-          maxAge: 3600,
-        });
-
-        permanentRedirect("/");
-      } else {
-        return "Invalid email or password.";
-      }
+      permanentRedirect("/");
     } else {
-      return "Invalid email or password.";
+      return "Invalid email or password";
     }
   } else {
-    const usernameExists = await prisma.user.findUnique({
-      where: { slug: username },
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { slug: username }],
+      },
     });
-
-    if (usernameExists) {
-      return "Username already taken!";
-    }
-
-    const emailExists = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (emailExists) {
-      return "Email already registered!";
+    if (existingUser) {
+      return "Email or username already taken";
     }
 
     const hashedPassword = await argon2.hash(password);
-
     const newUser = await prisma.user.create({
       data: {
-        slug: username,
-        name: username,
+        slug: username!,
+        name: username!,
         password: hashedPassword,
         email,
       },
     });
+
+    if (authorImg) {
+      try {
+        await uploadCover(authorImg, `${newUser.id}`, true);
+      } catch (error) {
+        console.log(error);
+
+        return "Error uploading image";
+      }
+    } else {
+      return "Profile image is required";
+    }
 
     (await cookies()).set("metapress", newUser.id, {
       httpOnly: true,
@@ -70,10 +105,9 @@ export async function handleAuth(prevState, formData: FormData) {
 
     permanentRedirect("/");
   }
-}
+};
 
 export const logoutUser = async () => {
   (await cookies()).delete("metapress");
-
   permanentRedirect("/login");
 };

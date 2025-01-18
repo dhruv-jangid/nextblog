@@ -5,8 +5,21 @@ import { uploadCover } from "@/lib/uploadCover";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export const createBlog = async (prevState, formData) => {
+export const createBlog = async (
+  prevState: null,
+  formData: {
+    title: string;
+    blogCover: File;
+    content: string;
+    category: string;
+  }
+): Promise<string | void> => {
   const user_id = (await cookies()).get("metapress")?.value;
+
+  if (!user_id) {
+    return "User not authenticated. Please login again!";
+  }
+
   const { title, blogCover, content, category } = formData;
 
   const slug = title
@@ -19,7 +32,7 @@ export const createBlog = async (prevState, formData) => {
   });
 
   if (existingBlog) {
-    return "Title already taken, please choose a different title.";
+    return "Title already taken, please choose a different title!";
   }
 
   const newBlog = await prisma.blog.create({
@@ -30,23 +43,17 @@ export const createBlog = async (prevState, formData) => {
       category,
       authorId: user_id,
     },
+    include: { author: { select: { slug: true } } },
   });
 
-  const user = await prisma.user.findUnique({
-    where: { id: user_id },
-    select: { slug: true },
-  });
-
-  try {
+  if (blogCover) {
     await uploadCover(
       blogCover,
-      `${newBlog.id}_${newBlog.category}_${user.slug}`
+      `${newBlog.id}_${newBlog.category}_${newBlog.author.slug}`
     );
 
-    redirect(`/blogs/${user.slug}/${newBlog.slug}`);
-  } catch (error) {
-    console.error("Image upload failed: ", error);
-
-    return "Error uploading cover image.";
+    redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
   }
+
+  return "Error uploading cover";
 };

@@ -1,12 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import login2 from "@/public/images/login2.jpg";
-import { useState, useActionState } from "react";
+import { useActionState } from "react";
 import { handleAuth } from "@/actions/handleAuth";
 import Button from "@/components/button";
+import Image from "next/image";
 
 export default function Login() {
   const [error, formAction, isPending] = useActionState(handleAuth, null);
@@ -14,35 +15,42 @@ export default function Login() {
 
   return (
     <div className="grid grid-cols-2">
-      <div className="flex flex-col items-center justify-center gap-8 w-1/2 place-self-center text-nowrap">
+      <div className="flex flex-col items-center justify-center gap-4 w-1/2 place-self-center text-nowrap">
         <form
           action={formAction}
-          className="flex flex-col items-center justify-center gap-6 w-full text-gray-200"
+          className="flex flex-col items-center justify-center gap-4 w-full text-gray-200 text-lg font-medium"
         >
-          <div className="flex items-center justify-center gap-1 p-2 border border-gray-500 rounded-lg">
-            <input type="hidden" name="login" value={isLogin ? "1" : "0"} />
+          <div className="flex items-center justify-center gap-1 p-2 border border-gray-500 rounded-xl font-normal">
+            <input
+              type="hidden"
+              name="login"
+              value={isLogin ? "true" : "false"}
+            />
             <label
               onClick={() => setIsLogin(true)}
-              className={`text-lg font-medium px-3 py-1.5 rounded-md cursor-pointer ${
-                isLogin && "bg-gray-500"
+              className={`px-3 py-1.5 rounded-lg cursor-pointer ${
+                isLogin ? "bg-gray-500" : "bg-transparent"
               }`}
             >
-              Login
+              Signin
             </label>
             <label
               onClick={() => setIsLogin(false)}
-              className={`text-lg font-medium px-3 py-1.5 rounded-md cursor-pointer ${
-                !isLogin && "bg-gray-500"
+              className={`px-3 py-1.5 rounded-lg cursor-pointer ${
+                !isLogin ? "bg-gray-500" : "bg-transparent"
               }`}
             >
-              Register
+              Signup
             </label>
           </div>
+
           {error && (
-            <div className="bg-red-500 bg-opacity-50 px-3 py-1.5 rounded-md">
-              {error}
-            </div>
+            <div
+              className="bg-red-500 bg-opacity-50 w-full text-base font-normal text-wrap px-3 py-1.5 rounded-md"
+              dangerouslySetInnerHTML={{ __html: error }}
+            ></div>
           )}
+
           {!isLogin && (
             <div className="flex flex-col gap-2 w-full">
               <label htmlFor="username" className="text-lg font-medium">
@@ -50,10 +58,31 @@ export default function Login() {
               </label>
               <input
                 type="text"
-                className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-md focus:-outline-offset-2"
+                className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-none"
+                id="username"
                 name="username"
                 required
               />
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="flex flex-col gap-2 w-full">
+              <label>Profile Image</label>
+              <input
+                type="file"
+                className="hidden"
+                id="authorImg"
+                name="authorImg"
+                accept="image/*"
+                required
+              />
+              <label
+                htmlFor="authorImg"
+                className="w-full py-2 px-3 text-base border bg-transparent border-gray-500 rounded-lg text-center cursor-pointer hover:bg-gray-500/80 transition-all"
+              >
+                Select Image
+              </label>
             </div>
           )}
 
@@ -63,7 +92,8 @@ export default function Login() {
             </label>
             <input
               type="email"
-              className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-md focus:-outline-offset-2"
+              className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-none"
+              id="email"
               name="email"
               required
             />
@@ -75,36 +105,40 @@ export default function Login() {
             </label>
             <input
               type="password"
-              className="w-full p-1.5 px-3 border bg-transparent border-gray-500 rounded-md focus:-outline-offset-2"
+              className="w-full p-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-none mb-1.5"
+              id="password"
               name="password"
               required
             />
           </div>
+
           <Button disabled={isPending}>
             {isPending
               ? isLogin
-                ? "Logging in..."
-                : "Registering..."
+                ? "Signing in..."
+                : "Signing up..."
               : isLogin
-              ? "Login"
-              : "Register"}
+              ? "Signin"
+              : "Signup"}
           </Button>
+        </form>
+        <div className="flex flex-col items-center justify-between gap-4 w-full text-gray-200 text-lg font-medium">
           <div className="grid grid-cols-5 place-items-center w-full">
             <hr className="col-span-2 w-full border-gray-500" />
             <h3 className="text-lg font-medium">or</h3>
             <hr className="col-span-2 w-full border-gray-500" />
           </div>
-          <div className="flex items-center justify-center gap-2 w-full">
-            <button className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-md hover:bg-[#EEEEEE]/80 transition-all duration-300">
+          <div className="flex items-center justify-center gap-4 w-full">
+            <button className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-lg hover:bg-[#EEEEEE]/80 transition-all duration-300">
               <FcGoogle />
               Google
             </button>
-            <button className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-md hover:bg-[#EEEEEE]/80 transition-all duration-300">
+            <button className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-lg hover:bg-[#EEEEEE]/80 transition-all duration-300">
               <FaGithub />
               Github
             </button>
           </div>
-        </form>
+        </div>
       </div>
       <div className="rounded-full rounded-tr-none overflow-hidden">
         <Image
