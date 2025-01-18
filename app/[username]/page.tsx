@@ -1,4 +1,4 @@
-import Button from "@/components/button";
+import { Button } from "@/components/button";
 import { prisma } from "@/lib/db";
 import { getCldImageUrl } from "next-cloudinary";
 import { cookies } from "next/headers";

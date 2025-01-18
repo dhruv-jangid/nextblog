@@ -1,19 +1,19 @@
 "use client";
 
-import Button from "@/components/button";
-import User from "./user";
+import { Button } from "@/components/button";
+import { Author } from "@/components/author";
 import { CldImage } from "next-cloudinary";
 import { useRouter } from "next/navigation";
+import type { BlogWithAuthor } from "@/app/createblog/page";
 
-const Card = ({
+const Card: React.FC<BlogWithAuthor> = ({
   id,
   title,
   createdAt,
   category,
   authorId,
   slug,
-  username,
-  name,
+  author: { slug: username, name },
 }) => {
   const router = useRouter();
 
@@ -39,27 +39,24 @@ const Card = ({
       <h3 className="text-xl font-medium line-clamp-3 w-10/12 font-[Degular Variable Text]">
         {title}
       </h3>
-      <User publicId={authorId} name={name} slug={username} date={createdAt} />
+      <Author
+        publicId={authorId}
+        name={name}
+        slug={username}
+        date={createdAt}
+      />
     </div>
   );
 };
 
-export default function BlogGrid({ blogs }) {
+export const BlogGrid: React.FC<{
+  blogs: BlogWithAuthor[];
+}> = ({ blogs }) => {
   return (
     <div className="grid grid-cols-3 gap-8 px-4">
       {blogs.map((blog) => (
-        <Card
-          key={blog.id}
-          id={blog.id}
-          title={blog.title}
-          createdAt={blog.createdAt}
-          category={blog.category}
-          authorId={blog.authorId}
-          slug={blog.slug}
-          username={blog.author.slug}
-          name={blog.author.name}
-        />
+        <Card key={blog.id} {...blog} />
       ))}
     </div>
   );
-}
+};

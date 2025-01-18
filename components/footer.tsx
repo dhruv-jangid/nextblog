@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MdOutlineEmail } from "react-icons/md";
 import { FaGithub, FaInstagram } from "react-icons/fa";
 
-export default function Footer() {
+export const Footer = () => {
   return (
     <div className="py-16 bg-[#191919] rounded-t-2xl flex justify-around mt-10">
       <div className="flex flex-col gap-2 w-1/4">
@@ -47,4 +47,4 @@ export default function Footer() {
       </div>
     </div>
   );
-}
+};

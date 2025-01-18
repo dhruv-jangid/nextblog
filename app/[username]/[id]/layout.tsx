@@ -23,7 +23,7 @@ export async function generateMetadata({
 
   if (!blog) {
     return {
-      title: "MetaPress Blog",
+      title: "Blog",
       description: "MetaPress Blog",
     };
   }

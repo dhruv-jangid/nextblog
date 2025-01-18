@@ -37,8 +37,16 @@ import {
   FaCode,
   FaQuoteLeft,
 } from "react-icons/fa";
-import Button from "@/components/button";
+import { Button } from "@/components/button";
 import { createBlog } from "@/actions/handleBlog";
+import type { Blog } from "@prisma/client";
+
+export type BlogWithAuthor = Blog & {
+  author: {
+    slug: string;
+    name: string;
+  };
+};
 
 export default function CreateBlog({ content = "", onChange }) {
   // const [linkUrl, setLinkUrl] = useState("");

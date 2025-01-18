@@ -1,5 +1,5 @@
-import Carousel from "@/components/carousel";
-import BlogGrid from "@/components/bloggrid";
+import { Carousel } from "@/components/carousel";
+import { BlogGrid } from "@/components/bloggrid";
 import { prisma } from "@/lib/db";
 
 export default async function Home() {

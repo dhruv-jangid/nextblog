@@ -1,14 +1,17 @@
 "use client";
 
-import Button from "@/components/button";
+import type { BlogWithAuthor } from "@/app/createblog/page";
+import { Button } from "@/components/button";
 import { CldImage } from "next-cloudinary";
 import { useRouter } from "next/navigation";
 
-export default function Carousel({ blog }) {
+export const Carousel: React.FC<{
+  blog: BlogWithAuthor;
+}> = ({ blog }) => {
   const router = useRouter();
   return (
     <div
-      className="relative h-[550px] mb-10 cursor-pointer"
+      className="relative h-[70vh] w-full mb-10 cursor-pointer"
       onClick={() => {
         router.push(`/${blog.author.slug}/${blog.slug}`);
       }}
@@ -18,7 +21,7 @@ export default function Carousel({ blog }) {
         alt={blog.title}
         fill={true}
         priority={true}
-        className="mx-auto rounded-2xl object-cover"
+        className="rounded-2xl object-cover"
       />
       <div className="absolute left-14 bottom-14 flex flex-col gap-4">
         <Button>{blog.category}</Button>
@@ -35,6 +38,7 @@ export default function Carousel({ blog }) {
             alt={blog.author.name}
             width={42}
             height={42}
+            priority={true}
             className="rounded-full"
           />
           <div className="flex flex-col gap-1">
@@ -53,4 +57,4 @@ export default function Carousel({ blog }) {
       </div>
     </div>
   );
-}
+};

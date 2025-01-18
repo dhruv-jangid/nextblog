@@ -6,7 +6,7 @@ import { FaGithub } from "react-icons/fa";
 import login2 from "@/public/images/login2.jpg";
 import { useActionState } from "react";
 import { handleAuth } from "@/actions/handleAuth";
-import Button from "@/components/button";
+import { Button } from "@/components/button";
 import Image from "next/image";
 
 export default function Login() {

@@ -1,14 +1,14 @@
 import Link from "next/link";
-import Button from "./button";
+import { Button } from "@/components/button";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { getCldImageUrl } from "next-cloudinary";
 import { logoutUser } from "@/actions/handleAuth";
 import logo from "@/public/images/logo.png";
 import { prisma } from "@/lib/db";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 
-export default async function Navbar() {
+export const Navbar = async () => {
   let user: User | null = null;
   let profileUrl: string | null = null;
 
@@ -79,4 +79,4 @@ export default async function Navbar() {
       </div>
     </div>
   );
-}
+};

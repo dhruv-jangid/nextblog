@@ -1,14 +1,16 @@
 "use client";
 
-import { getCldImageUrl } from "next-cloudinary";
-import Image from "next/image";
+import { CldImage } from "next-cloudinary";
 import { useRouter } from "next/navigation";
+import type { BlogWithAuthor } from "@/app/createblog/page";
 
-export default function User({ publicId, name, slug, date }) {
+export const Author: React.FC<
+  Pick<BlogWithAuthor["author"], "slug" | "name"> & {
+    publicId: string;
+    date: Date;
+  }
+> = ({ publicId, name, slug, date }) => {
   const router = useRouter();
-  const imgUrl = getCldImageUrl({
-    src: `nextblog/authors/${publicId}`,
-  });
 
   return (
     <div
@@ -28,13 +30,14 @@ export default function User({ publicId, name, slug, date }) {
           })}
         </h6>
       </div>
-      <Image
-        src={imgUrl}
+      <CldImage
+        src={`nextblog/authors/${publicId}`}
         alt={name}
         width={42}
         height={42}
+        priority={true}
         className="rounded-full"
       />
     </div>
   );
-}
+};

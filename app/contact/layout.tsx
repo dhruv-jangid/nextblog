@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "MetaPress Contact",
+  description: "Contact MetaPress",
 };
 
 export default function ContactLayout({

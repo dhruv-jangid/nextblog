@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MetaPress Login",
+  title: "Login",
   description: "Login to MetaPress",
 };
 
