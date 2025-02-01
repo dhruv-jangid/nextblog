@@ -14,8 +14,8 @@ const Card: React.FC<BlogWithAuthor> = ({
   author: { slug: username, name },
 }) => {
   return (
-    <div className="rounded-2xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-gradient-to-br from-[#191919] from-40% to-transparent">
-      <div className="relative h-1/2 rounded-lg overflow-hidden">
+    <div className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-gradient-to-br from-[#191919] from-40% to-transparent">
+      <div className="relative h-1/2 rounded-xl overflow-hidden">
         <CloudImage
           publicId={id}
           alt={title}

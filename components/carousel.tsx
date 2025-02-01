@@ -14,7 +14,7 @@ export const Carousel: React.FC<{
         alt={blog.title}
         fill={true}
         priority={true}
-        className="rounded-2xl"
+        className="rounded-3xl bg-gradient-to-bl from-[#191919] from-40% to-transparent"
       />
       <div className="absolute left-10 md:left-14 bottom-10 md:bottom-14 flex flex-col gap-4">
         <Button>

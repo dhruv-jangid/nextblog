@@ -9,7 +9,7 @@ import Italic from "@tiptap/extension-italic";
 import Heading from "@tiptap/extension-heading";
 import History from "@tiptap/extension-history";
 import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
+import TipTapImage from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
@@ -23,6 +23,7 @@ import { createBlog } from "@/actions/handleBlog";
 import blogCategories from "@/lib/blogcategories.json";
 import { z } from "zod";
 import { TbPhotoUp } from "react-icons/tb";
+import Image from "next/image";
 
 interface MenuButtonProps {
   onClick: () => void;
@@ -113,7 +114,7 @@ export default function CreateBlog({
   >({});
 
   // Update handlers to use individual validation
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
     const error = validateTitle(newTitle);
@@ -161,12 +162,13 @@ export default function CreateBlog({
           class: "text-blue-500 underline",
         },
       }),
-      Image.configure({
+      TipTapImage.configure({
         HTMLAttributes: {
           class: "max-w-full h-auto rounded-lg",
         },
         allowBase64: true,
       }),
+
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
@@ -229,7 +231,7 @@ export default function CreateBlog({
               id="category"
               value={category}
               onChange={handleCategoryChange}
-              className="bg-[#EEEEEE] px-3 py-1 rounded-lg text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
+              className="bg-[#EEEEEE] px-3 py-1 rounded-xl text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               <option value="" disabled>
                 Select a category
@@ -242,13 +244,12 @@ export default function CreateBlog({
             </select>
           </div>
 
-          <input
+          <textarea
             id="title"
-            type="text"
             value={title}
             onChange={handleTitleChange}
             placeholder="Enter your blog title (10-100 characters)"
-            className="text-3xl rounded-lg w-3/5 font-semibold bg-[#191919] px-4 py-3"
+            className="text-3xl rounded-2xl w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
             required
           />
           {validationErrors.title && (
@@ -256,7 +257,7 @@ export default function CreateBlog({
           )}
         </div>
 
-        <div className="relative w-full h-[60vh] rounded-lg overflow-hidden group">
+        <div className="relative w-full h-[60vh] rounded-2xl overflow-hidden group">
           <input
             id="blogcover"
             type="file"
@@ -265,10 +266,11 @@ export default function CreateBlog({
             className="hidden"
           />
           {blogCover ? (
-            <img
+            <Image
               src={URL.createObjectURL(blogCover)}
               alt="Blog cover preview"
-              className="w-full h-full object-cover"
+              className="object-cover"
+              fill={true}
             />
           ) : (
             <div className="w-full h-full bg-gray-800 flex items-center justify-center">
@@ -294,9 +296,9 @@ export default function CreateBlog({
           )}
         </div>
 
-        <div className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-          <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 p-2">
-            <div className="flex flex-wrap gap-1 mb-2 pb-2 border-b border-gray-300 dark:border-gray-700">
+        <div className="border border-gray-300 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
+            <div className="flex flex-wrap items-center gap-1 py-1.5 px-3 border-b border-gray-300 dark:border-gray-700">
               {[1, 2, 3].map((level) => (
                 <MenuButton
                   key={level}
@@ -333,7 +335,7 @@ export default function CreateBlog({
               </MenuButton>
             </div>
 
-            <div className="flex gap-1">
+            <div className="flex gap-1 px-3 py-2">
               <MenuButton
                 onClick={() => editor?.chain().focus().undo().run()}
                 tooltip="Undo"
@@ -374,7 +376,7 @@ export default function CreateBlog({
               }
             }}
           >
-            {isPending ? "Posting..." : "Publish Blog"}
+            {isPending ? "Publishing..." : "Publish"}
           </Button>
         </div>
       </form>

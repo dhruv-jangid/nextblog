@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { uploadCover } from "@/lib/uploadCover";
+import { deleteCover, uploadCover } from "@/lib/handleCover";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -125,4 +125,33 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
   if (blog.slug !== newSlug) {
     redirect(`/${blog.author.slug}/${newSlug}`);
   }
+};
+
+export const deleteBlog = async (id: string): Promise<string | void> => {
+  const user_id = (await cookies()).get("metapress")?.value;
+
+  if (!user_id) {
+    return "User not authenticated. Please login again!";
+  }
+
+  const blog = await prisma.blog.findUnique({
+    where: { id },
+    select: { authorId: true },
+  });
+
+  if (!blog) {
+    return "Blog not found";
+  }
+
+  if (blog.authorId !== user_id) {
+    return "Unauthorized to delete this blog";
+  }
+
+  await prisma.blog.delete({
+    where: { id, authorId: user_id },
+  });
+
+  deleteCover(id);
+
+  redirect("/");
 };

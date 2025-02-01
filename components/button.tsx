@@ -7,7 +7,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = ({ children, ...props }: ButtonProps) => {
   return (
     <button
-      className="bg-[#EEEEEE] px-3 py-1 rounded-lg w-max text-black hover:bg-[#EEEEEE]/80 transition-all duration-300"
+      className="bg-[#EEEEEE] px-3 py-1 rounded-xl w-max text-black hover:bg-[#EEEEEE]/80 transition-all duration-300"
       {...props}
     >
       {children}

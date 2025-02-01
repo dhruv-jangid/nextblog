@@ -36,3 +36,17 @@ export const uploadCover = async (
     throw new Error("Upload failed: " + error);
   }
 };
+
+export const deleteCover = async (publicId: string) => {
+  try {
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: "image",
+      invalidate: true,
+      type: "authenticated",
+    });
+    return { success: true, message: "Cover deleted successfully" };
+  } catch (error) {
+    console.error("Error deleting cover:", error);
+    return { success: false, message: "Failed to delete cover" };
+  }
+};

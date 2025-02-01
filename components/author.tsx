@@ -10,13 +10,13 @@ export const Author: React.FC<
   }
 > = ({ publicId, name, slug, date, end }) => {
   return (
-    <Link href={`/${slug}`}>
-      <div
-        className={`flex gap-2 items-center cursor-pointer ${
-          end ? "justify-end text-end" : "justify-start text-start"
-        }`}
-      >
-        {!end && (
+    <div
+      className={`flex gap-2 items-center ${
+        end ? "justify-end text-end" : "justify-start text-start"
+      }`}
+    >
+      {!end && (
+        <Link href={`/${slug}`} className="hover:opacity-80">
           <CloudImage
             publicId={publicId}
             alt={name}
@@ -26,29 +26,33 @@ export const Author: React.FC<
             className="rounded-full"
             author
           />
-        )}
-        <div className="flex flex-col gap-1">
+        </Link>
+      )}
+      <div className="flex flex-col gap-1">
+        <Link href={`/${slug}`} className="hover:opacity-80">
           <h3 className="text-white font-semibold leading-none">{name}</h3>
-          <h6 className="text-gray-300 leading-none">
-            {new Date(date).toLocaleString("en-US", {
-              month: "short",
-              day: "2-digit",
-              year: "numeric",
-            })}
-          </h6>
-        </div>
-        {end && (
+        </Link>
+        <h6 className="text-gray-300 leading-none">
+          {new Date(date).toLocaleString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          })}
+        </h6>
+      </div>
+      {end && (
+        <Link href={`/${slug}`} className="hover:opacity-80">
           <CloudImage
             publicId={publicId}
             alt={name}
             width={44}
             height={44}
             priority={true}
-            className="rounded-full bg-red-500"
+            className="rounded-full"
             author
           />
-        )}
-      </div>
-    </Link>
+        </Link>
+      )}
+    </div>
   );
 };

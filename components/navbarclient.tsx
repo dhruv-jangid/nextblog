@@ -52,12 +52,9 @@ export const NavbarClient = ({ user }: NavbarClientProps) => {
         <Link href="/">Home</Link>
         <Link href="/blogs">Blogs</Link>
         <Link href="/contact">Contact</Link>
-        <Link
-          href="/createblog"
-          className="bg-[#EEEEEE] rounded-lg py-1 px-3 text-black hover:bg-[#EEEEEE]/80 transition-all duration-300"
-        >
-          Create Blog
-        </Link>
+        <Button>
+          <Link href="/createblog">Create Blog</Link>
+        </Button>
       </div>
 
       <div
@@ -75,11 +72,7 @@ export const NavbarClient = ({ user }: NavbarClientProps) => {
           <Link href="/contact" onClick={() => setIsOpen(false)}>
             Contact
           </Link>
-          <Link
-            href="/createblog"
-            onClick={() => setIsOpen(false)}
-            className="bg-[#EEEEEE] rounded-lg py-1 px-3 text-black hover:bg-[#EEEEEE]/80 transition-all duration-300"
-          >
+          <Link href="/createblog" onClick={() => setIsOpen(false)}>
             Create Blog
           </Link>
         </div>
