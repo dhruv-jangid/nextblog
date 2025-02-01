@@ -14,8 +14,8 @@ export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="grid grid-cols-2">
-      <div className="flex flex-col items-center justify-center gap-4 w-1/2 place-self-center text-nowrap">
+    <div className="grid lg:grid-cols-2 py-12 lg:py-6">
+      <div className="flex flex-col items-center justify-center gap-4 w-2/3 lg:w-1/2 place-self-center text-nowrap">
         <form
           action={formAction}
           className="flex flex-col items-center justify-center gap-4 w-full text-gray-200 text-lg font-medium"
@@ -140,7 +140,7 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="rounded-full rounded-tr-none overflow-hidden">
+      <div className="rounded-full rounded-tr-none overflow-hidden hidden lg:block">
         <Image
           src={login2}
           alt="The adventure begins"

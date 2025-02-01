@@ -358,7 +358,7 @@ export default function CreateBlog({
           <p className="text-red-500 text-sm">{validationErrors.content}</p>
         )}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end text-lg">
           <Button
             disabled={isPending || !isFormValid}
             onClick={() => {
@@ -373,7 +373,6 @@ export default function CreateBlog({
                 });
               }
             }}
-            className="px-6 py-2 text-lg"
           >
             {isPending ? "Posting..." : "Publish Blog"}
           </Button>

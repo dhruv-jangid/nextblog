@@ -8,7 +8,7 @@ export const Carousel: React.FC<{
   blog: BlogWithAuthor;
 }> = ({ blog }) => {
   return (
-    <div className="relative h-[70vh] w-full mb-10">
+    <div className="relative h-[50vh] lg:h-[70vh] w-full mb-10">
       <CloudImage
         publicId={blog.id}
         alt={blog.title}
@@ -16,12 +16,17 @@ export const Carousel: React.FC<{
         priority={true}
         className="rounded-2xl"
       />
-      <div className="absolute left-14 bottom-14 flex flex-col gap-4">
+      <div className="absolute left-10 md:left-14 bottom-10 md:bottom-14 flex flex-col gap-4">
         <Button>
-          <Link href={`/blogs/${blog.category}`}>{blog.category}</Link>
+          <Link href={`/blogs/${blog.category}`} className="text-sm md:text-md">
+            {blog.category}
+          </Link>
         </Button>
+
         <Link href={`/${blog.author.slug}/${blog.slug}`}>
-          <h1 className="text-white text-3xl font-bold w-3/5">{blog.title}</h1>
+          <h1 className="text-white text-2xl lg:text-3xl font-bold w-4/5 md:w-3/5 line-clamp-3">
+            {blog.title}
+          </h1>
         </Link>
         <Author
           date={blog.createdAt}

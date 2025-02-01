@@ -47,10 +47,7 @@ export const createBlog = async (
   });
 
   if (blogCover) {
-    await uploadCover(
-      blogCover,
-      `${newBlog.id}_${newBlog.category}_${newBlog.author.id}`
-    );
+    await uploadCover(blogCover, newBlog.id);
 
     redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
   }

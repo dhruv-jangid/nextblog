@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
 };
 
 module.exports = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+  },
+
   images: {
     remotePatterns: [
       {

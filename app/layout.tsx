@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={degular.className}>
-      <body className="bg-[#0F0F0F] text-white w-[70vw] mx-auto">
+      <body className="bg-[#0F0F0F] text-white w-[94vw] lg:w-[80vw] xl:w-[70vw] mx-auto">
         <Navbar />
         {children}
         <Footer />
