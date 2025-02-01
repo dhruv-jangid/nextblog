@@ -55,7 +55,11 @@ export default async function Profile({
 
       <div className="grid gap-4">
         {user.blogs.map((blog) => (
-          <div key={blog.id} className="bg-[#191919] p-4 rounded-lg">
+          <Link
+            href={`/${user.slug}/${blog.slug}`}
+            key={blog.id}
+            className="bg-[#191919] p-4 rounded-lg hover:bg-[#252525] transition-colors"
+          >
             <h2 className="text-xl mb-2">{blog.title}</h2>
             <p className="text-gray-400 mb-2">{blog.category}</p>
             <p className="text-sm text-gray-400">
@@ -68,7 +72,7 @@ export default async function Profile({
                 hour12: true,
               })}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

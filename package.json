@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "6.2.1",
+    "@prisma/client": "^6.3.0",
     "@tiptap/extension-character-count": "^2.11.2",
     "@tiptap/extension-color": "^2.11.2",
     "@tiptap/extension-highlight": "^2.11.2",

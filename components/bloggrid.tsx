@@ -17,7 +17,7 @@ const Card: React.FC<BlogWithAuthor> = ({
     <div className="rounded-2xl p-6 border border-gray-600 flex flex-col h-[30rem] justify-between bg-gradient-to-br from-[#191919] from-40% to-transparent">
       <div className="relative h-1/2 rounded-lg overflow-hidden">
         <CloudImage
-          publicId={`${id}_${category}_${authorId}`}
+          publicId={id}
           alt={title}
           fill={true}
           priority={false}
@@ -26,7 +26,9 @@ const Card: React.FC<BlogWithAuthor> = ({
           className="cursor-pointer object-cover"
         />
       </div>
-      <Button>{category}</Button>
+      <Button>
+        <Link href={`/blogs/${category}`}>{category}</Link>
+      </Button>
       <h3 className="cursor-pointer text-xl font-medium line-clamp-3 w-10/12 font-[Degular Variable Text]">
         <Link href={`/${username}/${slug}`}>{title}</Link>
       </h3>

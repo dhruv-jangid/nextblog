@@ -1,69 +1,159 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Heading from "@tiptap/extension-heading";
+import History from "@tiptap/extension-history";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
-import Superscript from "@tiptap/extension-superscript";
-import Subscript from "@tiptap/extension-subscript";
-import Highlight from "@tiptap/extension-highlight";
 import TextStyle from "@tiptap/extension-text-style";
-import Color from "@tiptap/extension-color";
 import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
-import Table from "@tiptap/extension-table";
-import TableRow from "@tiptap/extension-table-row";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import Youtube from "@tiptap/extension-youtube";
-import { useState, useActionState, startTransition } from "react";
-import {
-  FaBold,
-  FaItalic,
-  FaUnderline,
-  FaStrikethrough,
-  FaSuperscript,
-  FaSubscript,
-  FaLink,
-  FaImage,
-  FaVideo,
-  FaTable,
-  FaUndo,
-  FaRedo,
-  FaListUl,
-  FaListOl,
-  FaCode,
-  FaQuoteLeft,
-} from "react-icons/fa";
+import { useState } from "react";
+import { useActionState, startTransition } from "react";
+import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
 import { Button } from "@/components/button";
 import { createBlog } from "@/actions/handleBlog";
-import type { Blog } from "@prisma/client";
+import blogCategories from "@/lib/blogcategories.json";
+import { z } from "zod";
+import { TbPhotoUp } from "react-icons/tb";
 
-export type BlogWithAuthor = Blog & {
-  author: {
-    slug: string;
-    name: string;
-  };
+interface MenuButtonProps {
+  onClick: () => void;
+  isActive?: boolean;
+  children: React.ReactNode;
+  tooltip?: string;
+}
+
+// Add validation schema
+const blogSchema = z.object({
+  title: z
+    .string()
+    .min(10, "Title must be at least 10 characters")
+    .max(100, "Title cannot exceed 100 characters"),
+  content: z
+    .string()
+    .min(100, "Content must be at least 100 characters")
+    .max(10000, "Content cannot exceed 10000 characters"),
+  blogCover: z.instanceof(File).refine((file) => {
+    return file.size <= 5 * 1024 * 1024; // 5MB limit
+  }, "Image size must be less than 5MB"),
+  category: z.string().min(1, "Category is required"),
+});
+
+// Split validation into separate functions for each field
+const validateTitle = (title: string) => {
+  try {
+    blogSchema.shape.title.parse(title);
+    return "";
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return error.errors[0].message;
+    }
+    return "Invalid title";
+  }
 };
 
-export default function CreateBlog({ content = "", onChange }) {
-  // const [linkUrl, setLinkUrl] = useState("");
-  // const [showLinkInput, setShowLinkInput] = useState(false);
-  // const [imageUrl, setImageUrl] = useState("");
-  // const [showImageInput, setShowImageInput] = useState(false);
-  // const [youtubeUrl, setYoutubeUrl] = useState("");
-  // const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+const validateContent = (content: string) => {
+  try {
+    blogSchema.shape.content.parse(content);
+    return "";
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return error.errors[0].message;
+    }
+    return "Invalid content";
+  }
+};
+
+const validateImage = (file: File | null) => {
+  if (!file) return "Cover image is required";
+  try {
+    blogSchema.shape.blogCover.parse(file);
+    return "";
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return error.errors[0].message;
+    }
+    return "Invalid image";
+  }
+};
+
+const validateCategory = (category: string) => {
+  try {
+    blogSchema.shape.category.parse(category);
+    return "";
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return error.errors[0].message;
+    }
+    return "Invalid category";
+  }
+};
+
+export default function CreateBlog({
+  content = "",
+  onChange,
+}: {
+  content?: string;
+  onChange?: (html: string) => void;
+}) {
   const [title, setTitle] = useState("");
   const [state, formAction, isPending] = useActionState(createBlog, null);
   const [category, setCategory] = useState("");
   const [blogCover, setBlogCover] = useState<File | null>(null);
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
+  // Update handlers to use individual validation
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    const error = validateTitle(newTitle);
+    setValidationErrors((prev) => ({
+      ...prev,
+      title: error,
+    }));
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategory = e.target.value;
+    setCategory(newCategory);
+    const error = validateCategory(newCategory);
+    setValidationErrors((prev) => ({
+      ...prev,
+      category: error,
+    }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setBlogCover(file);
+    const error = validateImage(file);
+    setValidationErrors((prev) => ({
+      ...prev,
+      blogCover: error,
+    }));
+  };
+
+  // Update editor configuration
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        history: true,
+      Document,
+      Paragraph,
+      Text,
+      Bold,
+      Italic,
+      History,
+      Heading.configure({
+        levels: [1, 2, 3],
       }),
       Link.configure({
         openOnClick: false,
@@ -73,7 +163,7 @@ export default function CreateBlog({ content = "", onChange }) {
       }),
       Image.configure({
         HTMLAttributes: {
-          class: "max-w-full h-auto",
+          class: "max-w-full h-auto rounded-lg",
         },
         allowBase64: true,
       }),
@@ -81,341 +171,214 @@ export default function CreateBlog({ content = "", onChange }) {
         types: ["heading", "paragraph"],
       }),
       Underline,
-      Superscript,
-      Subscript,
-      Highlight.configure({ multicolor: true }),
       TextStyle,
-      Color,
       CharacterCount,
       Placeholder.configure({
-        placeholder: "Write something...",
-      }),
-      Table.configure({
-        resizable: true,
-      }),
-      TableRow,
-      TableCell,
-      TableHeader,
-      Youtube.configure({
-        controls: true,
+        placeholder: "Start writing your amazing blog post...",
       }),
     ],
     content,
     onUpdate: ({ editor }) => {
-      if (onChange) {
-        onChange(editor.getHTML());
-      }
+      const newContent = editor.getHTML();
+      onChange?.(newContent);
+      const error = validateContent(newContent);
+      setValidationErrors((prev) => ({
+        ...prev,
+        content: error,
+      }));
     },
-    immediatelyRender: false,
   });
 
-  // const addLink = () => {
-  //   if (linkUrl) {
-  //     editor?.chain().focus().setLink({ href: linkUrl }).run();
-  //     setLinkUrl("");
-  //     setShowLinkInput(false);
-  //   }
-  // };
+  // Update form validation check
+  const isFormValid =
+    !validationErrors.title &&
+    !validationErrors.content &&
+    !validationErrors.blogCover &&
+    !validationErrors.category &&
+    title &&
+    category &&
+    blogCover &&
+    editor?.getHTML();
 
-  // const addImage = () => {
-  //   if (imageUrl) {
-  //     editor?.chain().focus().setImage({ src: imageUrl }).run();
-  //     setImageUrl("");
-  //     setShowImageInput(false);
-  //   }
-  // };
-
-  // const addYoutubeVideo = () => {
-  //   if (youtubeUrl) {
-  //     editor?.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run();
-  //     setYoutubeUrl("");
-  //     setShowYoutubeInput(false);
-  //   }
-  // };
-
-  // const handleImageUpload = useCallback(
-  //   (event) => {
-  //     if (event.target.files?.length) {
-  //       const file = event.target.files[0];
-  //       const reader = new FileReader();
-  //       reader.onload = () => {
-  //         if (typeof reader.result === "string") {
-  //           editor?.chain().focus().setImage({ src: reader.result }).run();
-  //         }
-  //       };
-  //       reader.readAsDataURL(file);
-  //     }
-  //   },
-  //   [editor]
-  // );
-
-  // const insertTable = () => {
-  //   editor
-  //     ?.chain()
-  //     .focus()
-  //     .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-  //     .run();
-  // };
-
-  const MenuButton = ({ onClick, isActive = null, children }) => (
+  const MenuButton = ({
+    onClick,
+    isActive = false,
+    children,
+    tooltip,
+  }: MenuButtonProps) => (
     <button
       onClick={onClick}
-      className={`px-2 py-1 mr-2 mb-2 rounded hover:bg-gray-100 ${
-        isActive ? "bg-gray-200" : ""
+      className={`p-2 rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
+        isActive ? "bg-gray-200 dark:bg-gray-700" : ""
       }`}
+      type="button"
+      title={tooltip}
     >
       {children}
     </button>
   );
 
   return (
-    <form action={formAction}>
-      <h1 className="text-lg">Title</h1>
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-        }}
-        placeholder="Blog Title"
-        className="py-1.5 px-3 rounded-lg mb-4 bg-transparent border w-full"
-        required
-      />
-      <h1 className="text-lg">Blog Cover</h1>
-      <input
-        type="file"
-        accept="image/*"
-        name="blogcover"
-        className="mb-4"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            setBlogCover(file);
-          }
-        }}
-      />
-      <div className="w-full border rounded-lg">
-        <div className="p-2 border-b flex flex-wrap">
-          <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleBold().run()}
-              isActive={editor?.isActive("bold")}
-            >
-              <FaBold />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleItalic().run()}
-              isActive={editor?.isActive("italic")}
-            >
-              <FaItalic />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleUnderline().run()}
-              isActive={editor?.isActive("underline")}
-            >
-              <FaUnderline />
-            </MenuButton>
-            {/* <MenuButton
-              onClick={() => editor?.chain().focus().toggleStrike().run()}
-              isActive={editor?.isActive("strike")}
-            >
-              <FaStrikethrough />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleSuperscript().run()}
-              isActive={editor?.isActive("superscript")}
-            >
-              <FaSuperscript />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleSubscript().run()}
-              isActive={editor?.isActive("subscript")}
-            >
-              <FaSubscript />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleHighlight().run()}
-              isActive={editor?.isActive("highlight")}
-            >
-              <span className="text-yellow-400">H</span>
-            </MenuButton>
+    <div className="flex flex-col gap-10 px-16 py-12">
+      <form action={formAction} className="flex flex-col gap-10">
+        {state && <div>{state}</div>}
 
+        <div className="flex flex-col gap-6">
+          <div className="flex justify-between">
             <select
-              onChange={(e) =>
-                editor?.chain().focus().setColor(e.target.value).run()
-              }
-              className="px-2 py-1 mr-2 mb-2 rounded border"
+              id="category"
+              value={category}
+              onChange={handleCategoryChange}
+              className="bg-[#EEEEEE] px-3 py-1 rounded-lg text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
-              <option value="">Text Color</option>
-              <option value="#FF0000">Red</option>
-              <option value="#00FF00">Green</option>
-              <option value="#0000FF">Blue</option>
-            </select> */}
+              <option value="" disabled>
+                Select a category
+              </option>
+              {blogCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-            <MenuButton
-              onClick={() =>
-                editor?.chain().focus().toggleHeading({ level: 1 }).run()
-              }
-              isActive={editor?.isActive("heading", { level: 1 })}
-            >
-              H1
-            </MenuButton>
-            <MenuButton
-              onClick={() =>
-                editor?.chain().focus().toggleHeading({ level: 2 }).run()
-              }
-              isActive={editor?.isActive("heading", { level: 2 })}
-            >
-              H2
-            </MenuButton>
-            <MenuButton
-              onClick={() =>
-                editor?.chain().focus().toggleHeading({ level: 3 }).run()
-              }
-              isActive={editor?.isActive("heading", { level: 3 })}
-            >
-              H3
-            </MenuButton>
-
-            <MenuButton
-              onClick={() => editor?.chain().focus().setTextAlign("left").run()}
-              isActive={editor?.isActive({ textAlign: "left" })}
-            >
-              Left
-            </MenuButton>
-            <MenuButton
-              onClick={() =>
-                editor?.chain().focus().setTextAlign("center").run()
-              }
-              isActive={editor?.isActive({ textAlign: "center" })}
-            >
-              Center
-            </MenuButton>
-            <MenuButton
-              onClick={() =>
-                editor?.chain().focus().setTextAlign("right").run()
-              }
-              isActive={editor?.isActive({ textAlign: "right" })}
-            >
-              Right
-            </MenuButton>
-          </div> */}
-
-          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleBulletList().run()}
-              isActive={editor?.isActive("bulletList")}
-            >
-              <FaListUl />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-              isActive={editor?.isActive("orderedList")}
-            >
-              <FaListOl />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-              isActive={editor?.isActive("blockquote")}
-            >
-              <FaQuoteLeft />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-              isActive={editor?.isActive("codeBlock")}
-            >
-              <FaCode />
-            </MenuButton>
-          </div> */}
-
-          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-            <MenuButton onClick={insertTable}>
-              <FaTable />
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().addColumnBefore().run()}
-            >
-              Add Column
-            </MenuButton>
-            <MenuButton
-              onClick={() => editor?.chain().focus().addRowBefore().run()}
-            >
-              Add Row
-            </MenuButton>
-          </div> */}
-
-          {/* <div className="w-full flex flex-wrap mb-2 pb-2 border-b">
-            <MenuButton onClick={() => setShowImageInput(!showImageInput)}>
-              <FaImage />
-            </MenuButton>
-          </div> */}
-
-          <div className="w-full flex flex-wrap">
-            <MenuButton onClick={() => editor?.chain().focus().undo().run()}>
-              <FaUndo />
-            </MenuButton>
-            <MenuButton onClick={() => editor?.chain().focus().redo().run()}>
-              <FaRedo />
-            </MenuButton>
-          </div>
+          <input
+            id="title"
+            type="text"
+            value={title}
+            onChange={handleTitleChange}
+            placeholder="Enter your blog title (10-100 characters)"
+            className="text-3xl rounded-lg w-3/5 font-semibold bg-[#191919] px-4 py-3"
+            required
+          />
+          {validationErrors.title && (
+            <p className="text-red-500 text-sm">{validationErrors.title}</p>
+          )}
         </div>
 
-        {/* {showImageInput && (
-          <div className="p-2 border-b flex">
-            <input
-              type="url"
-              placeholder="Enter image URL"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="flex-1 px-2 py-1 border rounded mr-2"
+        <div className="relative w-full h-[60vh] rounded-lg overflow-hidden group">
+          <input
+            id="blogcover"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+          />
+          {blogCover ? (
+            <img
+              src={URL.createObjectURL(blogCover)}
+              alt="Blog cover preview"
+              className="w-full h-full object-cover"
             />
-            <button
-              onClick={addImage}
-              className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Add Image
-            </button>
+          ) : (
+            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+              <div className="text-center">
+                <TbPhotoUp size={48} className="mx-auto mb-2" />
+                <span>Click to upload cover image</span>
+              </div>
+            </div>
+          )}
+          <div
+            onClick={() => document.getElementById("blogcover")?.click()}
+            className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+          >
+            <div className="flex items-center gap-2 text-white">
+              <TbPhotoUp size={24} />
+              <span>{blogCover ? "Change Image" : "Upload Image"}</span>
+            </div>
           </div>
-        )} */}
+          {validationErrors.blogCover && (
+            <p className="text-red-500 text-sm mt-2">
+              {validationErrors.blogCover}
+            </p>
+          )}
+        </div>
 
-        <EditorContent editor={editor} className="p-4 min-h-[200px]" />
-      </div>
-      <select
-        value={category}
-        onChange={(e) => {
-          setCategory(e.target.value);
-        }}
-        className="py-1.5 px-3 rounded-lg border bg-transparent mt-4"
-        required
-      >
-        <option value="" disabled>
-          Select a category
-        </option>
-        <option value="Agriculture">Agriculture</option>
-        <option value="Collectibles">Collectibles</option>
-        <option value="Education">Education</option>
-        <option value="Food">Food</option>
-        <option value="Technology">Technology</option>
-      </select>
-      <div className="flex justify-center mt-4 text-xl">
-        <Button
-          disabled={isPending}
-          onClick={() => {
-            startTransition(() => {
-              formAction({
-                title,
-                blogCover,
-                content: editor.getHTML(),
-                category,
-              });
-            });
-          }}
-        >
-          {isPending ? "Posting..." : "Post"}
-        </Button>
-      </div>
-    </form>
+        <div className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 p-2">
+            <div className="flex flex-wrap gap-1 mb-2 pb-2 border-b border-gray-300 dark:border-gray-700">
+              {[1, 2, 3].map((level) => (
+                <MenuButton
+                  key={level}
+                  onClick={() =>
+                    editor?.chain().focus().toggleHeading({ level }).run()
+                  }
+                  isActive={editor?.isActive("heading", { level })}
+                  tooltip={`Heading ${level}`}
+                >
+                  H{level}
+                </MenuButton>
+              ))}
+              <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
+              <MenuButton
+                onClick={() => editor?.chain().focus().toggleBold().run()}
+                isActive={editor?.isActive("bold")}
+                tooltip="Bold"
+              >
+                <FaBold />
+              </MenuButton>
+              <MenuButton
+                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                isActive={editor?.isActive("italic")}
+                tooltip="Italic"
+              >
+                <FaItalic />
+              </MenuButton>
+              <MenuButton
+                onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                isActive={editor?.isActive("underline")}
+                tooltip="Underline"
+              >
+                <FaUnderline />
+              </MenuButton>
+            </div>
+
+            <div className="flex gap-1">
+              <MenuButton
+                onClick={() => editor?.chain().focus().undo().run()}
+                tooltip="Undo"
+              >
+                <FaUndo />
+              </MenuButton>
+              <MenuButton
+                onClick={() => editor?.chain().focus().redo().run()}
+                tooltip="Redo"
+              >
+                <FaRedo />
+              </MenuButton>
+            </div>
+          </div>
+
+          <EditorContent
+            editor={editor}
+            className="prose dark:prose-invert max-w-none p-4 min-h-[300px] focus:outline-none bg-[#191919]"
+          />
+        </div>
+        {validationErrors.content && (
+          <p className="text-red-500 text-sm">{validationErrors.content}</p>
+        )}
+
+        <div className="flex justify-end">
+          <Button
+            disabled={isPending || !isFormValid}
+            onClick={() => {
+              if (editor && isFormValid) {
+                startTransition(() => {
+                  formAction({
+                    title,
+                    blogCover,
+                    content: editor.getHTML(),
+                    category,
+                  });
+                });
+              }
+            }}
+            className="px-6 py-2 text-lg"
+          >
+            {isPending ? "Posting..." : "Publish Blog"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
