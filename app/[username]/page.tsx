@@ -24,9 +24,9 @@ export default async function Profile({
   }
 
   return (
-    <div className="flex flex-col gap-6 p-12">
-      <div className="flex justify-between items-center text-xl">
-        <div className="flex justify-center items-center gap-4">
+    <div className="flex flex-col gap-6 p-4 lg:p-12">
+      <div className="flex flex-col gap-4 lg:flex-row justify-between lg:items-center lg:text-xl">
+        <div className="flex lg:justify-center items-center gap-4">
           <CloudImage
             publicId={user.id}
             width={112}

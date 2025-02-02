@@ -149,8 +149,8 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
   });
 
   return (
-    <div className="flex flex-col gap-10 px-16 py-12">
-      <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10 p-4 lg:px-16 lg:py-12">
+      <div className="flex flex-col gap-4 lg:gap-6">
         <div className="flex justify-between">
           {isEditing ? (
             <select
@@ -220,7 +220,9 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
             className="text-3xl rounded-lg w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
-          <h1 className="text-3xl rounded-lg w-3/5 font-semibold">{title}</h1>
+          <h1 className="text-2xl lg:text-3xl rounded-lg w- lg:w-3/5 font-semibold">
+            {title}
+          </h1>
         )}
         {!isEditing && (
           <Author
@@ -231,7 +233,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
           />
         )}
       </div>
-      <div className="relative w-full h-[60vh] rounded-lg overflow-hidden group">
+      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-lg overflow-hidden group">
         {previewUrl ? (
           <Image
             src={previewUrl}
