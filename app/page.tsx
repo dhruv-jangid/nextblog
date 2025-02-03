@@ -9,6 +9,11 @@ export default async function Home() {
       createdAt: "desc",
     },
     take: 4,
+    cacheStrategy: {
+      ttl: 60,
+      swr: 60,
+      tags: ["blogs"],
+    },
   });
   const [firstBlog, ...remainingBlogs] = blogs;
 

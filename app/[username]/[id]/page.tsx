@@ -21,7 +21,8 @@ export default async function Blog({
     return <div>Blog not found</div>;
   }
 
-  const isAuthor = (await cookies()).get("metapress")?.value === blog.author.id;
+  const isAuthor =
+    JSON.parse((await cookies()).get("metapress")?.value).id === blog.author.id;
 
   return <BlogPage blog={blog} isAuthor={isAuthor} />;
 }

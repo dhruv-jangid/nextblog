@@ -129,7 +129,7 @@ export const NavbarClient = ({ user }: NavbarClientProps) => {
                 publicId={user.id}
                 width={32}
                 height={32}
-                alt={user.name}
+                alt="Profile Picture"
                 className="rounded-full"
                 author
               />
@@ -173,7 +173,7 @@ export const NavbarClient = ({ user }: NavbarClientProps) => {
         )}
       </div>
 
-      <div className="hidden lg:block">
+      <div className="hidden lg:block text-lg profile-menu-container">
         {user ? (
           <div className="relative">
             <button
@@ -197,9 +197,9 @@ export const NavbarClient = ({ user }: NavbarClientProps) => {
               </svg>
               <CloudImage
                 publicId={user.id}
-                width={44}
-                height={44}
-                alt={user.name}
+                width={38}
+                height={38}
+                alt="Profile Picture"
                 className="rounded-full"
                 author
               />

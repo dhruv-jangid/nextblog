@@ -15,8 +15,6 @@ export const CloudImage = ({
 }: CloudImageProps) => {
   const url = getCldImageUrl({
     src: `nextblog/${author ? "authors" : "blogs"}/${publicId}`,
-    aspectRatio: `${author ? "1:1" : "16:9"}`,
-    crop: "fill",
     gravity: `${author ? "center" : "auto"}`,
   });
 

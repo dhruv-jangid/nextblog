@@ -21,6 +21,7 @@ export const uploadCover = async (
         {
           folder: !isAuthor ? "nextblog/blogs" : "nextblog/authors",
           public_id: publicId,
+          invalidate: true,
         },
         (error, result) => {
           if (error) {

@@ -6,15 +6,10 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const createBlog = async (
-  prevState: null,
-  formData: {
-    title: string;
-    blogCover: File;
-    content: string;
-    category: string;
-  }
+  prevState,
+  formData
 ): Promise<string | void> => {
-  const user_id = (await cookies()).get("metapress")?.value;
+  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
@@ -35,11 +30,16 @@ export const createBlog = async (
     return "Title already taken, please choose a different title!";
   }
 
+  const cleanedContent = content
+    .replace(/<p><br><\/p>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
   const newBlog = await prisma.blog.create({
     data: {
       title,
       slug,
-      content,
+      content: cleanedContent,
       category,
       authorId: user_id,
     },
@@ -56,7 +56,7 @@ export const createBlog = async (
 };
 
 export const editBlog = async (formData: FormData): Promise<string | void> => {
-  const user_id = (await cookies()).get("metapress")?.value;
+  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
@@ -104,6 +104,7 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
 
   if (image) {
     try {
+      await deleteCover(id);
       await uploadCover(image, id);
     } catch (error) {
       console.log(error);
@@ -128,7 +129,7 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
 };
 
 export const deleteBlog = async (id: string): Promise<string | void> => {
-  const user_id = (await cookies()).get("metapress")?.value;
+  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
@@ -147,11 +148,15 @@ export const deleteBlog = async (id: string): Promise<string | void> => {
     return "Unauthorized to delete this blog";
   }
 
+  try {
+    await deleteCover(id);
+  } catch (error) {
+    console.log(error);
+  }
+
   await prisma.blog.delete({
     where: { id, authorId: user_id },
   });
-
-  deleteCover(id);
 
   redirect("/");
 };

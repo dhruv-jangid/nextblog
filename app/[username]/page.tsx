@@ -10,6 +10,12 @@ export default async function Profile({
   params: { username: string };
 }) {
   const { username } = await params;
+  const cookieSession = (await cookies()).get("metapress");
+  let user_id = null;
+  if (cookieSession) {
+    user_id = JSON.parse(cookieSession?.value).id;
+  }
+
   const user = await prisma.user.findUnique({
     where: { slug: username },
     include: {
@@ -25,7 +31,7 @@ export default async function Profile({
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-12">
-      <div className="flex flex-col gap-4 lg:flex-row justify-between lg:items-center lg:text-xl">
+      <div className="flex flex-col gap-4 lg:flex-row justify-between lg:items-center lg:text-base">
         <div className="flex lg:justify-center items-center gap-4">
           <CloudImage
             publicId={user.id}
@@ -38,11 +44,15 @@ export default async function Profile({
           <div>
             <h1 className="text-3xl font-semibold">{user.name}</h1>
             <p className="text-gray-400 text-lg">
-              @{user.slug} ({user.role})
+              @{user.slug}{" "}
+              {user.role === "ADMIN" && (
+                <span className="text-blue-500">({user.role})</span>
+              )}
             </p>
           </div>
         </div>
-        {(await cookies()).get("metapress")?.value === user.id && (
+
+        {user_id === user.id && (
           <Button>
             <Link href={`/${user.slug}/settings`}>Edit Profile</Link>
           </Button>

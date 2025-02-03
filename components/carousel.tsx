@@ -8,7 +8,7 @@ export const Carousel: React.FC<{
   blog: BlogWithAuthor;
 }> = ({ blog }) => {
   return (
-    <div className="relative h-[50vh] lg:h-[40vh] xl:h-[70vh] w-full mb-10">
+    <div className="relative h-[50vh] lg:h-[40vh] xl:h-[80vh] w-full mb-10">
       <CloudImage
         publicId={blog.id}
         alt={blog.title}

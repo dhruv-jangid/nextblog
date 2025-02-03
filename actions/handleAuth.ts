@@ -53,12 +53,19 @@ export const handleAuth = async (prevState, formData: FormData) => {
       where: { email },
     });
     if (user && (await argon2.verify(user.password, password))) {
-      (await cookies()).set("metapress", user.id, {
-        httpOnly: true,
-        path: "/",
-        maxAge: 3600,
-        sameSite: "strict",
-      });
+      (await cookies()).set(
+        "metapress",
+        JSON.stringify({
+          id: user.id,
+          slug: user.slug,
+        }),
+        {
+          httpOnly: true,
+          path: "/",
+          maxAge: 3600,
+          sameSite: "strict",
+        }
+      );
 
       permanentRedirect("/");
     } else {
@@ -96,12 +103,19 @@ export const handleAuth = async (prevState, formData: FormData) => {
       return "Profile image is required";
     }
 
-    (await cookies()).set("metapress", newUser.id, {
-      httpOnly: true,
-      path: "/",
-      maxAge: 3600,
-      sameSite: "strict",
-    });
+    (await cookies()).set(
+      "metapress",
+      JSON.stringify({
+        id: newUser.id,
+        slug: newUser.slug,
+      }),
+      {
+        httpOnly: true,
+        path: "/",
+        maxAge: 3600,
+        sameSite: "strict",
+      }
+    );
 
     permanentRedirect("/");
   }

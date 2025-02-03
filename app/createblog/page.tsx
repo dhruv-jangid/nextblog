@@ -32,23 +32,21 @@ interface MenuButtonProps {
   tooltip?: string;
 }
 
-// Add validation schema
 const blogSchema = z.object({
   title: z
     .string()
     .min(10, "Title must be at least 10 characters")
-    .max(100, "Title cannot exceed 100 characters"),
+    .max(80, "Title cannot exceed 80 characters"),
   content: z
     .string()
     .min(100, "Content must be at least 100 characters")
-    .max(10000, "Content cannot exceed 10000 characters"),
+    .max(3500, "Content cannot exceed 3500 characters"),
   blogCover: z.instanceof(File).refine((file) => {
-    return file.size <= 5 * 1024 * 1024; // 5MB limit
+    return file.size <= 5 * 1024 * 1024;
   }, "Image size must be less than 5MB"),
   category: z.string().min(1, "Category is required"),
 });
 
-// Split validation into separate functions for each field
 const validateTitle = (title: string) => {
   try {
     blogSchema.shape.title.parse(title);
@@ -113,7 +111,6 @@ export default function CreateBlog({
     Record<string, string>
   >({});
 
-  // Update handlers to use individual validation
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
@@ -144,8 +141,8 @@ export default function CreateBlog({
     }));
   };
 
-  // Update editor configuration
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       Document,
       Paragraph,
@@ -191,7 +188,6 @@ export default function CreateBlog({
     },
   });
 
-  // Update form validation check
   const isFormValid =
     !validationErrors.title &&
     !validationErrors.content &&

@@ -149,8 +149,8 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
   });
 
   return (
-    <div className="flex flex-col gap-10 p-4 lg:px-16 lg:py-12">
-      <div className="flex flex-col gap-4 lg:gap-6">
+    <div className="flex flex-col gap-6 p-4 lg:gap-8 lg:px-16 lg:py-10">
+      <div className="flex flex-col gap-4">
         <div className="flex justify-between">
           {isEditing ? (
             <select
@@ -217,10 +217,10 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
             minLength={40}
             maxLength={80}
             placeholder="Title cannot be empty"
-            className="text-3xl rounded-lg w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
+            className="text-2xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
-          <h1 className="text-2xl lg:text-3xl rounded-lg w- lg:w-3/5 font-semibold">
+          <h1 className="text-2xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold">
             {title}
           </h1>
         )}

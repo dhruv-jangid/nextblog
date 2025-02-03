@@ -7,6 +7,12 @@ export default async function Blogs() {
     orderBy: {
       createdAt: "desc",
     },
+    take: 10,
+    cacheStrategy: {
+      ttl: 60,
+      swr: 60,
+      tags: ["blogs"],
+    },
   });
   return <BlogGrid blogs={blogs} />;
 }
