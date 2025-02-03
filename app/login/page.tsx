@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import login2 from "@/public/images/login2.jpg";
+import login from "@/public/images/login.jpg";
 import { useActionState } from "react";
 import { handleAuth } from "@/actions/handleAuth";
 import { Button } from "@/components/button";
@@ -14,7 +14,7 @@ export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="grid lg:grid-cols-2 py-12 lg:py-6">
+    <div className="grid lg:grid-cols-2 h-[80vh]">
       <div className="flex flex-col items-center justify-center gap-4 w-2/3 lg:w-1/2 place-self-center text-nowrap">
         <form
           action={formAction}
@@ -140,15 +140,16 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="rounded-full rounded-tr-none overflow-hidden hidden lg:block">
+      <div className="rounded-full rounded-tr-none overflow-hidden hidden lg:block relative">
         <Image
-          src={login2}
+          src={login}
           alt="The adventure begins"
-          width={600}
-          height={600}
+          fill
+          quality={100}
           priority={true}
           placeholder="blur"
           sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
         />
       </div>
     </div>

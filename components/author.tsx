@@ -1,14 +1,7 @@
 import Link from "next/link";
-import type { BlogWithAuthor } from "@/app/createblog/page";
 import { CloudImage } from "@/components/cloudimage";
 
-export const Author: React.FC<
-  Pick<BlogWithAuthor["author"], "slug" | "name"> & {
-    publicId: string;
-    date: Date;
-    end?: boolean;
-  }
-> = ({ publicId, name, slug, date, end }) => {
+export const Author = ({ publicId, name, slug, date, end = false }) => {
   return (
     <div
       className={`flex gap-2 items-center ${
@@ -16,23 +9,26 @@ export const Author: React.FC<
       }`}
     >
       {!end && (
-        <Link href={`/${slug}`} className="hover:opacity-80">
+        <Link
+          href={`/${slug}`}
+          className="hover:opacity-80 w-11 h-11 lg:w-12 lg:h-12 relative"
+        >
           <CloudImage
             publicId={publicId}
             alt={name}
-            width={44}
-            height={44}
+            fill
             priority={true}
+            sizes="(min-width: 768px) 44px"
             className="rounded-full"
             author
           />
         </Link>
       )}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 md:gap-0 lg:text-lg">
         <Link href={`/${slug}`} className="hover:opacity-80">
-          <h3 className="text-white font-semibold leading-none">{name}</h3>
+          <h3 className="text-white font-medium leading-none">{name}</h3>
         </Link>
-        <h6 className="text-gray-300 leading-none">
+        <h6 className="text-gray-300 leading-none text-sm md:text-base">
           {new Date(date).toLocaleString("en-US", {
             month: "short",
             day: "2-digit",
@@ -41,13 +37,16 @@ export const Author: React.FC<
         </h6>
       </div>
       {end && (
-        <Link href={`/${slug}`} className="hover:opacity-80">
+        <Link
+          href={`/${slug}`}
+          className="hover:opacity-80 w-11 h-11 lg:w-12 lg:h-12 relative"
+        >
           <CloudImage
             publicId={publicId}
             alt={name}
-            width={44}
-            height={44}
+            fill
             priority={true}
+            sizes="(min-width: 768px) 44px"
             className="rounded-full"
             author
           />

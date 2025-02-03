@@ -1,7 +1,6 @@
 "use client";
 
 import { IoMdHeartEmpty } from "react-icons/io";
-import type { Blog } from "@prisma/client";
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import { CloudImage } from "@/components/cloudimage";
@@ -26,25 +25,7 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
 
-interface BlogProps {
-  blog: Blog & {
-    author: {
-      id: string;
-      name: string;
-      slug: string;
-    };
-  };
-  isAuthor: boolean;
-}
-
-interface MenuButtonProps {
-  onClick: () => void;
-  isActive?: boolean;
-  children: React.ReactNode;
-  tooltip?: string;
-}
-
-export default function BlogPage({ blog, isAuthor }: BlogProps) {
+export default function BlogPage({ blog, isAuthor }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [title, setTitle] = useState(blog.title);
@@ -101,12 +82,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
     router.refresh();
   };
 
-  const MenuButton = ({
-    onClick,
-    isActive = false,
-    children,
-    tooltip,
-  }: MenuButtonProps) => (
+  const MenuButton = ({ onClick, isActive = false, children, tooltip }) => (
     <button
       onClick={onClick}
       className={`p-2 rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
@@ -120,6 +96,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
   );
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       Document,
       Paragraph,
@@ -156,7 +133,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="bg-[#EEEEEE] px-3 py-1 rounded-xl text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
+              className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               {blogCategories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -166,7 +143,12 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
             </select>
           ) : (
             <Button>
-              <Link href={`/blogs/${category}`}>{category}</Link>
+              <Link
+                href={`/blogs/${category}`}
+                className="text-sm xl:text-base"
+              >
+                {category}
+              </Link>
             </Button>
           )}
           {isAuthor &&
@@ -174,7 +156,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
               <div className="flex gap-2">
                 <Button
                   onClick={handleCancel}
-                  className="flex items-center gap-1 bg-red-600 text-white cursor-pointer px-3 rounded-xl hover:bg-red-600/80 transition-all duration-300"
+                  className="flex items-center gap-1 bg-red-600 text-sm xl:text-base text-white cursor-pointer px-3 rounded-xl hover:bg-red-600/80 transition-all duration-300"
                 >
                   Cancel
                 </Button>
@@ -182,7 +164,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
                 <Button
                   onClick={handleSubmit}
                   disabled={!hasChanges}
-                  className={`flex items-center gap-1 ${
+                  className={`flex items-center gap-1 text-sm xl:text-base ${
                     hasChanges
                       ? "bg-[#EEEEEE] text-black cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300"
                       : "bg-gray-400 text-gray-600 cursor-not-allowed"
@@ -195,14 +177,14 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
               <div className="flex gap-2">
                 <Button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-black cursor-pointer px-3 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300"
+                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-black cursor-pointer px-3 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300"
                 >
                   Edit
                   <TbEdit />
                 </Button>
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-1.5 bg-red-600 text-[#EEEEEE] cursor-pointer px-3 rounded-xl hover:bg-red-600/80 transition-all duration-300"
+                  className="flex items-center gap-1.5 bg-red-600 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 rounded-xl hover:bg-red-600/80 transition-all duration-300"
                 >
                   <TbTrash />
                 </Button>
@@ -217,7 +199,7 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
             minLength={40}
             maxLength={80}
             placeholder="Title cannot be empty"
-            className="text-2xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
+            className="text-xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
           <h1 className="text-2xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold">
@@ -233,13 +215,13 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
           />
         )}
       </div>
-      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-lg overflow-hidden group">
+      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-lg overflow-hidden group max-h-[30rem]">
         {previewUrl ? (
           <Image
             src={previewUrl}
             alt={title}
             fill={true}
-            className="w-full h-full object-cover"
+            className="object-cover"
           />
         ) : (
           <CloudImage
@@ -248,7 +230,6 @@ export default function BlogPage({ blog, isAuthor }: BlogProps) {
             fill={true}
             priority={false}
             placeholder="empty"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
           />
         )}

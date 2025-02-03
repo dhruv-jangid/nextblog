@@ -41,7 +41,7 @@ export const createBlog = async (
       slug,
       content: cleanedContent,
       category,
-      authorId: user_id,
+      author: { connect: { id: user_id } },
     },
     include: { author: { select: { id: true, slug: true } } },
   });

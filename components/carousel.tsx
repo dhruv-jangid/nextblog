@@ -1,14 +1,11 @@
-import type { BlogWithAuthor } from "@/app/createblog/page";
 import { Button } from "@/components/button";
-import { Author } from "./author";
+import { Author } from "@/components/author";
 import { CloudImage } from "@/components/cloudimage";
 import Link from "next/link";
 
-export const Carousel: React.FC<{
-  blog: BlogWithAuthor;
-}> = ({ blog }) => {
+export const Carousel = ({ blog }) => {
   return (
-    <div className="relative h-[50vh] lg:h-[40vh] xl:h-[80vh] w-full mb-10">
+    <div className="relative h-[50vh] lg:h-[80vh] max-h-[24rem] sm:max-h-[40rem] w-full mb-10">
       <CloudImage
         publicId={blog.id}
         alt={blog.title}
@@ -16,15 +13,18 @@ export const Carousel: React.FC<{
         priority={true}
         className="rounded-3xl bg-gradient-to-bl from-[#191919] from-40% to-transparent"
       />
-      <div className="absolute left-10 md:left-14 bottom-10 md:bottom-14 flex flex-col gap-4">
+      <div className="absolute left-8 md:left-14 bottom-8 md:bottom-14 text-base flex flex-col gap-2 sm:gap-4">
         <Button>
-          <Link href={`/blogs/${blog.category}`} className="text-sm md:text-md">
+          <Link
+            href={`/blogs/${blog.category}`}
+            className="text-sm xl:text-base"
+          >
             {blog.category}
           </Link>
         </Button>
 
         <Link href={`/${blog.author.slug}/${blog.slug}`}>
-          <h1 className="text-white text-2xl lg:text-3xl font-bold w-4/5 md:w-3/5 line-clamp-3">
+          <h1 className="text-white text-xl lg:text-2xl xl:text-3xl font-bold w-4/5 md:w-3/5 line-clamp-2 sm:line-clamp-3">
             {blog.title}
           </h1>
         </Link>

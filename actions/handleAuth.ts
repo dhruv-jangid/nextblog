@@ -125,3 +125,15 @@ export const logoutUser = async () => {
   (await cookies()).delete("metapress");
   permanentRedirect("/login");
 };
+
+export const deleteUser = async (id: string) => {
+  const user = await prisma.user.delete({
+    where: { id },
+  });
+
+  if (!user) {
+    return "User not found";
+  }
+
+  return "User deleted successfully";
+};

@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { MdOutlineEmail } from "react-icons/md";
 import { FaGithub, FaInstagram } from "react-icons/fa";

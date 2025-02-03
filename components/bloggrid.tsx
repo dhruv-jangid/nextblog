@@ -1,10 +1,9 @@
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
-import type { BlogWithAuthor } from "@/app/createblog/page";
 import Link from "next/link";
 import { CloudImage } from "@/components/cloudimage";
 
-const Card: React.FC<BlogWithAuthor> = ({
+const Card = ({
   id,
   title,
   createdAt,
@@ -27,7 +26,7 @@ const Card: React.FC<BlogWithAuthor> = ({
         />
       </div>
       <Button>
-        <Link href={`/blogs/${category}`} className="text-sm md:text-md">
+        <Link href={`/blogs/${category}`} className="text-sm xl:text-base">
           {category}
         </Link>
       </Button>
@@ -50,11 +49,9 @@ const Card: React.FC<BlogWithAuthor> = ({
   );
 };
 
-export const BlogGrid: React.FC<{
-  blogs: BlogWithAuthor[];
-}> = ({ blogs }) => {
+export const BlogGrid = ({ blogs }) => {
   return (
-    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 px-4 lg:px-8">
+    <div className="grid md:grid-cols-2 2xl:grid-cols-3 gap-8 px-4 lg:px-8">
       {blogs.map((blog) => (
         <Card key={blog.id} {...blog} />
       ))}
