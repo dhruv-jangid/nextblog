@@ -213,7 +213,7 @@ export default function BlogPage({ blog, isAuthor }) {
           />
         )}
       </div>
-      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-lg overflow-hidden group max-h-[30rem]">
+      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-2xl overflow-hidden group max-h-[30rem]">
         {previewUrl ? (
           <Image
             src={previewUrl}
@@ -327,7 +327,7 @@ export default function BlogPage({ blog, isAuthor }) {
       </div>
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
             <h2 className="text-xl font-semibold mb-4">Confirm Delete?</h2>
             <p className="mb-6">
@@ -337,7 +337,7 @@ export default function BlogPage({ blog, isAuthor }) {
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all duration-300 px-4 py-2 rounded-xl"
+                className="bg-gray-200 cursor-pointer text-gray-800 hover:bg-gray-300 transition-all duration-300 px-4 py-2 rounded-xl"
               >
                 Cancel
               </Button>
@@ -346,7 +346,7 @@ export default function BlogPage({ blog, isAuthor }) {
                   handleDelete();
                   setShowDeleteConfirm(false);
                 }}
-                className="bg-red-600 text-white hover:bg-red-600/80 transition-all duration-300 px-4 py-2 rounded-xl"
+                className="bg-red-600 cursor-pointer text-white hover:bg-red-600/80 transition-all duration-300 px-4 py-2 rounded-xl"
               >
                 Delete
               </Button>

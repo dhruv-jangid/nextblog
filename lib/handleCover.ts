@@ -38,16 +38,26 @@ export const uploadCover = async (
   }
 };
 
-export const deleteCover = async (publicId: string) => {
+export const deleteImage = async (publicId: string) => {
   try {
     await cloudinary.uploader.destroy(publicId, {
-      resource_type: "image",
       invalidate: true,
-      type: "authenticated",
     });
     return { success: true, message: "Cover deleted successfully" };
   } catch (error) {
     console.error("Error deleting cover:", error);
     return { success: false, message: "Failed to delete cover" };
+  }
+};
+
+export const deleteImages = async (publicIds: string[]) => {
+  try {
+    await cloudinary.api.delete_resources(publicIds, {
+      invalidate: true,
+    });
+    return { success: true, message: "Images deleted successfully" };
+  } catch (error) {
+    console.error("Error deleting images:", error);
+    return { success: false, message: "Failed to delete images" };
   }
 };

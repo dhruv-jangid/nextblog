@@ -5,11 +5,12 @@ import { permanentRedirect } from "next/navigation";
 import argon2 from "argon2";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { uploadCover } from "@/lib/handleCover";
+import { deleteImages, uploadCover } from "@/lib/handleCover";
 
 const authSchema = z.object({
   login: z.string().transform((val) => val === "true"),
   username: z
+
     .string()
     .min(3, "Username must have at least 3 characters")
     .regex(
@@ -126,14 +127,31 @@ export const logoutUser = async () => {
   permanentRedirect("/login");
 };
 
-export const deleteUser = async (id: string) => {
-  const user = await prisma.user.delete({
-    where: { id },
-  });
+export const deleteUser = async () => {
+  const id = JSON.parse((await cookies()).get("metapress")?.value).id;
 
-  if (!user) {
+  if (!id) {
     return "User not found";
   }
 
-  return "User deleted successfully";
+  const blogs = await prisma.blog.findMany({
+    where: { authorId: id },
+  });
+
+  if (blogs.length > 0) {
+    const publicIds = blogs.map((blog) => `nextblog/blogs/${blog.id}`);
+    publicIds.push(`nextblog/authors/${id}`);
+    await deleteImages(publicIds);
+  }
+
+  try {
+    await prisma.user.delete({
+      where: { id },
+    });
+    logoutUser();
+    return "User deleted successfully";
+  } catch (error) {
+    console.log(error);
+    return "User not found or could not be deleted";
+  }
 };

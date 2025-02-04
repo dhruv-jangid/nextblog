@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { deleteCover, uploadCover } from "@/lib/handleCover";
+import { deleteImage, uploadCover } from "@/lib/handleCover";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -104,7 +104,7 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
 
   if (image) {
     try {
-      await deleteCover(id);
+      await deleteImage(`nextblog/blogs/${id}`);
       await uploadCover(image, id);
     } catch (error) {
       console.log(error);
@@ -149,7 +149,7 @@ export const deleteBlog = async (id: string): Promise<string | void> => {
   }
 
   try {
-    await deleteCover(id);
+    await deleteImage(`nextblog/blogs/${id}`);
   } catch (error) {
     console.log(error);
   }
