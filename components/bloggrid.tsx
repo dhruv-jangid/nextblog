@@ -13,7 +13,7 @@ const Card = ({
   author: { slug: username, name },
 }) => {
   return (
-    <div className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-gradient-to-br from-[#191919] from-40% to-transparent">
+    <div className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-linear-to-br from-[#191919] from-40% to-transparent">
       <div className="relative h-1/2 rounded-xl overflow-hidden">
         <CloudImage
           publicId={id}
@@ -25,12 +25,10 @@ const Card = ({
           className="cursor-pointer object-cover"
         />
       </div>
-      <Button>
-        <Link href={`/blogs/${category}`} className="text-sm xl:text-base">
-          {category}
-        </Link>
-      </Button>
-      <h3 className="cursor-pointer text-xl font-medium line-clamp-3 w-10/12 font-[Degular Variable Text]">
+      <Link href={`/blogs/${category}`} className="text-sm xl:text-base w-max">
+        <Button>{category}</Button>
+      </Link>
+      <h3 className="cursor-pointer text-xl font-medium line-clamp-3 w-10/12">
         <Link
           href={`/${username}/${slug}`}
           className="line-clamp-2 lg:line-clamp-3"

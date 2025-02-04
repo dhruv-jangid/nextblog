@@ -26,18 +26,18 @@ export default function Settings() {
         <nav>
           <ul className="space-y-2">
             <li>
-              <button
-                className={`w-full justify-start text-left rounded-xl py-2 px-3 ${
+              <Button
+                className={`w-full justify-start cursor-pointer text-left rounded-xl py-2 px-3 ${
                   activeTab === "profile" ? "bg-gray-100 text-[#0F0F0F]" : ""
                 }`}
                 onClick={() => setActiveTab("profile")}
               >
                 Profile
-              </button>
+              </Button>
             </li>
             <li>
               <Button
-                className={`w-full justify-start text-left font-medium rounded-xl py-2 px-3 ${
+                className={`w-full justify-start cursor-pointer text-left font-medium rounded-xl py-2 px-3 ${
                   activeTab === "account" ? "bg-gray-100 text-[#0F0F0F]" : ""
                 }`}
                 onClick={() => setActiveTab("account")}

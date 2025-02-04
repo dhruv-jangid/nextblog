@@ -192,7 +192,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-1.5 bg-[#EEEEEE]/10 hover:bg-[#EEEEEE]/20 transition-all duration-300 rounded-full pl-2 pr-1 py-1"
+              className="flex items-center gap-1.5 bg-[#EEEEEE]/10 hover:bg-[#EEEEEE]/20 transition-all duration-300 rounded-full pl-2 pr-1 py-1 cursor-pointer"
             >
               <svg
                 className={`w-4 h-4 transition-transform duration-200 ${
@@ -214,7 +214,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
               />
             </button>
             <div
-              className={`flex flex-col absolute right-0 text-lg mt-1 p-1.5 w-max bg-[#191919] shadow-md outline outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
+              className={`flex flex-col absolute right-0 text-lg mt-1 p-1.5 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
                 isProfileOpen
                   ? "opacity-100 scale-100 visible"
                   : "opacity-0 scale-95 invisible"

@@ -58,7 +58,7 @@ export default function Login() {
               </label>
               <input
                 type="text"
-                className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-none"
+                className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-hidden"
                 id="username"
                 name="username"
                 required
@@ -92,7 +92,7 @@ export default function Login() {
             </label>
             <input
               type="email"
-              className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-none"
+              className="w-full py-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-hidden"
               id="email"
               name="email"
               required
@@ -105,7 +105,7 @@ export default function Login() {
             </label>
             <input
               type="password"
-              className="w-full p-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-none mb-1.5"
+              className="w-full p-1.5 px-3 border bg-transparent border-gray-500 rounded-lg focus:outline-hidden mb-1.5"
               id="password"
               name="password"
               required

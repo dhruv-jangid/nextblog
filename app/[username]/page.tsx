@@ -53,9 +53,12 @@ export default async function Profile({
         </div>
 
         {user_id === user.id && (
-          <Button>
-            <Link href={`/${user.slug}/settings`}>Edit Profile</Link>
-          </Button>
+          <Link
+            href={`/${user.slug}/settings`}
+            className="text-sm xl:text-base w-max"
+          >
+            <Button>Edit Profile</Button>
+          </Link>
         )}
       </div>
 

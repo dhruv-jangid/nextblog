@@ -11,17 +11,15 @@ export const Carousel = ({ blog }) => {
         alt={blog.title}
         fill={true}
         priority={true}
-        className="rounded-3xl bg-gradient-to-bl from-[#191919] from-40% to-transparent"
+        className="rounded-3xl bg-linear-to-bl from-[#191919] from-40% to-transparent"
       />
       <div className="absolute left-8 md:left-14 bottom-8 md:bottom-14 text-base flex flex-col gap-2 sm:gap-4">
-        <Button>
-          <Link
-            href={`/blogs/${blog.category}`}
-            className="text-sm xl:text-base"
-          >
-            {blog.category}
-          </Link>
-        </Button>
+        <Link
+          href={`/blogs/${blog.category}`}
+          className="text-sm xl:text-base w-max"
+        >
+          <Button>{blog.category}</Button>
+        </Link>
 
         <Link href={`/${blog.author.slug}/${blog.slug}`}>
           <h1 className="text-white text-xl lg:text-2xl xl:text-3xl font-bold w-4/5 md:w-3/5 line-clamp-2 sm:line-clamp-3">

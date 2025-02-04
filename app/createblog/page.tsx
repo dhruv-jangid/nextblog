@@ -278,7 +278,7 @@ export default function CreateBlog({
           )}
           <div
             onClick={() => document.getElementById("blogcover")?.click()}
-            className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+            className="absolute inset-0 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
           >
             <div className="flex items-center gap-2 text-white">
               <TbPhotoUp size={24} />
@@ -349,7 +349,7 @@ export default function CreateBlog({
 
           <EditorContent
             editor={editor}
-            className="prose dark:prose-invert max-w-none p-4 min-h-[300px] focus:outline-none bg-[#191919]"
+            className="prose dark:prose-invert max-w-none p-4 min-h-[300px] focus:outline-hidden bg-[#191919]"
           />
         </div>
         {validationErrors.content && (
