@@ -1,24 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MetaPress - The Pulse of Creativity
+
+MetaPress is a modern, feature-rich blogging platform built with Next.js, where writers and creators can share their stories with the world. The platform emphasizes clean design, user experience, and powerful content creation tools.
+
+## Features
+
+- **Rich Text Editor**: Full-featured WYSIWYG editor with support for:
+
+  - Text formatting (bold, italic, underline)
+  - Multiple heading levels
+  - Image uploads
+  - Link embedding
+  - History management (undo/redo)
+
+- **User Management**:
+
+  - Secure authentication
+  - Custom user profiles
+  - Profile image management
+  - Account settings
+
+- **Blog Management**:
+
+  - Create, edit, and delete blog posts
+  - Category organization
+  - Cover image support
+  - Like system
+  - Slug-based URLs
+
+- **Image Handling**:
+  - Cloudinary integration for image storage
+  - Automatic image optimization
+  - Support for multiple image formats
+
+## Tech Stack
+
+- **Frontend**: Next.js 14+ with React 19
+- **Backend**: Next.js Server Actions
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Custom cookie-based auth
+- **Image Storage**: Cloudinary
+- **Styling**: Tailwind CSS
+- **Editor**: TipTap
+- **Type Safety**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd metapress
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up environment variables:
+   Create a `.env` file with the following variables:
+
+```env
+DATABASE_URL="your-postgresql-url"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
+NEXT_PUBLIC_CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+OPTIMIZE_API_KEY="your-prisma-optimize-key"
+```
+
+4. Run database migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+5. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/app`: Next.js app router pages and layouts
+- `/components`: Reusable React components
+- `/actions`: Server actions for data mutations
+- `/lib`: Utility functions and configurations
+- `/prisma`: Database schema and migrations
+- `/public`: Static assets
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Next.js team for the amazing framework
+- Vercel for hosting and deployment solutions
+- TipTap for the rich text editor
+- Cloudinary for image management
+- Prisma team for the excellent ORM
 
 ## Learn More
 
