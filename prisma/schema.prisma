@@ -9,28 +9,39 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  name      String
+  name      String   @db.VarChar(255)
   slug      String   @unique
-  email     String   @unique
+  email     String   @unique @db.VarChar(255)
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  blogs     Blog[]
   role      Role     @default(USER)
+  blogs     Blog[]
+  likes     Like[]
 }
 
 model Blog {
   id        String   @id @default(cuid())
-  title     String
+  title     String   @db.VarChar(255)
   slug      String   @unique
   content   String   @db.Text
-  category  String
-  updatedAt DateTime @updatedAt @map("updated_at")
+  category  String   @db.VarChar(100)
   createdAt DateTime @default(now()) @map("created_at")
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt @map("updated_at")
   authorId  String   @map("author_id")
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     Like[]
+}
 
-  @@unique([title, content])
+model Like {
+  id      String   @id @default(cuid())
+  userId  String   @map("user_id")
+  blogId  String   @map("blog_id")
+  likedAt DateTime @default(now()) @map("liked_at")
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog    Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
 }
 
 enum Role {

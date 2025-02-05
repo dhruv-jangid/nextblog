@@ -13,7 +13,27 @@ export default async function Blog({
   const { username, id } = await params;
 
   const blog = await prisma.blog.findUnique({
-    include: { author: { select: { id: true, name: true, slug: true } } },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      createdAt: true,
+      content: true,
+      category: true,
+      likes: {
+        select: {
+          userId: true,
+        },
+      },
+
+      author: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
     where: { slug: id, author: { slug: username } },
   });
 
@@ -21,8 +41,12 @@ export default async function Blog({
     return <div>Blog not found</div>;
   }
 
-  const isAuthor =
-    JSON.parse((await cookies()).get("metapress")?.value).id === blog.author.id;
+  const cookieStore = await cookies();
+  const userId = JSON.parse(cookieStore.get("metapress")?.value).id;
 
-  return <BlogPage blog={blog} isAuthor={isAuthor} />;
+  const isAuthor = userId === blog.author.id;
+
+  const isLiked = blog.likes.find((like) => userId === like.userId);
+
+  return <BlogPage blog={blog} isAuthor={isAuthor} isLiked={isLiked} />;
 }

@@ -160,3 +160,50 @@ export const deleteBlog = async (id: string): Promise<string | void> => {
 
   redirect("/");
 };
+
+export const likeBlog = async (id: string): Promise<string | void> => {
+  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
+
+  if (!user_id) {
+    return "User not authenticated. Please login again!";
+  }
+
+  const blog = await prisma.blog.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+
+  if (!blog) {
+    return "Blog not found";
+  }
+
+  const existingLike = await prisma.like.findUnique({
+    where: {
+      userId_blogId: {
+        userId: user_id,
+        blogId: id,
+      },
+    },
+  });
+
+  if (existingLike) {
+    await prisma.like.delete({
+      where: {
+        userId_blogId: {
+          userId: user_id,
+          blogId: id,
+        },
+      },
+    });
+    return "Blog unliked";
+  }
+
+  await prisma.like.create({
+    data: {
+      userId: user_id,
+      blogId: id,
+    },
+  });
+
+  return "Blog liked";
+};

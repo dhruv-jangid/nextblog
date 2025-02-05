@@ -1,13 +1,13 @@
 "use client";
 
-import { IoMdHeartEmpty } from "react-icons/io";
+import { IoMdHeart, IoMdHeartEmpty } from "react-icons/io";
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import { CloudImage } from "@/components/cloudimage";
 import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { deleteBlog, editBlog } from "@/actions/handleBlog";
+import { deleteBlog, editBlog, likeBlog } from "@/actions/handleBlog";
 import blogCategories from "@/lib/blogcategories.json";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,7 +25,7 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
 
-export default function BlogPage({ blog, isAuthor }) {
+export default function BlogPage({ blog, isAuthor, isLiked }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [title, setTitle] = useState(blog.title);
@@ -33,6 +33,8 @@ export default function BlogPage({ blog, isAuthor }) {
   const [category, setCategory] = useState(blog.category);
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [localLikeCount, setLocalLikeCount] = useState(blog.likes.length);
+  const [localIsLiked, setLocalIsLiked] = useState(isLiked);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -80,6 +82,12 @@ export default function BlogPage({ blog, isAuthor }) {
   const handleDelete = async () => {
     await deleteBlog(blog.id);
     router.refresh();
+  };
+
+  const handleLike = async () => {
+    await likeBlog(blog.id);
+    setLocalIsLiked(!localIsLiked);
+    setLocalLikeCount(localIsLiked ? localLikeCount - 1 : localLikeCount + 1);
   };
 
   const MenuButton = ({ onClick, isActive = false, children, tooltip }) => (
@@ -208,7 +216,7 @@ export default function BlogPage({ blog, isAuthor }) {
           <Author
             date={blog.createdAt}
             slug={blog.author.slug}
-            publicId={blog.authorId}
+            publicId={blog.author.id}
             name={blog.author.name}
           />
         )}
@@ -323,7 +331,23 @@ export default function BlogPage({ blog, isAuthor }) {
         ></div>
       )}
       <div className="flex justify-end">
-        <IoMdHeartEmpty size={36} className="cursor-pointer" />
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{localLikeCount}</span>
+          {localIsLiked ? (
+            <IoMdHeart
+              size={36}
+              className="cursor-pointer"
+              onClick={handleLike}
+              color="#EEEEEE"
+            />
+          ) : (
+            <IoMdHeartEmpty
+              size={36}
+              className="cursor-pointer"
+              onClick={handleLike}
+            />
+          )}
+        </div>
       </div>
 
       {showDeleteConfirm && (
