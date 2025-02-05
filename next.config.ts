@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    staleTimes: {
+      static: 30,
+      dynamic: 180,
+    },
+  },
 };
 
 module.exports = {

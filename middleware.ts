@@ -3,16 +3,20 @@ import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("metapress");
+  const path = req.nextUrl.pathname;
 
-  if (token && req.nextUrl.pathname === "/login") {
-    return NextResponse.redirect(new URL("/", req.url));
+  if (path === "/" || path.startsWith("/_next")) {
+    return NextResponse.next();
   }
 
-  if (
-    !token &&
-    req.nextUrl.pathname !== "/login" &&
-    !req.nextUrl.pathname.startsWith("/_next")
-  ) {
+  if (path === "/login") {
+    if (token) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -20,5 +24,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/createblog", "/:username", "/:username/:id"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

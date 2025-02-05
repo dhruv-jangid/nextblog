@@ -22,5 +22,6 @@ export default async function Blogs() {
       tags: ["blogs"],
     },
   });
+
   return <BlogGrid blogs={blogs} />;
 }

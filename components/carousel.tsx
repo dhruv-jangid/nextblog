@@ -3,7 +3,17 @@ import { Author } from "@/components/author";
 import { CloudImage } from "@/components/cloudimage";
 import Link from "next/link";
 
-export const Carousel = ({ blog }) => {
+type BlogWithAuthorAndLikes = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  createdAt: Date;
+  likes: { blogId: string; userId: string }[];
+  author: { name: string; slug: string; id: string };
+};
+
+export const Carousel = ({ blog }: { blog: BlogWithAuthorAndLikes }) => {
   return (
     <div className="relative h-[50vh] lg:h-[80vh] max-h-[24rem] sm:max-h-[40rem] w-full mb-10">
       <CloudImage
@@ -11,7 +21,7 @@ export const Carousel = ({ blog }) => {
         alt={blog.title}
         fill={true}
         priority={true}
-        className="rounded-3xl bg-linear-to-bl from-[#191919] from-40% to-transparent"
+        className="rounded-3xl bg-linear-to-bl from-[#191919] from-40% to-transparent object-cover"
       />
       <div className="absolute left-8 md:left-14 bottom-8 md:bottom-14 text-base flex flex-col gap-2 sm:gap-4">
         <Link
@@ -27,7 +37,7 @@ export const Carousel = ({ blog }) => {
           </h1>
         </Link>
         <Author
-          date={blog.createdAt}
+          date={blog.createdAt.toISOString()}
           slug={blog.author.slug}
           publicId={blog.author.id}
           name={blog.author.name}

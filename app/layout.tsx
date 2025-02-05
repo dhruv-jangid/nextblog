@@ -19,11 +19,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let user = null;
   const cookieSession = (await cookies()).get("metapress");
-  if (cookieSession) {
-    user = JSON.parse(cookieSession?.value);
-  }
+  const user = cookieSession ? JSON.parse(cookieSession.value) : null;
 
   return (
     <html lang="en" className={degular.className}>

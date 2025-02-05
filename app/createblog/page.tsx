@@ -6,10 +6,11 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import Bold from "@tiptap/extension-bold";
 import Italic from "@tiptap/extension-italic";
-import Heading from "@tiptap/extension-heading";
+import Heading, { Level } from "@tiptap/extension-heading";
 import History from "@tiptap/extension-history";
 import Link from "@tiptap/extension-link";
 import TipTapImage from "@tiptap/extension-image";
+
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
@@ -219,7 +220,7 @@ export default function CreateBlog({
   return (
     <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12">
       <form action={formAction} className="flex flex-col gap-4 lg:gap-10">
-        {state && <div>{state}</div>}
+        {state?.toString() && <div>{state}</div>}
 
         <div className="flex flex-col gap-2 lg:gap-6">
           <div className="flex justify-between">
@@ -299,9 +300,15 @@ export default function CreateBlog({
                 <MenuButton
                   key={level}
                   onClick={() =>
-                    editor?.chain().focus().toggleHeading({ level }).run()
+                    editor
+                      ?.chain()
+                      .focus()
+                      .toggleHeading({ level: level as Level })
+                      .run()
                   }
-                  isActive={editor?.isActive("heading", { level })}
+                  isActive={editor?.isActive("heading", {
+                    level: level as Level,
+                  })}
                   tooltip={`Heading ${level}`}
                 >
                   H{level}

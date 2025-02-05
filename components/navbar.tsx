@@ -39,6 +39,7 @@ const ChevronIcon = () => (
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/blogs", label: "Blogs" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/createblog", label: "Create Blog" },
 ];

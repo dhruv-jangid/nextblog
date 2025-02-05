@@ -6,7 +6,7 @@ import { CloudImage } from "@/components/cloudimage";
 import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { deleteBlog, editBlog, likeBlog } from "@/actions/handleBlog";
+import { deleteBlog, editBlog } from "@/actions/handleBlog";
 import blogCategories from "@/lib/blogcategories.json";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,7 +16,7 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import Bold from "@tiptap/extension-bold";
 import Italic from "@tiptap/extension-italic";
-import Heading from "@tiptap/extension-heading";
+import Heading, { Level } from "@tiptap/extension-heading";
 import History from "@tiptap/extension-history";
 import TiptapLink from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
@@ -24,8 +24,20 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
 import { Like } from "@/components/like";
+import { Blog, User, Like as PrismaLike } from "@prisma/client";
 
-export default function BlogPage({ blog, isAuthor, isLiked }) {
+export default function BlogPage({
+  blog,
+  isAuthor,
+  isLiked,
+}: {
+  blog: Blog & {
+    author: Pick<User, "id" | "name" | "slug">;
+    likes: PrismaLike[];
+  };
+  isAuthor: boolean;
+  isLiked: boolean;
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [title, setTitle] = useState(blog.title);
@@ -33,8 +45,6 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
   const [category, setCategory] = useState(blog.category);
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [localLikeCount, setLocalLikeCount] = useState(blog.likes.length);
-  const [localIsLiked, setLocalIsLiked] = useState(isLiked);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -84,13 +94,17 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
     router.refresh();
   };
 
-  const handleLike = async () => {
-    await likeBlog(blog.id);
-    setLocalIsLiked(!localIsLiked);
-    setLocalLikeCount(localIsLiked ? localLikeCount - 1 : localLikeCount + 1);
-  };
-
-  const MenuButton = ({ onClick, isActive = false, children, tooltip }) => (
+  const MenuButton = ({
+    onClick,
+    isActive = false,
+    children,
+    tooltip,
+  }: {
+    onClick: () => void;
+    isActive?: boolean;
+    children: React.ReactNode;
+    tooltip: string;
+  }) => (
     <button
       onClick={onClick}
       className={`p-2 rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
@@ -214,7 +228,7 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
         )}
         {!isEditing && (
           <Author
-            date={blog.createdAt}
+            date={blog.createdAt.toISOString()}
             slug={blog.author.slug}
             publicId={blog.author.id}
             name={blog.author.name}
@@ -270,7 +284,11 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
                 <MenuButton
                   key={level}
                   onClick={() =>
-                    editor?.chain().focus().toggleHeading({ level }).run()
+                    editor
+                      ?.chain()
+                      .focus()
+                      .toggleHeading({ level: level as Level })
+                      .run()
                   }
                   isActive={editor?.isActive("heading", { level })}
                   tooltip={`Heading ${level}`}
@@ -281,7 +299,7 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
               <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
               <MenuButton
                 onClick={() => editor?.chain().focus().toggleBold().run()}
-                isActive={editor?.isActive("bold")}
+                isActive={editor?.isActive("bold") || false}
                 tooltip="Bold"
               >
                 <FaBold />
@@ -330,7 +348,7 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
           dangerouslySetInnerHTML={{ __html: content }}
         ></div>
       )}
-      <Like blogId={blog.id} likes={localLikeCount} isLiked={localIsLiked} />
+      <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">

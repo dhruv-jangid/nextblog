@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export async function generateMetadata({
   params,
 }: {
-  params: { username: string; id: string };
+  params: Promise<{ username: string; id: string }>;
 }): Promise<Metadata> {
   const { username, id } = await params;
 

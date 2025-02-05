@@ -3,30 +3,43 @@ import { CloudImage } from "@/components/cloudimage";
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Profile({
   params,
 }: {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
   const cookieSession = (await cookies()).get("metapress");
-  let user_id = null;
-  if (cookieSession) {
-    user_id = JSON.parse(cookieSession?.value).id;
-  }
+  const user_id = cookieSession ? JSON.parse(cookieSession.value).id : null;
 
   const user = await prisma.user.findUnique({
     where: { slug: username },
     include: {
       blogs: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          category: true,
+          createdAt: true,
+          likes: { select: { blogId: true, userId: true } },
+          author: { select: { name: true, slug: true, id: true } },
+        },
         orderBy: { createdAt: "desc" },
+        take: 10,
       },
+    },
+    cacheStrategy: {
+      ttl: 60,
+      swr: 60,
+      tags: ["blogs"],
     },
   });
 
   if (!user) {
-    throw new Error("User not found");
+    redirect("/login");
   }
 
   return (

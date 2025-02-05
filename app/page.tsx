@@ -13,7 +13,6 @@ export default async function Home() {
       likes: { select: { blogId: true, userId: true } },
       author: { select: { name: true, slug: true, id: true } },
     },
-
     orderBy: {
       createdAt: "desc",
     },

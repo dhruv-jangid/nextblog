@@ -5,7 +5,15 @@ import { useActionState, useState } from "react";
 import { deleteUser } from "@/actions/handleAuth";
 import Form from "next/form";
 
-function Section({ title, description, children }) {
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-6">
       <div>
@@ -31,7 +39,7 @@ export default function Settings() {
               <li>
                 <Button
                   className={`w-full justify-start cursor-pointer text-left rounded-xl py-2 px-3 ${
-                    activeTab === "profile" ? "bg-gray-100 text-[#0F0F0F]" : ""
+                    activeTab === "profile" ? "outline outline-[#EEEEEE]" : ""
                   }`}
                   onClick={() => setActiveTab("profile")}
                 >
@@ -41,7 +49,7 @@ export default function Settings() {
               <li>
                 <Button
                   className={`w-full justify-start cursor-pointer text-left font-medium rounded-xl py-2 px-3 ${
-                    activeTab === "account" ? "bg-gray-100 text-[#0F0F0F]" : ""
+                    activeTab === "account" ? "outline outline-[#EEEEEE]" : ""
                   }`}
                   onClick={() => setActiveTab("account")}
                 >
@@ -57,7 +65,11 @@ export default function Settings() {
             <Section
               title="Profile Settings"
               description="Manage your profile information"
-            />
+            >
+              <div className="border-t pt-6">
+                <h2>Profile Information</h2>
+              </div>
+            </Section>
           ) : (
             <Section
               title="Account"

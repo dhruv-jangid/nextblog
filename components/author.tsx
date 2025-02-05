@@ -1,7 +1,19 @@
 import Link from "next/link";
 import { CloudImage } from "@/components/cloudimage";
 
-export const Author = ({ publicId, name, slug, date, end = false }) => {
+export const Author = ({
+  publicId,
+  name,
+  slug,
+  date,
+  end = false,
+}: {
+  publicId: string;
+  name: string;
+  slug: string;
+  date: string;
+  end?: boolean;
+}) => {
   return (
     <div
       className={`flex gap-2 items-center ${
