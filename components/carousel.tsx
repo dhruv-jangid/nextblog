@@ -29,7 +29,7 @@ export const Carousel = ({ blog }) => {
         <Author
           date={blog.createdAt}
           slug={blog.author.slug}
-          publicId={blog.authorId}
+          publicId={blog.author.id}
           name={blog.author.name}
         />
       </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { IoMdHeart, IoMdHeartEmpty } from "react-icons/io";
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import { CloudImage } from "@/components/cloudimage";
@@ -24,6 +23,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
+import { Like } from "@/components/like";
 
 export default function BlogPage({ blog, isAuthor, isLiked }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -330,25 +330,7 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
           dangerouslySetInnerHTML={{ __html: content }}
         ></div>
       )}
-      <div className="flex justify-end">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{localLikeCount}</span>
-          {localIsLiked ? (
-            <IoMdHeart
-              size={36}
-              className="cursor-pointer"
-              onClick={handleLike}
-              color="#EEEEEE"
-            />
-          ) : (
-            <IoMdHeartEmpty
-              size={36}
-              className="cursor-pointer"
-              onClick={handleLike}
-            />
-          )}
-        </div>
-      </div>
+      <Like blogId={blog.id} likes={localLikeCount} isLiked={localIsLiked} />
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">

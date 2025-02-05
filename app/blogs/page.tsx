@@ -3,7 +3,15 @@ import { prisma } from "@/lib/db";
 
 export default async function Blogs() {
   const blogs = await prisma.blog.findMany({
-    include: { author: { select: { name: true, slug: true } } },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      category: true,
+      createdAt: true,
+      likes: { select: { blogId: true, userId: true } },
+      author: { select: { name: true, slug: true, id: true } },
+    },
     orderBy: {
       createdAt: "desc",
     },

@@ -162,10 +162,12 @@ export const deleteBlog = async (id: string): Promise<string | void> => {
 };
 
 export const likeBlog = async (id: string): Promise<string | void> => {
-  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
+  const cookieStore = await cookies();
+  const metapressCookie = cookieStore.get("metapress")?.value;
+  const user_id = metapressCookie ? JSON.parse(metapressCookie).id : null;
 
   if (!user_id) {
-    return "User not authenticated. Please login again!";
+    redirect("/login");
   }
 
   const blog = await prisma.blog.findUnique({

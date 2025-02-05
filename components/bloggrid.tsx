@@ -2,16 +2,24 @@ import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import Link from "next/link";
 import { CloudImage } from "@/components/cloudimage";
+import { Like } from "./like";
+import { cookies } from "next/headers";
 
-const Card = ({
+const Card = async ({
   id,
   title,
   createdAt,
   category,
-  authorId,
   slug,
-  author: { slug: username, name },
+  author: { slug: username, name, id: authorId },
+  likes,
 }) => {
+  const cookieStore = await cookies();
+  const metapressCookie = cookieStore.get("metapress")?.value;
+  const userId = metapressCookie ? JSON.parse(metapressCookie).id : null;
+
+  const isLiked = userId ? likes.find((like) => userId === like.userId) : false;
+
   return (
     <div className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-linear-to-br from-[#191919] from-40% to-transparent">
       <div className="relative h-1/2 rounded-xl overflow-hidden">
@@ -36,13 +44,16 @@ const Card = ({
           {title}
         </Link>
       </h3>
-      <Author
-        publicId={authorId}
-        name={name}
-        slug={username}
-        date={createdAt}
-        end
-      />
+      <div className="flex justify-between items-center">
+        <Like blogId={id} likes={likes.length} isLiked={isLiked} />
+        <Author
+          publicId={authorId}
+          name={name}
+          slug={username}
+          date={createdAt}
+          end
+        />
+      </div>
     </div>
   );
 };
