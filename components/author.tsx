@@ -16,7 +16,7 @@ export const Author = ({
 }) => {
   return (
     <div
-      className={`flex gap-2 items-center ${
+      className={`flex gap-3 items-center ${
         end ? "justify-end text-end" : "justify-start text-start"
       }`}
     >

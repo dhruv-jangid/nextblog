@@ -32,7 +32,7 @@ export const Carousel = ({ blog }: { blog: BlogWithAuthorAndLikes }) => {
         </Link>
 
         <Link href={`/${blog.author.slug}/${blog.slug}`}>
-          <h1 className="text-white text-xl lg:text-2xl xl:text-3xl font-bold w-4/5 md:w-3/5 line-clamp-2 sm:line-clamp-3">
+          <h1 className="text-white text-xl md:text-3xl xl:text-4xl font-bold w-2/3 md:w-3/5 line-clamp-2 sm:line-clamp-3">
             {blog.title}
           </h1>
         </Link>

@@ -105,7 +105,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
           isOpen ? "block" : "hidden"
         }`}
       >
-        <div className="flex flex-col items-center rounded-2xl gap-4 p-1.5 bg-[#191919] shadow-md outline outline-1 outline-gray-600/80">
+        <div className="flex flex-col items-center rounded-2xl gap-4 p-1.5 bg-[#191919] shadow-md outline-1 outline-gray-600/80">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
