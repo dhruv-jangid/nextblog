@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { deleteImage, uploadCover } from "@/lib/handleCover";
+import { deleteImage, uploadCover } from "@/lib/handleImage";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -129,7 +129,8 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
 };
 
 export const deleteBlog = async (id: string): Promise<string | void> => {
-  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
+  const cookieSession = (await cookies()).get("metapress")?.value;
+  const user_id = cookieSession ? JSON.parse(cookieSession).id : null;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";

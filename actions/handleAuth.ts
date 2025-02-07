@@ -5,7 +5,7 @@ import { permanentRedirect } from "next/navigation";
 import argon2 from "argon2";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { deleteImages, uploadCover } from "@/lib/handleCover";
+import { deleteImages, uploadCover } from "@/lib/handleImage";
 
 const authSchema = z.object({
   login: z.string().transform((val) => val === "true"),

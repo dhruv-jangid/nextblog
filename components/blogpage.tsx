@@ -10,21 +10,9 @@ import { deleteBlog, editBlog } from "@/actions/handleBlog";
 import blogCategories from "@/lib/blogcategories.json";
 import Image from "next/image";
 import Link from "next/link";
-import { useEditor, EditorContent } from "@tiptap/react";
-import Document from "@tiptap/extension-document";
-import Paragraph from "@tiptap/extension-paragraph";
-import Text from "@tiptap/extension-text";
-import Bold from "@tiptap/extension-bold";
-import Italic from "@tiptap/extension-italic";
-import Heading, { Level } from "@tiptap/extension-heading";
-import History from "@tiptap/extension-history";
-import TiptapLink from "@tiptap/extension-link";
-import TextAlign from "@tiptap/extension-text-align";
-import Underline from "@tiptap/extension-underline";
-import TextStyle from "@tiptap/extension-text-style";
-import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
 import { Like } from "@/components/like";
 import { Blog, User, Like as PrismaLike } from "@prisma/client";
+import { RichTextEditor } from "@/components/editor";
 
 export default function BlogPage({
   blog,
@@ -64,20 +52,24 @@ export default function BlogPage({
   };
 
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("id", blog.id);
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("category", category);
-    if (image) {
-      formData.append("image", image);
-    }
+    try {
+      const formData = new FormData();
+      formData.append("id", blog.id);
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("category", category);
+      if (image) {
+        formData.append("image", image);
+      }
 
-    await editBlog(formData);
-    setIsEditing(false);
-    setImage(null);
-    setPreviewUrl(null);
-    router.refresh();
+      await editBlog(formData);
+      setIsEditing(false);
+      setImage(null);
+      setPreviewUrl(null);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCancel = () => {
@@ -90,62 +82,15 @@ export default function BlogPage({
   };
 
   const handleDelete = async () => {
-    await deleteBlog(blog.id);
-    router.refresh();
+    try {
+      await deleteBlog(blog.id);
+      router.push("/blogs");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setShowDeleteConfirm(false);
+    }
   };
-
-  const MenuButton = ({
-    onClick,
-    isActive = false,
-    children,
-    tooltip,
-  }: {
-    onClick: () => void;
-    isActive?: boolean;
-    children: React.ReactNode;
-    tooltip: string;
-  }) => (
-    <button
-      onClick={onClick}
-      className={`p-2 rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-        isActive ? "bg-gray-200 dark:bg-gray-700" : ""
-      }`}
-      type="button"
-      title={tooltip}
-    >
-      {children}
-    </button>
-  );
-
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [
-      Document,
-      Paragraph,
-      Text,
-      Bold,
-      Italic,
-      History,
-      Heading.configure({
-        levels: [1, 2, 3],
-      }),
-      TiptapLink.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: "text-blue-500 underline",
-        },
-      }),
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-      Underline,
-      TextStyle,
-    ],
-    content: blog.content,
-    onUpdate: ({ editor }) => {
-      setContent(editor.getHTML());
-    },
-  });
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:gap-8 lg:px-16 lg:py-10">
@@ -168,7 +113,9 @@ export default function BlogPage({
               href={`/blogs/${category}`}
               className="text-sm xl:text-base w-max"
             >
-              <Button>{category}</Button>
+              <Button className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors">
+                {category}
+              </Button>
             </Link>
           )}
           {isAuthor &&
@@ -176,11 +123,10 @@ export default function BlogPage({
               <div className="flex gap-2">
                 <Button
                   onClick={handleCancel}
-                  className="flex items-center gap-1 bg-red-600 text-sm xl:text-base text-white cursor-pointer px-3 rounded-xl hover:bg-red-600/80 transition-all duration-300"
+                  className="flex items-center gap-1 bg-red-600 text-sm xl:text-base text-white cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-600/80 transition-all duration-300"
                 >
                   Cancel
                 </Button>
-
                 <Button
                   onClick={handleSubmit}
                   disabled={!hasChanges}
@@ -188,7 +134,7 @@ export default function BlogPage({
                     hasChanges
                       ? "bg-[#EEEEEE] text-black cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300"
                       : "bg-gray-400 text-gray-600 cursor-not-allowed"
-                  } px-3 rounded-xl`}
+                  } px-3 py-1.5 rounded-xl`}
                 >
                   Save
                 </Button>
@@ -197,14 +143,13 @@ export default function BlogPage({
               <div className="flex gap-2">
                 <Button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-black cursor-pointer px-3 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300"
+                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-black cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300"
                 >
-                  Edit
-                  <TbEdit />
+                  Edit <TbEdit />
                 </Button>
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-1.5 bg-red-600 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 rounded-xl hover:bg-red-600/80 transition-all duration-300"
+                  className="flex items-center gap-1.5 bg-red-600 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-600/80 transition-all duration-300"
                 >
                   <TbTrash />
                 </Button>
@@ -219,10 +164,10 @@ export default function BlogPage({
             minLength={40}
             maxLength={80}
             placeholder="Title cannot be empty"
-            className="text-xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
+            className="text-3xl lg:text-5xl rounded-2xl w-full font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
-          <h1 className="text-2xl lg:text-3xl rounded-lg w-3/4 lg:w-3/5 font-semibold">
+          <h1 className="text-3xl lg:text-5xl rounded-lg w-4/5 font-semibold">
             {title}
           </h1>
         )}
@@ -235,6 +180,7 @@ export default function BlogPage({
           />
         )}
       </div>
+
       <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-2xl overflow-hidden group max-h-[30rem]">
         {previewUrl ? (
           <Image
@@ -269,86 +215,34 @@ export default function BlogPage({
             >
               <div className="flex items-center gap-2 text-white">
                 <TbPhotoUp size={24} />
-
                 <span>Change Image</span>
               </div>
             </div>
           </>
         )}
       </div>
+
       {isEditing ? (
-        <div className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-          <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700 p-2">
-            <div className="flex flex-wrap gap-1 mb-2 pb-2 border-b border-gray-300 dark:border-gray-700">
-              {[1, 2, 3].map((level) => (
-                <MenuButton
-                  key={level}
-                  onClick={() =>
-                    editor
-                      ?.chain()
-                      .focus()
-                      .toggleHeading({ level: level as Level })
-                      .run()
-                  }
-                  isActive={editor?.isActive("heading", { level })}
-                  tooltip={`Heading ${level}`}
-                >
-                  H{level}
-                </MenuButton>
-              ))}
-              <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
-              <MenuButton
-                onClick={() => editor?.chain().focus().toggleBold().run()}
-                isActive={editor?.isActive("bold") || false}
-                tooltip="Bold"
-              >
-                <FaBold />
-              </MenuButton>
-              <MenuButton
-                onClick={() => editor?.chain().focus().toggleItalic().run()}
-                isActive={editor?.isActive("italic")}
-                tooltip="Italic"
-              >
-                <FaItalic />
-              </MenuButton>
-              <MenuButton
-                onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                isActive={editor?.isActive("underline")}
-                tooltip="Underline"
-              >
-                <FaUnderline />
-              </MenuButton>
-            </div>
-
-            <div className="flex gap-1">
-              <MenuButton
-                onClick={() => editor?.chain().focus().undo().run()}
-                tooltip="Undo"
-              >
-                <FaUndo />
-              </MenuButton>
-              <MenuButton
-                onClick={() => editor?.chain().focus().redo().run()}
-                tooltip="Redo"
-              >
-                <FaRedo />
-              </MenuButton>
-            </div>
-          </div>
-
-          <EditorContent
-            editor={editor}
-            className="prose dark:prose-invert max-w-none p-4 min-h-[200px] focus:outline-hidden bg-[#191919]"
-          />
-        </div>
+        <RichTextEditor
+          content={content}
+          onChange={(html: string) => setContent(html)}
+        />
       ) : (
         <div
-          className="text-lg rounded-lg"
+          className="text-lg rounded-lg prose dark:prose-invert max-w-none 
+          [&_h1]:text-4xl [&_h2]:text-3xl [&_h3]:text-2xl 
+          [&_h1]:mb-2 [&_h2]:mb-2 [&_h3]:mb-2 
+          [&_p]:mb-8 
+          [&_ul]:mb-4 [&_ol]:mb-4 
+          [&_li]:mb-2"
           id="blogdesc"
           dangerouslySetInnerHTML={{ __html: content }}
         ></div>
       )}
-      <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
+
+      {!isEditing && (
+        <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
+      )}
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
@@ -366,10 +260,7 @@ export default function BlogPage({
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  handleDelete();
-                  setShowDeleteConfirm(false);
-                }}
+                onClick={handleDelete}
                 className="bg-red-600 cursor-pointer text-white hover:bg-red-600/80 transition-all duration-300 px-4 py-2 rounded-xl"
               >
                 Delete
