@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  env: {
+    AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
+    AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
+  },
   experimental: {
     staleTimes: {
       static: 30,
@@ -23,7 +27,14 @@ module.exports = {
         hostname: "res.cloudinary.com",
         port: "",
         pathname: "/dkzj1yg2n/**",
-        search: "?_a=BAVAZGBz0",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
       },
     ],
   },

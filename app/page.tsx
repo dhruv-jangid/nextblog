@@ -33,7 +33,7 @@ export default async function Home() {
           <BlogGrid blogs={remainingBlogs} />
         </>
       ) : (
-        <div className="flex justify-center items-center min-h-[70vh] text-4xl text-black bg-[#EEEEEE] rounded-lg w-3/4 mx-auto">
+        <div className="flex justify-center items-center min-h-[70vh] text-4xl rounded-lg w-3/4 mx-auto">
           Sorry, no blogs available at this time!
         </div>
       )}

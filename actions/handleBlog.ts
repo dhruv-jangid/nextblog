@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { deleteImage, uploadCover } from "@/lib/handleImage";
+import { deleteImage, uploadImage } from "@/lib/handleImage";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -47,7 +47,7 @@ export const createBlog = async (
   });
 
   if (blogCover) {
-    await uploadCover(blogCover, newBlog.id);
+    await uploadImage(blogCover, newBlog.id);
 
     redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
   }
@@ -105,7 +105,7 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
   if (image) {
     try {
       await deleteImage(`nextblog/blogs/${id}`);
-      await uploadCover(image, id);
+      await uploadImage(image, id);
     } catch (error) {
       console.log(error);
 

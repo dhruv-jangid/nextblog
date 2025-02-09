@@ -1,19 +1,7 @@
 import Link from "next/link";
-import { CloudImage } from "@/components/cloudimage";
+import Image from "next/image";
 
-export const Author = ({
-  publicId,
-  name,
-  slug,
-  date,
-  end = false,
-}: {
-  publicId: string;
-  name: string;
-  slug: string;
-  date: string;
-  end?: boolean;
-}) => {
+export const Author = ({ name, image, slug, date, end = false }) => {
   return (
     <div
       className={`flex gap-3 items-center ${
@@ -25,14 +13,13 @@ export const Author = ({
           href={`/${slug}`}
           className="hover:opacity-80 w-11 h-11 lg:w-12 lg:h-12 relative"
         >
-          <CloudImage
-            publicId={publicId}
+          <Image
+            src={image}
             alt={name}
             fill
             priority={true}
             sizes="(min-width: 768px) 44px"
             className="rounded-full"
-            author
           />
         </Link>
       )}
@@ -53,14 +40,13 @@ export const Author = ({
           href={`/${slug}`}
           className="hover:opacity-80 w-11 h-11 lg:w-12 lg:h-12 relative"
         >
-          <CloudImage
-            publicId={publicId}
+          <Image
+            src={image}
             alt={name}
             fill
             priority={true}
             sizes="(min-width: 768px) 44px"
             className="rounded-full"
-            author
           />
         </Link>
       )}

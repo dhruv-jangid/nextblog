@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MetaPress | Login",
-  description: "Login to MetaPress",
+  title: "MetaPress | Signin",
+  description: "Signin to MetaPress",
 };
 
-export default function LoginLayout({
+export default function SigninLayout({
   children,
 }: {
   children: React.ReactNode;

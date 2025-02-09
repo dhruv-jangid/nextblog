@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/button";
 import { useActionState, useState } from "react";
-import { deleteUser } from "@/actions/handleAuth";
+import { removeUser } from "@/actions/handleAuth";
 import Form from "next/form";
 
 function Section({
@@ -27,7 +27,7 @@ function Section({
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<"profile" | "account">("profile");
-  const [state, action, isPending] = useActionState(deleteUser, null);
+  const [state, action, isPending] = useActionState(removeUser, null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   return (

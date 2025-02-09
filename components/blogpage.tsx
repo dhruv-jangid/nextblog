@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
-import { CloudImage } from "@/components/cloudimage";
 import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -175,7 +174,7 @@ export default function BlogPage({
           <Author
             date={blog.createdAt.toISOString()}
             slug={blog.author.slug}
-            publicId={blog.author.id}
+            image={blog.image}
             name={blog.author.name}
           />
         )}
@@ -190,8 +189,8 @@ export default function BlogPage({
             className="object-cover"
           />
         ) : (
-          <CloudImage
-            publicId={blog.id}
+          <Image
+            src={blog.image}
             alt={blog.title}
             fill={true}
             priority={false}

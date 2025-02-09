@@ -5,9 +5,9 @@ import { Button } from "@/components/button";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CloudImage } from "@/components/cloudimage";
+import { usePathname } from "next/navigation";
 import logo from "@/public/images/logo.png";
-import { logoutUser } from "@/actions/handleAuth";
+import { currentSignout } from "@/actions/handleAuth";
 
 const MenuIcon = () => (
   <path
@@ -47,6 +47,7 @@ const NAV_LINKS = [
 export const Navbar = ({ user }: { user: User | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -84,16 +85,16 @@ export const Navbar = ({ user }: { user: User | null }) => {
         <h1 className="font-semibold text-xl">MetaPress</h1>
       </div>
 
-      <div className="hidden lg:flex gap-8 items-center text-lg">
+      <div className="hidden lg:flex gap-6 items-center text-lg">
         {NAV_LINKS.map(({ href, label }) => (
           <Link
             key={href}
             href={href}
-            className={
-              href === "/createblog"
-                ? "bg-[#EEEEEE] rounded-xl py-1 px-3 text-black hover:bg-[#EEEEEE]/80 transition-all duration-300"
+            className={`rounded-xl py-1 px-3 transition-all duration-300 ${
+              pathname === href
+                ? "bg-[#EEEEEE] text-black hover:bg-[#EEEEEE]/80"
                 : ""
-            }
+            }`}
           >
             {label}
           </Link>
@@ -111,11 +112,11 @@ export const Navbar = ({ user }: { user: User | null }) => {
               key={href}
               href={href}
               onClick={() => setIsOpen(false)}
-              className={
-                href === "/createblog"
-                  ? "bg-[#EEEEEE] rounded-xl py-1 px-3 text-black hover:bg-[#EEEEEE]/80 transition-all duration-300"
-                  : ""
-              }
+              className={`rounded-xl py-1 px-3 transition-all duration-300 ${
+                pathname === href
+                  ? "bg-white text-black py-2 px-4"
+                  : "bg-[#EEEEEE] text-black hover:bg-[#EEEEEE]/80"
+              }`}
             >
               {label}
             </Link>
@@ -140,17 +141,16 @@ export const Navbar = ({ user }: { user: User | null }) => {
               >
                 <ChevronIcon />
               </svg>
-              <CloudImage
-                publicId={user.id}
+              <Image
+                src={user.image}
                 width={32}
                 height={32}
                 alt="Profile Picture"
                 className="rounded-full"
-                author
               />
             </button>
             <div
-              className={`flex flex-col absolute right-0 text-lg mt-1 p-1.5 w-max bg-[#191919] shadow-md outline outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
+              className={`flex flex-col absolute right-0 text-lg mt-1 p-1.5 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
                 isProfileOpen
                   ? "opacity-100 scale-100 visible"
                   : "opacity-0 scale-95 invisible"
@@ -174,7 +174,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
                 className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl whitespace-nowrap"
                 onClick={() => {
                   setIsProfileOpen(false);
-                  logoutUser();
+                  currentSignout();
                 }}
               >
                 Logout
@@ -182,8 +182,8 @@ export const Navbar = ({ user }: { user: User | null }) => {
             </div>
           </div>
         ) : (
-          <Link href="/login">
-            <Button>Login</Button>
+          <Link href="/signin">
+            <Button>Signin</Button>
           </Link>
         )}
       </div>
@@ -205,13 +205,12 @@ export const Navbar = ({ user }: { user: User | null }) => {
               >
                 <ChevronIcon />
               </svg>
-              <CloudImage
-                publicId={user.id}
+              <Image
+                src={user.image || ""}
                 width={38}
                 height={38}
                 alt="Profile Picture"
                 className="rounded-full"
-                author
               />
             </button>
             <div
@@ -239,7 +238,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
                 className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl"
                 onClick={() => {
                   setIsProfileOpen(false);
-                  logoutUser();
+                  currentSignout();
                 }}
               >
                 Logout
@@ -247,8 +246,8 @@ export const Navbar = ({ user }: { user: User | null }) => {
             </div>
           </div>
         ) : (
-          <Link href="/login">
-            <Button>Login</Button>
+          <Link href="/signin">
+            <Button>Signin</Button>
           </Link>
         )}
       </div>

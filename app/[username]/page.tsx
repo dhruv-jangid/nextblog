@@ -1,9 +1,9 @@
 import { Button } from "@/components/button";
-import { CloudImage } from "@/components/cloudimage";
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 export default async function Profile({
   params,
@@ -46,13 +46,12 @@ export default async function Profile({
     <div className="flex flex-col gap-6 p-4 lg:p-12">
       <div className="flex flex-col gap-4 lg:flex-row justify-between lg:items-center lg:text-base">
         <div className="flex lg:justify-center items-center gap-4">
-          <CloudImage
-            publicId={user.id}
+          <Image
+            src={user.image!}
             width={112}
             height={112}
-            alt={user.name}
+            alt={user.name!}
             className="rounded-full"
-            author
           />
           <div>
             <h1 className="text-3xl font-semibold">{user.name}</h1>
