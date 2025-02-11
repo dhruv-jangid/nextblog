@@ -26,6 +26,7 @@ export default {
               image: true,
               role: true,
               password: true,
+              accounts: true,
             },
           });
           if (!user?.password) return null;
@@ -36,12 +37,21 @@ export default {
           );
           if (!isValid) return null;
 
-          const { password: _, ...userWithoutPassword } = user;
+          if (!user.accounts.find((acc) => acc.provider === "credentials")) {
+            await prisma.account.create({
+              data: {
+                userId: user.id,
+                type: "credentials",
+                provider: "credentials",
+                providerAccountId: user.id,
+              },
+            });
+          }
 
+          const { password: _, accounts: __, ...userWithoutPassword } = user;
           return userWithoutPassword;
         } catch (error) {
           console.error("Auth error:", error);
-
           return null;
         }
       },

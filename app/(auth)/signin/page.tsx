@@ -77,7 +77,7 @@ export default function Signin() {
 
           <Button
             disabled={isPending}
-            className="w-full bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold py-2 rounded-xl cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300"
+            className="w-full bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold py-1.5 rounded-xl cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300"
           >
             {isPending ? "Signing in..." : "Signin"}
           </Button>

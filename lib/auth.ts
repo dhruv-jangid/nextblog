@@ -11,31 +11,76 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (account!.provider === "credentials") {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! },
+          include: {
+            accounts: true,
+          },
+        });
+
+        if (existingUser) {
+          const existingAccount = existingUser.accounts.find(
+            (acc) => acc.provider === "credentials"
+          );
+
+          if (!existingAccount) {
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: "credentials",
+                provider: "credentials",
+                providerAccountId: existingUser.id,
+              },
+            });
+          }
+          return true;
+        }
+      }
+      if (account!.provider === "credentials") {
         return true;
       }
       if (!user.email) return false;
 
-      let existingUser = await prisma.user.findUnique({
+      const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
+        include: {
+          accounts: true,
+        },
       });
 
-      if (!existingUser) {
-        existingUser = await prisma.user.create({
-          data: {
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            slug: generateSlug(user.name!),
-            accounts: {
-              create: {
-                type: account!.type,
-                provider: account!.provider,
-                providerAccountId: account!.providerAccountId,
-              },
+      if (existingUser) {
+        const existingAccount = existingUser.accounts.find(
+          (acc) => acc.provider === account!.provider
+        );
+
+        if (!existingAccount) {
+          await prisma.account.create({
+            data: {
+              userId: existingUser.id,
+              type: account!.type,
+              provider: account!.provider,
+              providerAccountId: account!.providerAccountId,
+            },
+          });
+        }
+        return true;
+      }
+
+      await prisma.user.create({
+        data: {
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          slug: generateSlug(user.name!),
+          accounts: {
+            create: {
+              type: account!.type,
+              provider: account!.provider,
+              providerAccountId: account!.providerAccountId,
             },
           },
-        });
-      }
+        },
+      });
       return true;
     },
     async session({ session, token }) {

@@ -218,6 +218,7 @@ export default function CreateBlog() {
         <div className="flex justify-end text-lg">
           <Button
             disabled={isPending || !isFormValid}
+            className="bg-[#EEEEEE] rounded-xl px-6 py-1.5 text-[#0F0F0F] font-semibold text-xl"
             onClick={() => {
               if (content && isFormValid) {
                 startTransition(() => {

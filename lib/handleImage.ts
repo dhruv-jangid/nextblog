@@ -79,3 +79,19 @@ export const deleteImages = async (publicIds: string[]) => {
     return { success: false, message: "Failed to delete images" };
   }
 };
+
+export const getPublicIdFromUrl = (url: string, isAuthor: boolean = false) => {
+  const regex = /\/upload\/v\d+\/(.+?)\.\w+$/;
+  const match = url.match(regex);
+  let publicId = match ? match[1] : null;
+
+  if (publicId && isAuthor) {
+    const parts = publicId.split("/");
+    if (parts[0] === "nextblog" && parts.length > 2) {
+      parts[1] = "authors";
+      publicId = parts.join("/");
+    }
+  }
+
+  return publicId;
+};

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
 import BlogPage from "@/components/blogpage";
 import { User, Blog as PrismaBlog, Like as PrismaLike } from "@prisma/client";
+import { auth } from "@/lib/auth";
 
 export default async function Blog({
   params,
@@ -15,6 +15,7 @@ export default async function Blog({
       id: true,
       title: true,
       slug: true,
+      image: true,
       createdAt: true,
       content: true,
       category: true,
@@ -28,6 +29,7 @@ export default async function Blog({
           id: true,
           name: true,
           slug: true,
+          image: true,
         },
       },
     },
@@ -43,8 +45,8 @@ export default async function Blog({
     return <div>Blog not found</div>;
   }
 
-  const cookieSession = (await cookies()).get("metapress");
-  const userId = cookieSession ? JSON.parse(cookieSession.value).id : null;
+  const session = await auth();
+  const userId = session ? session.user.id : null;
   const isAuthor = userId === blog.author.id;
   const isLiked = blog.likes.some((like) => like.userId === userId);
 
@@ -52,7 +54,7 @@ export default async function Blog({
     ...blog,
     likes: blog.likes.map((like) => ({ userId: like.userId, blogId: blog.id })),
   } as PrismaBlog & {
-    author: Pick<User, "id" | "name" | "slug">;
+    author: Pick<User, "id" | "name" | "slug" | "image">;
     likes: PrismaLike[];
   };
 

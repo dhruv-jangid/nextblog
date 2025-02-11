@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { permanentRedirect } from "next/navigation";
 import argon2 from "argon2";
 import { prisma } from "@/lib/db";
@@ -8,6 +7,8 @@ import { z } from "zod";
 import { deleteImages, uploadImage } from "@/lib/handleImage";
 import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
+import { auth } from "@/lib/auth";
+import { getPublicIdFromUrl } from "@/lib/handleImage";
 
 const signUpSchema = z
   .object({
@@ -86,6 +87,7 @@ export const credentialsSignup = async (prevState, formData: FormData) => {
 
   const hashedPassword = await argon2.hash(password);
   const imageUrl = await uploadImage(userImg, true);
+
   await prisma.user.create({
     data: {
       slug,
@@ -93,6 +95,13 @@ export const credentialsSignup = async (prevState, formData: FormData) => {
       image: imageUrl,
       password: hashedPassword,
       email,
+      accounts: {
+        create: {
+          type: "credentials",
+          provider: "credentials",
+          providerAccountId: slug,
+        },
+      },
     },
   });
 
@@ -112,31 +121,48 @@ export const currentSignout = async () => {
   permanentRedirect("/signin");
 };
 
-export const removeUser = async () => {
-  const id = JSON.parse((await cookies()).get("metapress")?.value).id;
+export const removeUser = async (): Promise<string> => {
+  const session = await auth();
+  const id = session?.user.id;
 
   if (!id) {
-    return "User not found";
-  }
-
-  const blogs = await prisma.blog.findMany({
-    where: { authorId: id },
-  });
-
-  if (blogs.length > 0) {
-    const publicIds = blogs.map((blog) => `nextblog/blogs/${blog.id}`);
-    publicIds.push(`nextblog/authors/${id}`);
-    await deleteImages(publicIds);
+    return "User not authenticated";
   }
 
   try {
-    await prisma.user.delete({
-      where: { id },
+    await prisma.$transaction(async (tx) => {
+      const [blogs, user] = await Promise.all([
+        tx.blog.findMany({
+          where: { authorId: id },
+          select: { id: true, image: true },
+        }),
+        tx.user.findUnique({
+          where: { id },
+          select: { image: true },
+        }),
+      ]);
+
+      const publicIds = blogs.map(
+        (blog) => blog.image && getPublicIdFromUrl(blog.image)
+      );
+
+      const userImagePublicId = getPublicIdFromUrl(user.image, true);
+      if (userImagePublicId) publicIds.push(userImagePublicId);
+
+      await tx.user.delete({ where: { id } });
+
+      if (publicIds.length > 0) {
+        const deleteResult = await deleteImages(publicIds);
+        if (!deleteResult.success) {
+          throw new Error("Failed to delete images");
+        }
+      }
     });
-    signOut();
-    return "User deleted successfully";
+
+    await signOut({ redirect: false });
+    return "Account deleted successfully";
   } catch (error) {
-    console.log(error);
-    return "User not found or could not be deleted";
+    console.error("Error deleting user:", error);
+    return "Failed to delete account";
   }
 };

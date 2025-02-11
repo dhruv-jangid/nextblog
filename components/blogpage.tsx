@@ -174,7 +174,7 @@ export default function BlogPage({
           <Author
             date={blog.createdAt.toISOString()}
             slug={blog.author.slug}
-            image={blog.image}
+            image={blog.author.image}
             name={blog.author.name}
           />
         )}

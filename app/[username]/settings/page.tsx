@@ -104,7 +104,7 @@ export default function Settings() {
               <div>Your account settings</div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 justify-end">
               <Button
                 className="bg-gray-200 cursor-pointer text-gray-800 hover:bg-gray-300 transition-all duration-300 px-4 py-2 rounded-xl"
                 onClick={() => setShowConfirmation(false)}
