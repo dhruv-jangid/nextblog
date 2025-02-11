@@ -2,12 +2,50 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import authConfig from "@/auth.config";
+import Credentials from "next-auth/providers/credentials";
+import argon2 from "argon2";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   pages: { signIn: "/signin" },
-  ...authConfig,
+  providers: [
+    ...authConfig.providers,
+    Credentials({
+      async authorize({ email, password }) {
+        if (!email || !password) return null;
+
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              slug: true,
+              image: true,
+              role: true,
+              password: true,
+              accounts: true,
+            },
+          });
+          if (!user?.password) return null;
+
+          const isValid = await argon2.verify(
+            user.password,
+            password as string
+          );
+          if (!isValid) return null;
+
+          const { password: _, accounts: __, ...userWithoutPassword } = user;
+          return userWithoutPassword;
+        } catch (error) {
+          console.error("Auth error:", error);
+          return null;
+        }
+      },
+    }),
+  ],
   callbacks: {
     async signIn({ user, account }) {
       if (account!.provider === "credentials") {

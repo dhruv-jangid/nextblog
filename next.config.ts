@@ -1,22 +1,15 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  env: {
-    AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
-    AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
-  },
-  experimental: {
-    staleTimes: {
-      static: 30,
-      dynamic: 180,
-    },
-  },
-};
+const nextConfig: NextConfig = {};
 
 module.exports = {
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",
+    },
+    staleTimes: {
+      static: 30,
+      dynamic: 180,
     },
   },
 
@@ -25,8 +18,7 @@ module.exports = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        port: "",
-        pathname: "/dkzj1yg2n/**",
+        pathname: `/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/**`,
       },
       {
         protocol: "https",
