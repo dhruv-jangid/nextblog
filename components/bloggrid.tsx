@@ -1,29 +1,20 @@
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import Link from "next/link";
-import { CloudImage } from "@/components/cloudimage";
+import Image from "next/image";
 import { Like } from "@/components/like";
 import { cookies } from "next/headers";
-
-type BlogWithAuthorAndLikes = {
-  id: string;
-  title: string;
-  slug: string;
-  category: string;
-  createdAt: Date;
-  likes: { blogId: string; userId: string }[];
-  author: { name: string; slug: string; id: string };
-};
 
 const Card = async ({
   id,
   title,
+  image,
   createdAt,
   category,
   slug,
   author,
   likes,
-}: BlogWithAuthorAndLikes) => {
+}) => {
   const cookieSession = (await cookies()).get("metapress");
   const userId = cookieSession ? JSON.parse(cookieSession.value).id : null;
   const isLiked = userId
@@ -33,8 +24,8 @@ const Card = async ({
   return (
     <div className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-linear-to-br from-[#191919] from-40% to-transparent">
       <div className="relative h-1/2 rounded-xl overflow-hidden">
-        <CloudImage
-          publicId={id}
+        <Image
+          src={image}
           alt={title}
           fill={true}
           priority={false}
@@ -57,7 +48,7 @@ const Card = async ({
       <div className="flex justify-between items-center">
         <Like blogId={id} likes={likes.length} isLiked={isLiked} />
         <Author
-          publicId={author.id}
+          image={author.image}
           name={author.name}
           slug={author.slug}
           date={createdAt.toISOString()}
@@ -68,7 +59,7 @@ const Card = async ({
   );
 };
 
-export const BlogGrid = ({ blogs }: { blogs: BlogWithAuthorAndLikes[] }) => {
+export const BlogGrid = ({ blogs }) => {
   return (
     <div className="grid md:grid-cols-2 2xl:grid-cols-3 gap-8 px-4 lg:px-8">
       {blogs.map((blog) => (

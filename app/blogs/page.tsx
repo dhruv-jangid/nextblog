@@ -7,10 +7,11 @@ export default async function Blogs() {
       id: true,
       title: true,
       slug: true,
+      image: true,
       category: true,
       createdAt: true,
       likes: { select: { blogId: true, userId: true } },
-      author: { select: { name: true, slug: true, id: true } },
+      author: { select: { name: true, slug: true, id: true, image: true } },
     },
     orderBy: {
       createdAt: "desc",
@@ -23,5 +24,15 @@ export default async function Blogs() {
     },
   });
 
-  return <BlogGrid blogs={blogs} />;
+  return (
+    <>
+      {blogs.length > 0 ? (
+        <BlogGrid blogs={blogs} />
+      ) : (
+        <div className="flex justify-center items-center min-h-[80vh] text-4xl rounded-lg w-3/4 mx-auto">
+          Sorry, no blogs available at this time!
+        </div>
+      )}
+    </>
+  );
 }

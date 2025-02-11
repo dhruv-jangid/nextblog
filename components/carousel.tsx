@@ -1,23 +1,13 @@
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
-import { CloudImage } from "@/components/cloudimage";
 import Link from "next/link";
+import Image from "next/image";
 
-type BlogWithAuthorAndLikes = {
-  id: string;
-  title: string;
-  slug: string;
-  category: string;
-  createdAt: Date;
-  likes: { blogId: string; userId: string }[];
-  author: { name: string; slug: string; id: string };
-};
-
-export const Carousel = ({ blog }: { blog: BlogWithAuthorAndLikes }) => {
+export const Carousel = ({ blog }) => {
   return (
     <div className="relative h-[50vh] lg:h-[80vh] max-h-[24rem] sm:max-h-[40rem] w-full mb-10">
-      <CloudImage
-        publicId={blog.id}
+      <Image
+        src={blog.image}
         alt={blog.title}
         fill={true}
         priority={true}
@@ -32,14 +22,14 @@ export const Carousel = ({ blog }: { blog: BlogWithAuthorAndLikes }) => {
         </Link>
 
         <Link href={`/${blog.author.slug}/${blog.slug}`}>
-          <h1 className="text-white text-xl md:text-3xl xl:text-4xl font-bold w-2/3 md:w-3/5 line-clamp-2 sm:line-clamp-3">
+          <h1 className="text-white text-xl md:text-3xl xl:text-4xl font-bold w-2/3 md:w-4/5 line-clamp-2 sm:line-clamp-3">
             {blog.title}
           </h1>
         </Link>
         <Author
           date={blog.createdAt.toISOString()}
+          image={blog.author.image}
           slug={blog.author.slug}
-          publicId={blog.author.id}
           name={blog.author.name}
         />
       </div>

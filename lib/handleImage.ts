@@ -7,11 +7,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const uploadCover = async (
+export const uploadImage = async (
   image: File,
-  publicId: string,
   isAuthor: boolean = false
-) => {
+): Promise<string> => {
   try {
     const fileBuffer = Buffer.from(await image.arrayBuffer());
     const readableStream = Readable.from(fileBuffer);
@@ -20,14 +19,33 @@ export const uploadCover = async (
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: !isAuthor ? "nextblog/blogs" : "nextblog/authors",
-          public_id: publicId,
+          allowed_formats: ["jpeg", "png", "webp"],
+          format: "webp",
           invalidate: true,
+          transformation: !isAuthor
+            ? [{ aspect_ratio: "16:9", crop: "fill", gravity: "center" }]
+            : [
+                {
+                  width: 300,
+                  height: 300,
+                  aspect_ratio: "1:1",
+                  crop: "fill",
+                  gravity: "face:auto",
+                },
+              ],
         },
         (error, result) => {
           if (error) {
             reject(new Error("Upload Failed: " + error.message));
+            return;
           }
-          resolve(result);
+          if (!result) {
+            reject(
+              new Error("Upload failed: No result returned from Cloudinary")
+            );
+            return;
+          }
+          resolve(result.secure_url);
         }
       );
 
@@ -60,4 +78,20 @@ export const deleteImages = async (publicIds: string[]) => {
     console.error("Error deleting images:", error);
     return { success: false, message: "Failed to delete images" };
   }
+};
+
+export const getPublicIdFromUrl = (url: string, isAuthor: boolean = false) => {
+  const regex = /\/upload\/v\d+\/(.+?)\.\w+$/;
+  const match = url.match(regex);
+  let publicId = match ? match[1] : null;
+
+  if (publicId && isAuthor) {
+    const parts = publicId.split("/");
+    if (parts[0] === "nextblog" && parts.length > 2) {
+      parts[1] = "authors";
+      publicId = parts.join("/");
+    }
+  }
+
+  return publicId;
 };

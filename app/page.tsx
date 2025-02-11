@@ -8,10 +8,11 @@ export default async function Home() {
       id: true,
       title: true,
       slug: true,
+      image: true,
       category: true,
       createdAt: true,
       likes: { select: { blogId: true, userId: true } },
-      author: { select: { name: true, slug: true, id: true } },
+      author: { select: { name: true, slug: true, id: true, image: true } },
     },
     orderBy: {
       createdAt: "desc",
@@ -33,7 +34,7 @@ export default async function Home() {
           <BlogGrid blogs={remainingBlogs} />
         </>
       ) : (
-        <div className="flex justify-center items-center min-h-[70vh] text-4xl text-black bg-[#EEEEEE] rounded-lg w-3/4 mx-auto">
+        <div className="flex justify-center items-center min-h-[80vh] text-4xl rounded-lg w-3/4 mx-auto">
           Sorry, no blogs available at this time!
         </div>
       )}

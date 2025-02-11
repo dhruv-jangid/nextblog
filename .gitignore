@@ -1,4 +1,5 @@
 # dependencies
+dev.db
 /node_modules
 /.pnp
 .pnp.*

@@ -1,15 +1,20 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { deleteImage, uploadCover } from "@/lib/handleImage";
-import { cookies } from "next/headers";
+import {
+  deleteImage,
+  uploadImage,
+  getPublicIdFromUrl,
+} from "@/lib/handleImage";
 import { redirect } from "next/navigation";
 
 export const createBlog = async (
   prevState,
   formData
 ): Promise<string | void> => {
-  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
+  const session = await auth();
+  const user_id = session?.user.id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
@@ -35,19 +40,20 @@ export const createBlog = async (
     .replace(/\s+/g, " ")
     .trim();
 
-  const newBlog = await prisma.blog.create({
-    data: {
-      title,
-      slug,
-      content: cleanedContent,
-      category,
-      author: { connect: { id: user_id } },
-    },
-    include: { author: { select: { id: true, slug: true } } },
-  });
+  const image = await uploadImage(blogCover);
 
-  if (blogCover) {
-    await uploadCover(blogCover, newBlog.id);
+  if (image) {
+    const newBlog = await prisma.blog.create({
+      data: {
+        title,
+        slug,
+        image,
+        content: cleanedContent,
+        category,
+        author: { connect: { id: user_id } },
+      },
+      include: { author: { select: { id: true, slug: true } } },
+    });
 
     redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
   }
@@ -56,7 +62,8 @@ export const createBlog = async (
 };
 
 export const editBlog = async (formData: FormData): Promise<string | void> => {
-  const user_id = JSON.parse((await cookies()).get("metapress")?.value).id;
+  const session = await auth();
+  const user_id = session?.user.id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
@@ -66,15 +73,15 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as string;
-  const image = formData.get("image") as File | null;
+  const newImage = formData.get("image") as File | null;
 
   const blog = await prisma.blog.findUnique({
     where: { id },
     select: {
       authorId: true,
       slug: true,
-      category: true,
       author: { select: { slug: true } },
+      image: true,
     },
   });
 
@@ -102,15 +109,13 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
     return "Title already taken, please choose a different title!";
   }
 
-  if (image) {
-    try {
-      await deleteImage(`nextblog/blogs/${id}`);
-      await uploadCover(image, id);
-    } catch (error) {
-      console.log(error);
-
-      return "Error uploading image";
+  let imageUrl;
+  if (newImage && newImage.size > 0) {
+    if (blog.image) {
+      const publicId = getPublicIdFromUrl(blog.image);
+      await deleteImage(publicId!);
     }
+    imageUrl = await uploadImage(newImage);
   }
 
   await prisma.blog.update({
@@ -120,17 +125,16 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
       slug: newSlug,
       content,
       category,
+      ...(imageUrl && { image: imageUrl }),
     },
   });
 
-  if (blog.slug !== newSlug) {
-    redirect(`/${blog.author.slug}/${newSlug}`);
-  }
+  redirect(`/${blog.author.slug}/${newSlug}`);
 };
 
 export const deleteBlog = async (id: string): Promise<string | void> => {
-  const cookieSession = (await cookies()).get("metapress")?.value;
-  const user_id = cookieSession ? JSON.parse(cookieSession).id : null;
+  const session = await auth();
+  const user_id = session?.user.id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
@@ -138,7 +142,7 @@ export const deleteBlog = async (id: string): Promise<string | void> => {
 
   const blog = await prisma.blog.findUnique({
     where: { id },
-    select: { authorId: true },
+    select: { image: true, authorId: true },
   });
 
   if (!blog) {
@@ -149,64 +153,74 @@ export const deleteBlog = async (id: string): Promise<string | void> => {
     return "Unauthorized to delete this blog";
   }
 
-  try {
-    await deleteImage(`nextblog/blogs/${id}`);
-  } catch (error) {
-    console.log(error);
-  }
+  await prisma.$transaction(async (tx) => {
+    if (blog.image) {
+      const publicId = getPublicIdFromUrl(blog.image);
+      if (publicId) {
+        await deleteImage(publicId);
+      }
+    }
 
-  await prisma.blog.delete({
-    where: { id, authorId: user_id },
+    await tx.blog.delete({
+      where: { id, authorId: user_id },
+    });
   });
 
   redirect("/");
 };
 
 export const likeBlog = async (id: string): Promise<string | void> => {
-  const cookieStore = await cookies();
-  const metapressCookie = cookieStore.get("metapress")?.value;
-  const user_id = metapressCookie ? JSON.parse(metapressCookie).id : null;
+  const session = await auth();
+  const user_id = session?.user.id;
 
   if (!user_id) {
     redirect("/login");
   }
 
-  const blog = await prisma.blog.findUnique({
-    where: { id },
-    select: { id: true },
-  });
+  try {
+    await prisma.$transaction(async (tx) => {
+      const blog = await tx.blog.findUnique({
+        where: { id },
+        select: { id: true },
+      });
 
-  if (!blog) {
-    return "Blog not found";
-  }
+      if (!blog) {
+        throw new Error("Blog not found");
+      }
 
-  const existingLike = await prisma.like.findUnique({
-    where: {
-      userId_blogId: {
-        userId: user_id,
-        blogId: id,
-      },
-    },
-  });
+      const existingLike = await tx.like.findUnique({
+        where: {
+          userId_blogId: {
+            userId: user_id,
+            blogId: id,
+          },
+        },
+      });
 
-  if (existingLike) {
-    await prisma.like.delete({
-      where: {
-        userId_blogId: {
+      if (existingLike) {
+        await tx.like.delete({
+          where: {
+            userId_blogId: {
+              userId: user_id,
+              blogId: id,
+            },
+          },
+        });
+        return "Blog unliked";
+      }
+
+      await tx.like.create({
+        data: {
           userId: user_id,
           blogId: id,
         },
-      },
+      });
+      return "Blog liked";
     });
-    return "Blog unliked";
+  } catch (error) {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return "Failed to process like operation";
   }
-
-  await prisma.like.create({
-    data: {
-      userId: user_id,
-      blogId: id,
-    },
-  });
-
-  return "Blog liked";
 };

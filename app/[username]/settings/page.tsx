@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/button";
 import { useActionState, useState } from "react";
-import { deleteUser } from "@/actions/handleAuth";
+import { removeUser } from "@/actions/handleAuth";
 import Form from "next/form";
 
 function Section({
@@ -27,7 +27,7 @@ function Section({
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<"profile" | "account">("profile");
-  const [state, action, isPending] = useActionState(deleteUser, null);
+  const [state, action, isPending] = useActionState(removeUser, null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   return (
@@ -104,7 +104,7 @@ export default function Settings() {
               <div>Your account settings</div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 justify-end">
               <Button
                 className="bg-gray-200 cursor-pointer text-gray-800 hover:bg-gray-300 transition-all duration-300 px-4 py-2 rounded-xl"
                 onClick={() => setShowConfirmation(false)}

@@ -3,7 +3,7 @@ import "@/app/globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import localFont from "next/font/local";
-import { cookies } from "next/headers";
+import { auth } from "@/lib/auth";
 
 const degular = localFont({
   src: "../public/fonts/DegularVariable.ttf",
@@ -19,8 +19,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieSession = (await cookies()).get("metapress");
-  const user = cookieSession ? JSON.parse(cookieSession.value) : null;
+  const session = await auth();
+  const user = session ? session.user : null;
 
   return (
     <html lang="en" className={degular.className}>
