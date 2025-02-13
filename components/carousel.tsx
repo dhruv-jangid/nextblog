@@ -2,8 +2,11 @@ import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import Link from "next/link";
 import Image from "next/image";
+import Account from "@/public/images/account.png";
 
 export const Carousel = ({ blog }) => {
+  const finalImg = blog.author.image ? blog.author.image : Account;
+
   return (
     <div className="relative h-[50vh] lg:h-[80vh] max-h-[24rem] sm:max-h-[40rem] w-full mb-10">
       <Image
@@ -28,7 +31,7 @@ export const Carousel = ({ blog }) => {
         </Link>
         <Author
           date={blog.createdAt.toISOString()}
-          image={blog.author.image}
+          image={finalImg}
           slug={blog.author.slug}
           name={blog.author.name}
         />

@@ -1,9 +1,8 @@
 "use client";
 
-import { Button } from "@/components/button";
 import { useActionState, useState } from "react";
-import { removeUser } from "@/actions/handleAuth";
-import Form from "next/form";
+import { removeUser } from "@/actions/handleUser";
+import { HiOutlineUser, HiOutlineCog6Tooth } from "react-icons/hi2";
 
 function Section({
   title,
@@ -15,10 +14,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col">
       <div>
-        <h3 className="text-lg font-medium">{title}</h3>
-        <p className="text-sm text-gray-500">{description}</p>
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        <p className="text-gray-400 text-sm">{description}</p>
       </div>
       {children}
     </div>
@@ -31,58 +30,83 @@ export default function Settings() {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   return (
-    <>
-      <div className="grid grid-cols-[1fr_5fr]">
-        <div className="border-r border-gray-200 p-4">
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+      <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-8">
+        <div className="bg-[#121212] rounded-2xl p-4 h-fit">
           <nav>
             <ul className="space-y-2">
               <li>
-                <Button
-                  className={`w-full justify-start cursor-pointer text-left rounded-xl py-2 px-3 ${
-                    activeTab === "profile" ? "outline outline-[#EEEEEE]" : ""
+                <button
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-base rounded-xl cursor-pointer transition-colors ${
+                    activeTab === "profile"
+                      ? "bg-white/10 text-white"
+                      : "text-gray-400 hover:bg-white/5 hover:text-white"
                   }`}
                   onClick={() => setActiveTab("profile")}
                 >
+                  <HiOutlineUser className="w-5 h-5" />
                   Profile
-                </Button>
+                </button>
               </li>
               <li>
-                <Button
-                  className={`w-full justify-start cursor-pointer text-left font-medium rounded-xl py-2 px-3 ${
-                    activeTab === "account" ? "outline outline-[#EEEEEE]" : ""
+                <button
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-base rounded-xl cursor-pointer transition-colors ${
+                    activeTab === "account"
+                      ? "bg-white/10 text-white"
+                      : "text-gray-400 hover:bg-white/5 hover:text-white"
                   }`}
                   onClick={() => setActiveTab("account")}
                 >
+                  <HiOutlineCog6Tooth className="w-5 h-5" />
                   Account
-                </Button>
+                </button>
               </li>
             </ul>
           </nav>
         </div>
 
-        <div className="flex-1 p-6">
+        <div className="bg-[#121212] rounded-2xl p-6 md:p-8">
           {activeTab === "profile" ? (
             <Section
               title="Profile Settings"
-              description="Manage your profile information"
+              description="Update your profile information and customize how others see you."
             >
-              <div className="border-t pt-6">
-                <h2>Profile Information</h2>
+              <div className="space-y-6">
+                <div className="grid gap-6 pt-6">
+                  {/* Profile settings form to be implemented */}
+                  <p className="text-gray-400">
+                    Profile settings coming soon...
+                  </p>
+                </div>
               </div>
             </Section>
           ) : (
             <Section
-              title="Account"
-              description="Manage your account settings and delete your account"
+              title="Account Settings"
+              description="Manage your account preferences and security settings."
             >
-              <div className="border-t pt-6">
-                {state && <h2>{state}</h2>}
-                <h4 className="text-sm font-medium text-red-600 mb-2">
-                  WARNING! This action is irreversible
-                </h4>
-                <Button onClick={() => setShowConfirmation(true)}>
-                  Delete Account
-                </Button>
+              <div className="space-y-6 pt-6">
+                {state && (
+                  <div className="bg-red-500/10 text-red-500 p-4 rounded-xl">
+                    {state}
+                  </div>
+                )}
+                <div className="flex flex-col border border-red-500/20 rounded-2xl p-6 bg-red-500/5">
+                  <h4 className="text-lg font-semibold text-red-500 mb-2">
+                    Delete Account
+                  </h4>
+                  <p className="text-gray-400 text-sm mb-4">
+                    Once you delete your account, there is no going back. Please
+                    be certain.
+                  </p>
+                  <button
+                    className="px-4 py-2 rounded-xl cursor-pointer border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors w-max self-end"
+                    onClick={() => setShowConfirmation(true)}
+                  >
+                    Delete Account
+                  </button>
+                </div>
               </div>
             </Section>
           )}
@@ -90,36 +114,45 @@ export default function Settings() {
       </div>
 
       {showConfirmation && (
-        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50">
-          <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">
-              Confirm Account Deletion
-            </h2>
-            <div className="text-red-600 mb-4 font-normal">
-              <div className="text-gray-600 mb-1 font-medium">
-                Deleting your account will remove :
-              </div>
-              <div>All your blogs</div>
-              <div>Your profile information</div>
-              <div>Your account settings</div>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="flex flex-col gap-4 bg-[#121212] p-6 rounded-2xl max-w-md w-full border border-[#222]">
+            <div>
+              <h2 className="text-xl font-bold">Confirm Account Deletion</h2>
+              <p className="text-gray-400">
+                This action cannot be undone. This will:
+              </p>
             </div>
+            <ul className="flex flex-col text-red-400">
+              <li className="flex items-center gap-2">
+                • Permanently delete all your blogs
+              </li>
+              <li className="flex items-center gap-2">
+                • Remove your profile information
+              </li>
+              <li className="flex items-center gap-2">
+                • Delete all your account data
+              </li>
+            </ul>
 
-            <div className="flex gap-4 justify-end">
-              <Button
-                className="bg-gray-200 cursor-pointer text-gray-800 hover:bg-gray-300 transition-all duration-300 px-4 py-2 rounded-xl"
+            <div className="flex gap-4 justify-end mt-4">
+              <button
+                className="px-4 py-2 rounded-xl cursor-pointer text-gray-400 outline hover:bg-white/5 hover:text-white transition-colors"
                 onClick={() => setShowConfirmation(false)}
               >
                 Cancel
-              </Button>
-              <Form action={action}>
-                <Button className="bg-red-600 cursor-pointer text-white hover:bg-red-600/80 transition-all duration-300 px-4 py-2 rounded-xl">
+              </button>
+              <form action={action}>
+                <button
+                  className="px-4 py-2 rounded-xl cursor-pointer border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isPending}
+                >
                   {isPending ? "Deleting..." : "Delete Account"}
-                </Button>
-              </Form>
+                </button>
+              </form>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -4,15 +4,20 @@ import { prisma } from "@/lib/db";
 import authConfig from "@/auth.config";
 import Credentials from "next-auth/providers/credentials";
 import argon2 from "argon2";
+import type { Adapter } from "next-auth/adapters";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: { strategy: "jwt" },
-  pages: { signIn: "/signin" },
+  pages: { signIn: "/signin", error: "/signin" },
   providers: [
     ...authConfig.providers,
     Credentials({
-      async authorize({ email, password }) {
+      async authorize(credentials) {
+        const { email, password } = credentials as {
+          email: string;
+          password: string;
+        };
         if (!email || !password) return null;
 
         try {
@@ -48,73 +53,75 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (account!.provider === "credentials") {
+      if (!account || !user.email) return false;
+
+      if (account.provider === "credentials") {
         const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! },
-          include: {
-            accounts: true,
-          },
+          where: { email: user.email },
+          include: { accounts: true },
         });
 
-        if (existingUser) {
-          const existingAccount = existingUser.accounts.find(
-            (acc) => acc.provider === "credentials"
-          );
+        if (!existingUser) return false;
 
-          if (!existingAccount) {
-            await prisma.account.create({
-              data: {
-                userId: existingUser.id,
-                type: "credentials",
-                provider: "credentials",
-                providerAccountId: existingUser.id,
-              },
-            });
-          }
-          return true;
-        }
-      }
-      if (account!.provider === "credentials") {
-        return true;
-      }
-      if (!user.email) return false;
-
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        include: {
-          accounts: true,
-        },
-      });
-
-      if (existingUser) {
-        const existingAccount = existingUser.accounts.find(
-          (acc) => acc.provider === account!.provider
-        );
-
-        if (!existingAccount) {
+        if (
+          !existingUser.accounts.some((acc) => acc.provider === "credentials")
+        ) {
           await prisma.account.create({
             data: {
               userId: existingUser.id,
-              type: account!.type,
-              provider: account!.provider,
-              providerAccountId: account!.providerAccountId,
+              type: "credentials",
+              provider: "credentials",
+              providerAccountId: existingUser.id,
             },
           });
         }
         return true;
       }
 
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        include: { accounts: true },
+      });
+
+      if (existingUser) {
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            name: user.name || existingUser.name,
+            image: user.image || existingUser.image,
+          },
+        });
+
+        if (
+          !existingUser.accounts.some(
+            (acc) => acc.provider === account.provider
+          )
+        ) {
+          await prisma.account.create({
+            data: {
+              userId: existingUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          });
+        }
+        return true;
+      }
+
+      const finalSlug = await generateSlug(user.name || "user");
+
       await prisma.user.create({
         data: {
           email: user.email,
           name: user.name,
           image: user.image,
-          slug: generateSlug(user.name!),
+          slug: finalSlug,
           accounts: {
             create: {
-              type: account!.type,
-              provider: account!.provider,
-              providerAccountId: account!.providerAccountId,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
             },
           },
         },
@@ -152,7 +159,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
 });
 
-const generateSlug = (name: string): string => {
+const generateSlug = async (
+  name: string,
+  attempt: number = 0
+): Promise<string> => {
   let slug = name
     .toLowerCase()
     .normalize("NFKD")
@@ -167,17 +177,26 @@ const generateSlug = (name: string): string => {
     slug = "user";
   }
 
-  const needsPostfix = slug.length < 3 || !/^[a-z]/.test(slug);
-  if (needsPostfix) {
-    const random = Math.floor(100 + Math.random() * 900).toString();
+  if (slug.length < 3 || !/^[a-z]/.test(slug) || attempt > 0) {
+    const randomSuffix = Math.floor(100 + Math.random() * 900).toString();
     slug = (
       slug.replace(/[^a-z0-9_.]/g, "") +
       (slug.length ? "_" : "") +
-      random
+      randomSuffix
     )
       .replace(/^[^a-z]+/g, "")
       .slice(0, 20);
   }
 
-  return slug.padEnd(3, "0").replace(/0+$/, "").slice(0, 20);
+  slug = slug.padEnd(3, "0").replace(/0+$/, "").slice(0, 20);
+
+  const existingUser = await prisma.user.findUnique({
+    where: { slug },
+  });
+
+  if (!existingUser) {
+    return slug;
+  }
+
+  return generateSlug(name, attempt + 1);
 };

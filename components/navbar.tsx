@@ -7,47 +7,26 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import logo from "@/public/images/logo.png";
-import { currentSignout } from "@/actions/handleAuth";
-
-const MenuIcon = () => (
-  <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={2}
-    d="M4 6h16M4 12h16M4 18h16"
-  />
-);
-
-const CloseIcon = () => (
-  <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={2}
-    d="M6 18L18 6M6 6l12 12"
-  />
-);
-
-const ChevronIcon = () => (
-  <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={2}
-    d="M19 9l-7 7-7-7"
-  />
-);
+import { signOutCurrent } from "@/actions/handleAuth";
+import { GrMenu, GrClose } from "react-icons/gr";
+import { HiChevronDown } from "react-icons/hi2";
+import Account from "@/public/images/account.png";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/blogs", label: "Blogs" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-  { href: "/createblog", label: "Create Blog" },
+  { href: "/createblog", label: "Create" },
 ];
 
 export const Navbar = ({ user }: { user: User | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
+
+  const isProfileActive = pathname === `/${user?.slug}`;
+  const isSettingsActive = pathname === `/${user?.slug}/settings`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,6 +40,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, isProfileOpen]);
 
@@ -70,14 +50,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
         className="lg:hidden mobile-menu-container"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          {isOpen ? <CloseIcon /> : <MenuIcon />}
-        </svg>
+        {isOpen ? <GrClose size={24} /> : <GrMenu size={24} />}
       </button>
 
       <div className="flex items-center gap-2">
@@ -90,10 +63,8 @@ export const Navbar = ({ user }: { user: User | null }) => {
           <Link
             key={href}
             href={href}
-            className={`rounded-xl py-1 px-3 transition-all duration-300 ${
-              pathname === href
-                ? "bg-[#EEEEEE] text-black hover:bg-[#EEEEEE]/80"
-                : ""
+            className={`rounded-xl py-1 px-3 transition-all duration-300 text-[#EEEEEE] ${
+              pathname === href ? "bg-white/10" : "hover:bg-white/5"
             }`}
           >
             {label}
@@ -102,20 +73,18 @@ export const Navbar = ({ user }: { user: User | null }) => {
       </div>
 
       <div
-        className={`lg:hidden absolute top-16 left-7 text-md mobile-menu-container ${
+        className={`lg:hidden absolute top-16 left-7 mobile-menu-container ${
           isOpen ? "block" : "hidden"
         }`}
       >
-        <div className="flex flex-col items-center rounded-2xl gap-4 p-1.5 bg-[#191919] shadow-md outline-1 outline-gray-600/80">
+        <div className="flex flex-col items-center rounded-2xl gap-4 py-2.5 px-1 bg-[#191919] shadow-md outline-1 outline-gray-600/80">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setIsOpen(false)}
               className={`rounded-xl py-1 px-3 transition-all duration-300 ${
-                pathname === href
-                  ? "bg-white text-black py-2 px-4"
-                  : "bg-[#EEEEEE] text-black hover:bg-[#EEEEEE]/80"
+                pathname === href ? "bg-white/10" : "hover:bg-white/5"
               }`}
             >
               {label}
@@ -131,18 +100,13 @@ export const Navbar = ({ user }: { user: User | null }) => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-1.5 bg-[#EEEEEE]/10 transition-all duration-300 rounded-full pl-2 pr-1 py-1"
             >
-              <svg
+              <HiChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   isProfileOpen ? "rotate-180" : ""
                 }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <ChevronIcon />
-              </svg>
+              />
               <Image
-                src={user.image}
+                src={user.image || Account}
                 width={32}
                 height={32}
                 alt="Profile Picture"
@@ -150,7 +114,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
               />
             </button>
             <div
-              className={`flex flex-col absolute right-0 text-lg mt-1 p-1.5 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
+              className={`flex flex-col absolute right-0 mt-1 p-1.5 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
                 isProfileOpen
                   ? "opacity-100 scale-100 visible"
                   : "opacity-0 scale-95 invisible"
@@ -159,22 +123,26 @@ export const Navbar = ({ user }: { user: User | null }) => {
               <Link
                 href={`/${user?.slug}`}
                 onClick={() => setIsProfileOpen(false)}
-                className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl whitespace-nowrap"
+                className={`px-3 py-1 rounded-xl whitespace-nowrap ${
+                  isProfileActive ? "bg-white/10" : "hover:bg-white/5"
+                }`}
               >
                 Profile
               </Link>
               <Link
                 href={`/${user?.slug}/settings`}
                 onClick={() => setIsProfileOpen(false)}
-                className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl whitespace-nowrap"
+                className={`px-3 py-1 rounded-xl whitespace-nowrap ${
+                  isSettingsActive ? "bg-white/10" : "hover:bg-white/5"
+                }`}
               >
                 Settings
               </Link>
               <div
-                className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl whitespace-nowrap"
+                className="px-3 py-1 rounded-xl whitespace-nowrap"
                 onClick={() => {
                   setIsProfileOpen(false);
-                  currentSignout();
+                  signOutCurrent();
                 }}
               >
                 Logout
@@ -195,18 +163,13 @@ export const Navbar = ({ user }: { user: User | null }) => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-1.5 bg-[#EEEEEE]/10 hover:bg-[#EEEEEE]/20 transition-all duration-300 rounded-full pl-2 pr-1 py-1 cursor-pointer"
             >
-              <svg
+              <HiChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   isProfileOpen ? "rotate-180" : ""
                 }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <ChevronIcon />
-              </svg>
+              />
               <Image
-                src={user.image || ""}
+                src={user.image || Account}
                 width={38}
                 height={38}
                 alt="Profile Picture"
@@ -214,7 +177,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
               />
             </button>
             <div
-              className={`flex flex-col absolute right-0 text-lg mt-1 p-1.5 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
+              className={`flex flex-col absolute right-0 text-lg mt-1 p-2 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
                 isProfileOpen
                   ? "opacity-100 scale-100 visible"
                   : "opacity-0 scale-95 invisible"
@@ -223,22 +186,26 @@ export const Navbar = ({ user }: { user: User | null }) => {
               <Link
                 href={`/${user?.slug}`}
                 onClick={() => setIsProfileOpen(false)}
-                className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl"
+                className={`px-3 py-1 cursor-pointer rounded-xl ${
+                  isProfileActive ? "bg-white/10" : "hover:bg-white/5"
+                }`}
               >
                 Profile
               </Link>
               <Link
                 href={`/${user?.slug}/settings`}
                 onClick={() => setIsProfileOpen(false)}
-                className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl"
+                className={`px-3 py-1 cursor-pointer rounded-xl ${
+                  isSettingsActive ? "bg-white/10" : "hover:bg-white/5"
+                }`}
               >
-                Settings
+                Setting
               </Link>
               <div
-                className="px-3 py-1 hover:bg-[#EEEEEE] hover:text-black cursor-pointer rounded-xl"
+                className="px-3 py-1 hover:bg-white/5 cursor-pointer rounded-xl"
                 onClick={() => {
                   setIsProfileOpen(false);
-                  currentSignout();
+                  signOutCurrent();
                 }}
               >
                 Logout

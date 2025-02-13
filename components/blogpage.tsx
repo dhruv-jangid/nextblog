@@ -6,12 +6,13 @@ import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { deleteBlog, editBlog } from "@/actions/handleBlog";
-import blogCategories from "@/lib/blogcategories.json";
+import blogCategories from "@/utils/blogCategories.json";
 import Image from "next/image";
 import Link from "next/link";
 import { Like } from "@/components/like";
 import { Blog, User, Like as PrismaLike } from "@prisma/client";
 import { RichTextEditor } from "@/components/editor";
+import Account from "@/public/images/account.png";
 
 export default function BlogPage({
   blog,
@@ -19,7 +20,7 @@ export default function BlogPage({
   isLiked,
 }: {
   blog: Blog & {
-    author: Pick<User, "id" | "name" | "slug">;
+    author: Pick<User, "id" | "name" | "slug" | "image">;
     likes: PrismaLike[];
   };
   isAuthor: boolean;
@@ -174,7 +175,7 @@ export default function BlogPage({
           <Author
             date={blog.createdAt.toISOString()}
             slug={blog.author.slug}
-            image={blog.author.image}
+            image={blog.author.image || Account}
             name={blog.author.name}
           />
         )}
@@ -190,7 +191,7 @@ export default function BlogPage({
           />
         ) : (
           <Image
-            src={blog.image}
+            src={blog.image!}
             alt={blog.title}
             fill={true}
             priority={false}

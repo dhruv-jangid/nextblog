@@ -12,10 +12,11 @@ export default async function Blogs({
       id: true,
       title: true,
       slug: true,
+      image: true,
       category: true,
       createdAt: true,
       likes: { select: { blogId: true, userId: true } },
-      author: { select: { name: true, slug: true, id: true } },
+      author: { select: { name: true, slug: true, id: true, image: true } },
     },
     where: { category: category },
     orderBy: {
