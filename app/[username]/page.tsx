@@ -1,9 +1,9 @@
 import { Button } from "@/components/button";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
+import Account from "@/public/images/account.png";
 
 export default async function Profile({
   params,
@@ -12,20 +12,27 @@ export default async function Profile({
 }) {
   const { username } = await params;
   const session = await auth();
-  const user_id = session ? session.user.id : null;
+  const user_slug = session ? session.user.slug : null;
 
   const user = await prisma.user.findUnique({
     where: { slug: username },
-    include: {
+    select: {
+      slug: true,
+      role: true,
+      name: true,
+      image: true,
       blogs: {
         select: {
-          id: true,
           title: true,
           slug: true,
+          image: true,
           category: true,
           createdAt: true,
-          likes: { select: { blogId: true, userId: true } },
-          author: { select: { name: true, slug: true, id: true } },
+          _count: {
+            select: {
+              likes: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         take: 10,
@@ -39,7 +46,11 @@ export default async function Profile({
   });
 
   if (!user) {
-    redirect("/login");
+    return (
+      <div className="flex justify-center items-center text-2xl w-full h-[70vh]">
+        No such user! Please double check the username.
+      </div>
+    );
   }
 
   return (
@@ -48,21 +59,29 @@ export default async function Profile({
         <div className="flex lg:justify-center gap-8 xl:gap-16">
           <div className="relative h-30 w-30 lg:h-36 lg:w-36">
             <Image
-              src={user.image!}
+              src={user.image || Account}
               fill={true}
               alt={user.name!}
               className="rounded-full"
             />
+            {user_slug === user.slug && (
+              <Link
+                href={`/${user.slug}/settings`}
+                className="text-sm xl:text-base w-max md:hidden absolute left-1/2 -translate-x-1/2 -bottom-2 backdrop-blur-2xl text-[#0F0F0F] font-medium py-1.5 px-3 rounded-xl"
+              >
+                Edit Profile
+              </Link>
+            )}
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <div className="flex gap-6 items-center">
-              <h1 className="text-3xl font-semibold">
+              <h1 className="text-3xl font-medium">
                 {user.slug}
                 {user.role === "ADMIN" && (
                   <span className="text-blue-500">({user.role})</span>
                 )}
               </h1>
-              {user_id === user.id && (
+              {user_slug === user.slug && (
                 <Link
                   href={`/${user.slug}/settings`}
                   className="text-sm xl:text-base w-max hidden md:block"
@@ -72,12 +91,20 @@ export default async function Profile({
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-lg">
-              {user.blogs.length}
-              <div>Blogs</div>
+            <div className="flex items-center gap-6 text-lg">
+              <div className="flex items-center gap-2">
+                <h1 className="font-semibold">{user.blogs.length}</h1>
+                <div>Blogs</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-semibold">
+                  {user.blogs.reduce((sum, blog) => sum + blog._count.likes, 0)}
+                </h1>
+                <div>Likes</div>
+              </div>
             </div>
 
-            <div className="text-xl font-medium">{user.name}</div>
+            <div className="text-lg font-medium">{user.name}</div>
           </div>
         </div>
       </div>
@@ -87,31 +114,65 @@ export default async function Profile({
       </div>
 
       {user.blogs.length > 0 ? (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {user.blogs.map((blog) => (
             <Link
               href={`/${user.slug}/${blog.slug}`}
-              key={blog.id}
-              className="bg-[#191919] p-4 rounded-lg hover:bg-[#252525] transition-colors"
+              key={blog.slug}
+              className="group bg-[#191919] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <h2 className="text-xl mb-2">{blog.title}</h2>
-              <p className="text-gray-400 mb-2">{blog.category}</p>
-              <p className="text-sm text-gray-400">
-                {new Date(blog.createdAt).toLocaleString("en-US", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </p>
+              <div className="relative w-full h-48">
+                <Image
+                  src={blog.image || "/default-blog-image.jpg"}
+                  alt={blog.title}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </div>
+
+              <div className="p-6">
+                <span className="text-gray-400 text-sm">
+                  {new Date(blog.createdAt).toLocaleString("en-US", {
+                    month: "short",
+                    day: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
+
+                <h2 className="text-xl font-semibold mt-2 mb-4 group-hover:text-blue-400 transition-colors line-clamp-2">
+                  {blog.title}
+                </h2>
+
+                <div className="flex items-center justify-between pt-4 border-t border-[#252525]">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-red-500"
+                      viewBox="0 0 24 24"
+                      fill={blog._count.likes > 0 ? "currentColor" : "none"}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                    <span className="text-gray-400">{blog._count.likes}</span>
+                  </div>
+                  <span className="text-sm text-gray-400 px-3 py-1 bg-[#252525] rounded-full">
+                    {blog.category}
+                  </span>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
       ) : (
         <div className="flex justify-center items-center min-h-[60vh] text-4xl rounded-lg w-3/4 mx-auto">
-          Currently, this user has no blogs!
+          Currently, this user has no published blogs!
         </div>
       )}
     </div>

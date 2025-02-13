@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/button";
 
 export default function About() {
   return (
@@ -56,11 +57,8 @@ export default function About() {
           <p className="text-gray-300">
             Have questions or want to learn more about MetaPress?
           </p>
-          <Link
-            href="/contact"
-            className="inline-block bg-[#EEEEEE] text-black px-6 py-2 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300"
-          >
-            Contact Us
+          <Link href="/contact" className="text-lg">
+            <Button>Contact Us</Button>
           </Link>
         </div>
       </div>

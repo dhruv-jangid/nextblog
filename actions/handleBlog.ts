@@ -6,7 +6,7 @@ import {
   deleteImage,
   uploadImage,
   getPublicIdFromUrl,
-} from "@/lib/handleImage";
+} from "@/utils/cloudinaryUtils";
 import { redirect } from "next/navigation";
 
 export const createBlog = async (

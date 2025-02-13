@@ -3,7 +3,8 @@ import { Author } from "@/components/author";
 import Link from "next/link";
 import Image from "next/image";
 import { Like } from "@/components/like";
-import { cookies } from "next/headers";
+import { auth } from "@/lib/auth";
+import Account from "@/public/images/account.png";
 
 const Card = async ({
   id,
@@ -15,11 +16,12 @@ const Card = async ({
   author,
   likes,
 }) => {
-  const cookieSession = (await cookies()).get("metapress");
-  const userId = cookieSession ? JSON.parse(cookieSession.value).id : null;
+  const session = await auth();
+  const userId = session?.user.id;
   const isLiked = userId
     ? likes.find((like) => userId === like.userId) !== undefined
     : false;
+  const finalImg = author.image ? author.image : Account;
 
   return (
     <div className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-linear-to-br from-[#191919] from-40% to-transparent">
@@ -48,7 +50,7 @@ const Card = async ({
       <div className="flex justify-between items-center">
         <Like blogId={id} likes={likes.length} isLiked={isLiked} />
         <Author
-          image={author.image}
+          image={finalImg}
           name={author.name}
           slug={author.slug}
           date={createdAt.toISOString()}

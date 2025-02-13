@@ -4,11 +4,8 @@ import { permanentRedirect } from "next/navigation";
 import argon2 from "argon2";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
-import { deleteImages, uploadImage } from "@/lib/handleImage";
 import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
-import { auth } from "@/lib/auth";
-import { getPublicIdFromUrl } from "@/lib/handleImage";
 
 const signUpSchema = z
   .object({
@@ -31,16 +28,6 @@ const signUpSchema = z
       )
       .refine((pass) => !pass.includes(" "), "Cannot contain spaces"),
     passwordConfirm: z.string(),
-    userImg: z
-      .instanceof(File, { message: "Profile image is required" })
-      .refine(
-        (file) => file.size <= 5 * 1024 * 1024,
-        "User image must be less than 5MB"
-      )
-      .refine(
-        (file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type),
-        "Only JPEG, PNG, and WEBP formats are allowed"
-      ),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     message: "Passwords don't match",
@@ -79,20 +66,18 @@ export const credentialsSignup = async (prevState, formData: FormData) => {
     return parsedData.error.errors.map((err) => err.message).join("<br>");
   }
 
-  const { slug, password, email, userImg } = parsedData.data;
+  const { slug, password, email } = parsedData.data;
   const existingUser = await prisma.user.findFirst({
     where: { OR: [{ email }, { slug }] },
   });
   if (existingUser) return "Email or username already taken";
 
   const hashedPassword = await argon2.hash(password);
-  const imageUrl = await uploadImage(userImg, true);
 
   await prisma.user.create({
     data: {
       slug,
       name: slug,
-      image: imageUrl,
       password: hashedPassword,
       email,
       accounts: {
@@ -109,60 +94,15 @@ export const credentialsSignup = async (prevState, formData: FormData) => {
 };
 
 export const googleAuth = async () => {
-  await signIn("google", { redirectTo: "/" });
+  await signIn("google");
 };
 
 export const githubAuth = async () => {
-  await signIn("github", { redirectTo: "/" });
+  await signIn("github");
 };
 
-export const currentSignout = async () => {
+export const signOutCurrent = async () => {
   await signOut({ redirect: false });
+
   permanentRedirect("/signin");
-};
-
-export const removeUser = async (): Promise<string> => {
-  const session = await auth();
-  const id = session?.user.id;
-
-  if (!id) {
-    return "User not authenticated";
-  }
-
-  try {
-    await prisma.$transaction(async (tx) => {
-      const [blogs, user] = await Promise.all([
-        tx.blog.findMany({
-          where: { authorId: id },
-          select: { id: true, image: true },
-        }),
-        tx.user.findUnique({
-          where: { id },
-          select: { image: true },
-        }),
-      ]);
-
-      const publicIds = blogs.map(
-        (blog) => blog.image && getPublicIdFromUrl(blog.image)
-      );
-
-      const userImagePublicId = getPublicIdFromUrl(user.image, true);
-      if (userImagePublicId) publicIds.push(userImagePublicId);
-
-      await tx.user.delete({ where: { id } });
-
-      if (publicIds.length > 0) {
-        const deleteResult = await deleteImages(publicIds);
-        if (!deleteResult.success) {
-          throw new Error("Failed to delete images");
-        }
-      }
-    });
-
-    await signOut({ redirect: false });
-    return "Account deleted successfully";
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    return "Failed to delete account";
-  }
 };

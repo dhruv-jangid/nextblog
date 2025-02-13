@@ -12,7 +12,7 @@ export default auth(async function middleware(req) {
     return NextResponse.next();
   }
 
-  if (path === "/signin") {
+  if (path === "/signin" || path === "/signup") {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/", req.url));
     }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useActionState, startTransition } from "react";
 import { Button } from "@/components/button";
 import { createBlog } from "@/actions/handleBlog";
-import blogCategories from "@/lib/blogcategories.json";
+import blogCategories from "@/utils/blogCategories.json";
 import { z } from "zod";
 import { TbPhotoUp } from "react-icons/tb";
 import Image from "next/image";
