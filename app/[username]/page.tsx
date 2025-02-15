@@ -62,12 +62,13 @@ export default async function Profile({
               src={user.image || Account}
               fill={true}
               alt={user.name!}
+              quality={100}
               className="rounded-full"
             />
             {user_slug === user.slug && (
               <Link
                 href={`/${user.slug}/settings`}
-                className="text-sm xl:text-base w-max md:hidden absolute left-1/2 -translate-x-1/2 -bottom-2 backdrop-blur-2xl text-[#0F0F0F] font-medium py-1.5 px-3 rounded-xl"
+                className="text-sm xl:text-base w-max md:hidden absolute left-1/2 -translate-x-1/2 -bottom-2 backdrop-blur-2xl text-[#EEEEEE] font-medium py-1.5 px-3 rounded-xl"
               >
                 Edit Profile
               </Link>
@@ -84,7 +85,7 @@ export default async function Profile({
               {user_slug === user.slug && (
                 <Link
                   href={`/${user.slug}/settings`}
-                  className="text-sm xl:text-base w-max hidden md:block"
+                  className="hidden md:block"
                 >
                   <Button>Edit Profile</Button>
                 </Link>

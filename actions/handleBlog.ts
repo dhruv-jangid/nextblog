@@ -61,7 +61,7 @@ export const createBlog = async (
   return "Error uploading cover";
 };
 
-export const editBlog = async (formData: FormData): Promise<string | void> => {
+export const editBlog = async (prevState, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -132,13 +132,15 @@ export const editBlog = async (formData: FormData): Promise<string | void> => {
   redirect(`/${blog.author.slug}/${newSlug}`);
 };
 
-export const deleteBlog = async (id: string): Promise<string | void> => {
+export const deleteBlog = async (prevState, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
   if (!user_id) {
     return "User not authenticated. Please login again!";
   }
+
+  const id = formData.get("id") as string;
 
   const blog = await prisma.blog.findUnique({
     where: { id },
