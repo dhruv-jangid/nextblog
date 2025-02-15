@@ -3,8 +3,7 @@
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useActionState } from "react";
 import { deleteBlog, editBlog } from "@/actions/handleBlog";
 import blogCategories from "@/utils/blogCategories.json";
 import Image from "next/image";
@@ -31,16 +30,14 @@ export default function BlogPage({
   const [title, setTitle] = useState(blog.title);
   const [content, setContent] = useState(blog.content);
   const [category, setCategory] = useState(blog.category);
-  const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-
-  const hasChanges =
-    title !== blog.title ||
-    content !== blog.content ||
-    category !== blog.category ||
-    image !== null;
+  const [image, setImage] = useState<File | null>(null);
+  const [deleteError, deleteAction, deleteIsPending] = useActionState(
+    deleteBlog,
+    null
+  );
+  const [editError, editAction, editIsPending] = useActionState(editBlog, null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,50 +48,27 @@ export default function BlogPage({
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("id", blog.id);
-      formData.append("title", title);
-      formData.append("content", content);
-      formData.append("category", category);
-      if (image) {
-        formData.append("image", image);
-      }
-
-      await editBlog(formData);
-      setIsEditing(false);
-      setImage(null);
-      setPreviewUrl(null);
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const handleCancel = () => {
     setTitle(blog.title);
     setContent(blog.content);
     setCategory(blog.category);
-    setImage(null);
     setPreviewUrl(null);
     setIsEditing(false);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteBlog(blog.id);
-      router.push("/blogs");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setShowDeleteConfirm(false);
-    }
   };
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:gap-8 lg:px-16 lg:py-10">
       <div className="flex flex-col gap-4">
+        {deleteError && (
+          <div className="flex bg-red-800 justify-center text-xl font-medium rounded-2xl py-2">
+            {deleteError}
+          </div>
+        )}
+        {editError && (
+          <div className="flex bg-red-800 justify-center text-xl font-medium rounded-2xl py-2">
+            {editError}
+          </div>
+        )}
         <div className="flex justify-between">
           {isEditing ? (
             <select
@@ -109,13 +83,8 @@ export default function BlogPage({
               ))}
             </select>
           ) : (
-            <Link
-              href={`/blogs/${category}`}
-              className="text-sm xl:text-base w-max"
-            >
-              <Button className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors">
-                {category}
-              </Button>
+            <Link href={`/blogs/${category}`}>
+              <Button>{category}</Button>
             </Link>
           )}
           {isAuthor &&
@@ -123,36 +92,61 @@ export default function BlogPage({
               <div className="flex gap-2">
                 <Button
                   onClick={handleCancel}
-                  className="flex items-center gap-1 bg-red-600 text-sm xl:text-base text-white cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-600/80 transition-all duration-300"
+                  disabled={editIsPending || deleteIsPending}
+                  className="flex items-center gap-1 bg-red-700 text-sm xl:text-base text-white cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!hasChanges}
-                  className={`flex items-center gap-1 text-sm xl:text-base ${
-                    hasChanges
-                      ? "bg-[#EEEEEE] text-black cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300"
-                      : "bg-gray-400 text-gray-600 cursor-not-allowed"
-                  } px-3 py-1.5 rounded-xl`}
-                >
-                  Save
-                </Button>
+                <form action={editAction}>
+                  <input type="hidden" name="id" id="id" value={blog.id} />
+                  <input type="hidden" name="title" id="title" value={title} />
+                  <input
+                    type="hidden"
+                    name="content"
+                    id="content"
+                    value={content}
+                  />
+                  <input
+                    type="hidden"
+                    name="category"
+                    id="category"
+                    value={category}
+                  />
+                  {image && (
+                    <input
+                      type="file"
+                      name="image"
+                      className="hidden"
+                      ref={(input) => {
+                        if (input) {
+                          const dataTransfer = new DataTransfer();
+                          dataTransfer.items.add(image);
+                          input.files = dataTransfer.files;
+                        }
+                      }}
+                    />
+                  )}
+                  <Button disabled={editIsPending || deleteIsPending}>
+                    {editIsPending ? "Saving..." : "Save"}
+                  </Button>
+                </form>
               </div>
             ) : (
               <div className="flex gap-2">
-                <Button
+                <button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-black cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300"
+                  disabled={editIsPending || deleteIsPending}
+                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-[#0F0F0F] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Edit <TbEdit />
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center gap-1.5 bg-red-600 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-600/80 transition-all duration-300"
+                  disabled={deleteIsPending || editIsPending}
+                  className="flex items-center gap-1.5 bg-red-700 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <TbTrash />
-                </Button>
+                </button>
               </div>
             ))}
         </div>
@@ -255,16 +249,19 @@ export default function BlogPage({
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="bg-gray-200 cursor-pointer text-gray-800 hover:bg-gray-300 transition-all duration-300 px-4 py-2 rounded-xl"
+                disabled={deleteIsPending || editIsPending}
               >
                 Cancel
               </Button>
-              <Button
-                onClick={handleDelete}
-                className="bg-red-600 cursor-pointer text-white hover:bg-red-600/80 transition-all duration-300 px-4 py-2 rounded-xl"
-              >
-                Delete
-              </Button>
+              <form action={deleteAction}>
+                <input type="hidden" name="id" id="id" value={blog.id} />
+                <button
+                  disabled={deleteIsPending || editIsPending}
+                  className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleteIsPending ? "Deleting..." : "Delete"}
+                </button>
+              </form>
             </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ const Card = async ({
       <h3 className="cursor-pointer text-xl font-medium line-clamp-3 w-10/12">
         <Link
           href={`/${author.slug}/${slug}`}
-          className="line-clamp-2 lg:line-clamp-3"
+          className="line-clamp-2 lg:line-clamp-3 hover:text-[#EEEEEE]/80 transition-all duration-300"
         >
           {title}
         </Link>

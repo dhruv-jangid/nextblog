@@ -6,7 +6,7 @@ import { getPublicIdFromUrl } from "@/utils/cloudinaryUtils";
 import { prisma } from "@/lib/db";
 import { permanentRedirect } from "next/navigation";
 
-export const removeUser = async (): Promise<string> => {
+export const removeUser = async () => {
   const session = await auth();
   const id = session?.user.id;
 

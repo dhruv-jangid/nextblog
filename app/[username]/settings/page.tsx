@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { removeUser } from "@/actions/handleUser";
 import { HiOutlineUser, HiOutlineCog6Tooth } from "react-icons/hi2";
+import { Button } from "@/components/button";
 
 function Section({
   title,
@@ -26,7 +27,7 @@ function Section({
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<"profile" | "account">("profile");
-  const [state, action, isPending] = useActionState(removeUser, null);
+  const [error, action, isPending] = useActionState(removeUser, null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   return (
@@ -87,11 +88,6 @@ export default function Settings() {
               description="Manage your account preferences and security settings."
             >
               <div className="space-y-6 pt-6">
-                {state && (
-                  <div className="bg-red-500/10 text-red-500 p-4 rounded-xl">
-                    {state}
-                  </div>
-                )}
                 <div className="flex flex-col border border-red-500/20 rounded-2xl p-6 bg-red-500/5">
                   <h4 className="text-lg font-semibold text-red-500 mb-2">
                     Delete Account
@@ -122,7 +118,7 @@ export default function Settings() {
                 This action cannot be undone. This will:
               </p>
             </div>
-            <ul className="flex flex-col text-red-400">
+            <ul className="flex flex-col text-red-600">
               <li className="flex items-center gap-2">
                 • Permanently delete all your blogs
               </li>
@@ -134,16 +130,21 @@ export default function Settings() {
               </li>
             </ul>
 
+            {error && (
+              <div className="bg-red-800 px-4 py-2 rounded-xl text-lg">
+                {error}
+              </div>
+            )}
             <div className="flex gap-4 justify-end mt-4">
-              <button
-                className="px-4 py-2 rounded-xl cursor-pointer text-gray-400 outline hover:bg-white/5 hover:text-white transition-colors"
+              <Button
+                disabled={isPending}
                 onClick={() => setShowConfirmation(false)}
               >
-                Cancel
-              </button>
+                Stay on Metapress
+              </Button>
               <form action={action}>
                 <button
-                  className="px-4 py-2 rounded-xl cursor-pointer border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 rounded-xl cursor-pointer border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isPending}
                 >
                   {isPending ? "Deleting..." : "Delete Account"}
