@@ -28,6 +28,15 @@ export default function BlogPage({ blog, isAuthor, isLiked, userSlug }) {
   );
   const [editError, editAction, editIsPending] = useActionState(editBlog, null);
 
+  const hasChanges = () => {
+    return (
+      title !== blog.title ||
+      content !== blog.content ||
+      category !== blog.category ||
+      image !== null
+    );
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -42,6 +51,7 @@ export default function BlogPage({ blog, isAuthor, isLiked, userSlug }) {
     setContent(blog.content);
     setCategory(blog.category);
     setPreviewUrl(null);
+    setImage(null);
     setIsEditing(false);
   };
 
@@ -63,6 +73,7 @@ export default function BlogPage({ blog, isAuthor, isLiked, userSlug }) {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              disabled={deleteIsPending || editIsPending}
               className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               {blogCategories.map((cat) => (
@@ -115,7 +126,9 @@ export default function BlogPage({ blog, isAuthor, isLiked, userSlug }) {
                       }}
                     />
                   )}
-                  <Button disabled={editIsPending || deleteIsPending}>
+                  <Button
+                    disabled={editIsPending || deleteIsPending || !hasChanges()}
+                  >
                     {editIsPending ? "Saving..." : "Save"}
                   </Button>
                 </form>

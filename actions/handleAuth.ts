@@ -95,10 +95,12 @@ export const credentialsSignup = async (prevState, formData: FormData) => {
 
 export const googleAuth = async () => {
   await signIn("google");
+  return null;
 };
 
 export const githubAuth = async () => {
   await signIn("github");
+  return null;
 };
 
 export const signOutCurrent = async () => {

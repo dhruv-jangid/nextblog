@@ -22,15 +22,26 @@ export const Like = ({
       <form action={action}>
         <input type="hidden" name="id" id="id" value={blogId} />
         <input type="hidden" name="path" id="path" value={pathname} />
-        <button type="submit" disabled={isPending} className="flex">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="flex disabled:opacity-50 transition-all duration-300"
+        >
           {isLiked ? (
             <IoMdHeart
               size={32}
-              className="cursor-pointer fill-red-600"
+              className={`${
+                isPending ? "cursor-not-allowed" : "cursor-pointer"
+              } fill-red-600`}
               color="#EEEEEE"
             />
           ) : (
-            <IoMdHeartEmpty size={32} className="cursor-pointer text-red-600" />
+            <IoMdHeartEmpty
+              size={32}
+              className={`${
+                isPending ? "cursor-not-allowed" : "cursor-pointer"
+              } fill-red-600`}
+            />
           )}
         </button>
       </form>

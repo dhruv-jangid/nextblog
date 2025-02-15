@@ -49,11 +49,14 @@ export const Comment = ({
           name="content"
           id="content"
           placeholder="Add a comment..."
-          className="w-full p-4 bg-[#191919] rounded-2xl resize-none min-h-[100px]"
+          className="w-full p-4 bg-[#191919] rounded-2xl resize-none min-h-[100px] disabled:cursor-not-allowed"
           maxLength={100}
+          disabled={isPending}
         />
         <div className="flex justify-end">
-          <Button>{isPending ? "Posting..." : "Post Comment"}</Button>
+          <Button disabled={isPending}>
+            {isPending ? "Posting..." : "Post Comment"}
+          </Button>
         </div>
       </form>
 
