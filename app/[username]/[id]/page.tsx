@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import BlogPage from "@/components/blogpage";
-import { User, Blog as PrismaBlog, Like as PrismaLike } from "@prisma/client";
 import { auth } from "@/lib/auth";
 
 export default async function Blog({
@@ -22,6 +21,16 @@ export default async function Blog({
       likes: {
         select: {
           userId: true,
+        },
+      },
+      comments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          author: { select: { name: true, image: true, slug: true } },
+          content: true,
+          createdAt: true,
         },
       },
       author: {
@@ -50,15 +59,5 @@ export default async function Blog({
   const isAuthor = userId === blog.author.id;
   const isLiked = blog.likes.some((like) => like.userId === userId);
 
-  const transformedBlog = {
-    ...blog,
-    likes: blog.likes.map((like) => ({ userId: like.userId, blogId: blog.id })),
-  } as PrismaBlog & {
-    author: Pick<User, "id" | "name" | "slug" | "image">;
-    likes: PrismaLike[];
-  };
-
-  return (
-    <BlogPage blog={transformedBlog} isAuthor={isAuthor} isLiked={isLiked} />
-  );
+  return <BlogPage blog={blog} isAuthor={isAuthor} isLiked={isLiked} />;
 }

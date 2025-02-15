@@ -9,22 +9,11 @@ import blogCategories from "@/utils/blogCategories.json";
 import Image from "next/image";
 import Link from "next/link";
 import { Like } from "@/components/like";
-import { Blog, User, Like as PrismaLike } from "@prisma/client";
 import { RichTextEditor } from "@/components/editor";
 import Account from "@/public/images/account.png";
+import { Comment } from "@/components/comment";
 
-export default function BlogPage({
-  blog,
-  isAuthor,
-  isLiked,
-}: {
-  blog: Blog & {
-    author: Pick<User, "id" | "name" | "slug" | "image">;
-    likes: PrismaLike[];
-  };
-  isAuthor: boolean;
-  isLiked: boolean;
-}) {
+export default function BlogPage({ blog, isAuthor, isLiked }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [title, setTitle] = useState(blog.title);
@@ -235,7 +224,10 @@ export default function BlogPage({
       )}
 
       {!isEditing && (
-        <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
+        <>
+          <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
+          <Comment blogId={blog.id} comments={blog.comments} />
+        </>
       )}
 
       {showDeleteConfirm && (

@@ -7,6 +7,7 @@ import {
   uploadImage,
   getPublicIdFromUrl,
 } from "@/utils/cloudinaryUtils";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export const createBlog = async (
@@ -171,7 +172,7 @@ export const deleteBlog = async (prevState, formData: FormData) => {
   redirect("/");
 };
 
-export const likeBlog = async (id: string): Promise<string | void> => {
+export const likeBlog = async (prevState, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -179,18 +180,30 @@ export const likeBlog = async (id: string): Promise<string | void> => {
     redirect("/login");
   }
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      const blog = await tx.blog.findUnique({
-        where: { id },
-        select: { id: true },
-      });
+  const id = formData.get("id") as string;
+  const path = formData.get("path") as string;
 
-      if (!blog) {
-        throw new Error("Blog not found");
-      }
+  await prisma.$transaction(async (tx) => {
+    const blog = await tx.blog.findUnique({
+      where: { id },
+      select: { id: true },
+    });
 
-      const existingLike = await tx.like.findUnique({
+    if (!blog) {
+      throw new Error("Blog not found");
+    }
+
+    const existingLike = await tx.like.findUnique({
+      where: {
+        userId_blogId: {
+          userId: user_id,
+          blogId: id,
+        },
+      },
+    });
+
+    if (existingLike) {
+      await tx.like.delete({
         where: {
           userId_blogId: {
             userId: user_id,
@@ -198,31 +211,53 @@ export const likeBlog = async (id: string): Promise<string | void> => {
           },
         },
       });
-
-      if (existingLike) {
-        await tx.like.delete({
-          where: {
-            userId_blogId: {
-              userId: user_id,
-              blogId: id,
-            },
-          },
-        });
-        return "Blog unliked";
-      }
-
-      await tx.like.create({
-        data: {
-          userId: user_id,
-          blogId: id,
-        },
-      });
-      return "Blog liked";
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      return error.message;
+      return "Blog unliked";
     }
-    return "Failed to process like operation";
+
+    await tx.like.create({
+      data: {
+        userId: user_id,
+        blogId: id,
+      },
+    });
+    return "Blog liked";
+  });
+
+  revalidatePath(path);
+};
+
+export const addComment = async (prevState, formData: FormData) => {
+  const session = await auth();
+  const user_id = session?.user.id;
+
+  if (!user_id) {
+    return "User not authenticated. Please login again!";
   }
+
+  const blogId = formData.get("blogId") as string;
+  const content = formData.get("content") as string;
+  const path = formData.get("path") as string;
+
+  if (!content.trim()) {
+    return "Comment content cannot be empty";
+  }
+
+  const blog = await prisma.blog.findUnique({
+    where: { id: blogId },
+    select: { author: { select: { slug: true } }, slug: true },
+  });
+
+  if (!blog) {
+    return "Blog not found";
+  }
+
+  await prisma.comment.create({
+    data: {
+      content,
+      blog: { connect: { id: blogId } },
+      author: { connect: { id: user_id } },
+    },
+  });
+
+  revalidatePath(path);
 };

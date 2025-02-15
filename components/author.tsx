@@ -27,11 +27,11 @@ export const Author = ({ name, image, slug, date, end = false }) => {
           </h3>
         </Link>
         <h6 className="text-gray-300 leading-none text-sm md:text-base">
-          {new Date(date).toLocaleString("en-US", {
+          {new Intl.DateTimeFormat("en-US", {
             month: "short",
             day: "2-digit",
             year: "numeric",
-          })}
+          }).format(new Date(date))}
         </h6>
       </div>
       {end && (

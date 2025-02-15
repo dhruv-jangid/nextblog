@@ -20,6 +20,7 @@ model User {
   role          Role            @default(USER)
   blogs         Blog[]
   likes         Like[]
+  comments      Comment[]
   accounts      Account[]
   sessions      Session[]
   authenticator Authenticator[]
@@ -76,17 +77,18 @@ model Authenticator {
 }
 
 model Blog {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
-  slug      String   @unique
+  slug      String    @unique
   content   String
   image     String?
   category  String
   authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   likes     Like[]
+  comments  Comment[]
 }
 
 model Like {
@@ -98,6 +100,17 @@ model Like {
   blog    Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blogId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  blogId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
