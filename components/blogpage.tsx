@@ -13,7 +13,7 @@ import { RichTextEditor } from "@/components/editor";
 import Account from "@/public/images/account.png";
 import { Comment } from "@/components/comment";
 
-export default function BlogPage({ blog, isAuthor, isLiked }) {
+export default function BlogPage({ blog, isAuthor, isLiked, userSlug }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [title, setTitle] = useState(blog.title);
@@ -47,7 +47,7 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:gap-8 lg:px-16 lg:py-10">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         {deleteError && (
           <div className="flex bg-red-800 justify-center text-xl font-medium rounded-2xl py-2">
             {deleteError}
@@ -150,7 +150,7 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
             className="text-3xl lg:text-5xl rounded-2xl w-full font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
-          <h1 className="text-3xl lg:text-5xl rounded-lg w-4/5 font-semibold">
+          <h1 className="text-3xl lg:text-5xl rounded-lg w-4/5 font-semibold line-clamp-3">
             {title}
           </h1>
         )}
@@ -226,7 +226,11 @@ export default function BlogPage({ blog, isAuthor, isLiked }) {
       {!isEditing && (
         <>
           <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
-          <Comment blogId={blog.id} comments={blog.comments} />
+          <Comment
+            blogId={blog.id}
+            comments={blog.comments}
+            userSlug={userSlug}
+          />
         </>
       )}
 

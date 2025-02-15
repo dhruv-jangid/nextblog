@@ -224,6 +224,7 @@ export const likeBlog = async (prevState, formData: FormData) => {
   });
 
   revalidatePath(path);
+  return null;
 };
 
 export const addComment = async (prevState, formData: FormData) => {
@@ -260,4 +261,21 @@ export const addComment = async (prevState, formData: FormData) => {
   });
 
   revalidatePath(path);
+  return null;
 };
+
+export async function deleteComment(prevState: any, formData: FormData) {
+  const commentId = formData.get("commentId") as string;
+  const path = formData.get("path") as string;
+
+  if (!commentId) return "Comment ID is required";
+
+  await prisma.comment.delete({
+    where: {
+      id: commentId,
+    },
+  });
+
+  revalidatePath(path);
+  return null;
+}

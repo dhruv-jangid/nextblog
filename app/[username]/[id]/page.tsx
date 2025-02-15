@@ -28,6 +28,7 @@ export default async function Blog({
           createdAt: "desc",
         },
         select: {
+          id: true,
           author: { select: { name: true, image: true, slug: true } },
           content: true,
           createdAt: true,
@@ -58,6 +59,14 @@ export default async function Blog({
   const userId = session ? session.user.id : null;
   const isAuthor = userId === blog.author.id;
   const isLiked = blog.likes.some((like) => like.userId === userId);
+  const userSlug = userId ? session?.user.slug : null;
 
-  return <BlogPage blog={blog} isAuthor={isAuthor} isLiked={isLiked} />;
+  return (
+    <BlogPage
+      blog={blog}
+      isAuthor={isAuthor}
+      isLiked={isLiked}
+      userSlug={userSlug}
+    />
+  );
 }
