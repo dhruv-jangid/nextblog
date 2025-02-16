@@ -6,11 +6,11 @@ import { useActionState } from "react";
 import { IoMdHeartEmpty, IoMdHeart } from "react-icons/io";
 
 export const Like = ({
-  blogId,
+  blogSlug,
   likes,
   isLiked,
 }: {
-  blogId: string;
+  blogSlug: string;
   likes: number;
   isLiked: boolean;
 }) => {
@@ -19,8 +19,9 @@ export const Like = ({
 
   return (
     <div className="flex items-center gap-1.5">
+      {error && <div>{error}</div>}
       <form action={action}>
-        <input type="hidden" name="id" id="id" value={blogId} />
+        <input type="hidden" name="slug" id="slug" value={blogSlug} />
         <input type="hidden" name="path" id="path" value={pathname} />
         <button
           type="submit"

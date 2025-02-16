@@ -1,7 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
+import Account from "@/public/images/account.png";
 
-export const Author = ({ name, image, slug, date, end = false }) => {
+export const Author = ({
+  name,
+  image,
+  slug,
+  date,
+  end = false,
+}: {
+  name: string;
+  image: string | null;
+  slug: string;
+  date: string;
+  end?: boolean | undefined;
+}) => {
   return (
     <div
       className={`flex gap-3 items-center ${
@@ -11,7 +24,7 @@ export const Author = ({ name, image, slug, date, end = false }) => {
       {!end && (
         <Link href={`/${slug}`} className="w-11 h-11 lg:w-12 lg:h-12 relative">
           <Image
-            src={image}
+            src={image || Account}
             alt={name}
             fill
             priority={true}
@@ -37,7 +50,7 @@ export const Author = ({ name, image, slug, date, end = false }) => {
       {end && (
         <Link href={`/${slug}`} className="w-11 h-11 lg:w-12 lg:h-12 relative">
           <Image
-            src={image}
+            src={image || Account}
             alt={name}
             fill
             priority={true}

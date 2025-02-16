@@ -34,7 +34,7 @@ const signUpSchema = z
     path: ["passwordConfirm"],
   });
 
-export const credentialsSignin = async (prevState, formData: FormData) => {
+export const credentialsSignin = async (prevState: any, formData: FormData) => {
   const data = Object.fromEntries(formData.entries());
   const { email, password } = data;
 
@@ -59,7 +59,7 @@ export const credentialsSignin = async (prevState, formData: FormData) => {
   permanentRedirect("/");
 };
 
-export const credentialsSignup = async (prevState, formData: FormData) => {
+export const credentialsSignup = async (prevState: any, formData: FormData) => {
   const data = Object.fromEntries(formData.entries());
   const parsedData = signUpSchema.safeParse(data);
   if (!parsedData.success) {

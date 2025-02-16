@@ -9,26 +9,16 @@ import { addComment, deleteComment } from "@/actions/handleBlog";
 import { usePathname } from "next/navigation";
 import { TbTrash } from "react-icons/tb";
 import { useState } from "react";
-
-type CommentType = {
-  id: string;
-  content: string;
-  createdAt: string;
-  author: {
-    name: string;
-    image?: string | null;
-    slug: string;
-  };
-};
+import { Comment as CommentType } from "@/types";
 
 export const Comment = ({
-  blogId,
+  blogSlug,
   comments,
   userSlug,
 }: {
-  blogId: string;
+  blogSlug: string;
   comments: CommentType[];
-  userSlug: string | null;
+  userSlug: string;
 }) => {
   const [error, action, isPending] = useActionState(addComment, null);
   const [deleteError, deleteAction, deleteIsPending] = useActionState(
@@ -43,7 +33,7 @@ export const Comment = ({
       {error && <div>{error}</div>}
       {deleteError && <div>{deleteError}</div>}
       <form action={action} className="flex flex-col gap-3">
-        <input type="hidden" name="blogId" id="blogId" value={blogId} />
+        <input type="hidden" name="slug" id="slug" value={blogSlug} />
         <input type="hidden" name="path" id="path" value={path} />
         <textarea
           name="content"

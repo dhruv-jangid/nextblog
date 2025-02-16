@@ -42,8 +42,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           );
           if (!isValid) return null;
 
-          const { password: _, accounts: __, ...userWithoutPassword } = user;
-          return userWithoutPassword;
+          return user;
         } catch (error) {
           console.error("Auth error:", error);
           return null;
@@ -114,7 +113,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       await prisma.user.create({
         data: {
           email: user.email,
-          name: user.name,
+          name: user.name!,
           image: user.image,
           slug: finalSlug,
           accounts: {

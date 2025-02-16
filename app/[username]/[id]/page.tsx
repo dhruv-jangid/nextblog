@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import BlogPage from "@/components/blogpage";
 import { auth } from "@/lib/auth";
+import { permanentRedirect } from "next/navigation";
 
 export default async function Blog({
   params,
@@ -11,7 +12,6 @@ export default async function Blog({
 
   const blog = await prisma.blog.findUnique({
     select: {
-      id: true,
       title: true,
       slug: true,
       image: true,
@@ -56,10 +56,13 @@ export default async function Blog({
   }
 
   const session = await auth();
+  if (!session) {
+    permanentRedirect("/");
+  }
   const userId = session ? session.user.id : null;
   const isAuthor = userId === blog.author.id;
   const isLiked = blog.likes.some((like) => like.userId === userId);
-  const userSlug = userId ? session?.user.slug : null;
+  const userSlug = session.user.slug;
 
   return (
     <BlogPage

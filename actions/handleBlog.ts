@@ -11,8 +11,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export const createBlog = async (
-  prevState,
-  formData
+  prevState: any,
+  formData: any
 ): Promise<string | void> => {
   const session = await auth();
   const user_id = session?.user.id;
@@ -62,7 +62,7 @@ export const createBlog = async (
   return "Error uploading cover";
 };
 
-export const editBlog = async (prevState, formData: FormData) => {
+export const editBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -70,17 +70,16 @@ export const editBlog = async (prevState, formData: FormData) => {
     return "User not authenticated. Please login again!";
   }
 
-  const id = formData.get("id") as string;
+  const slug = formData.get("slug") as string;
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as string;
   const newImage = formData.get("image") as File | null;
 
   const blog = await prisma.blog.findUnique({
-    where: { id },
+    where: { slug },
     select: {
       authorId: true,
-      slug: true,
       author: { select: { slug: true } },
       image: true,
     },
@@ -102,7 +101,7 @@ export const editBlog = async (prevState, formData: FormData) => {
   const existingBlog = await prisma.blog.findFirst({
     where: {
       slug: newSlug,
-      id: { not: id },
+      NOT: { slug },
     },
   });
 
@@ -120,7 +119,7 @@ export const editBlog = async (prevState, formData: FormData) => {
   }
 
   await prisma.blog.update({
-    where: { id },
+    where: { slug },
     data: {
       title,
       slug: newSlug,
@@ -133,7 +132,7 @@ export const editBlog = async (prevState, formData: FormData) => {
   redirect(`/${blog.author.slug}/${newSlug}`);
 };
 
-export const deleteBlog = async (prevState, formData: FormData) => {
+export const deleteBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -141,10 +140,10 @@ export const deleteBlog = async (prevState, formData: FormData) => {
     return "User not authenticated. Please login again!";
   }
 
-  const id = formData.get("id") as string;
+  const slug = formData.get("slug") as string;
 
   const blog = await prisma.blog.findUnique({
-    where: { id },
+    where: { slug },
     select: { image: true, authorId: true },
   });
 
@@ -165,27 +164,27 @@ export const deleteBlog = async (prevState, formData: FormData) => {
     }
 
     await tx.blog.delete({
-      where: { id, authorId: user_id },
+      where: { slug, authorId: user_id },
     });
   });
 
   redirect("/");
 };
 
-export const likeBlog = async (prevState, formData: FormData) => {
+export const likeBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
   if (!user_id) {
-    redirect("/login");
+    return "User not authenticated. Please login again!";
   }
 
-  const id = formData.get("id") as string;
+  const slug = formData.get("slug") as string;
   const path = formData.get("path") as string;
 
   await prisma.$transaction(async (tx) => {
     const blog = await tx.blog.findUnique({
-      where: { id },
+      where: { slug },
       select: { id: true },
     });
 
@@ -197,7 +196,7 @@ export const likeBlog = async (prevState, formData: FormData) => {
       where: {
         userId_blogId: {
           userId: user_id,
-          blogId: id,
+          blogId: blog.id,
         },
       },
     });
@@ -207,7 +206,7 @@ export const likeBlog = async (prevState, formData: FormData) => {
         where: {
           userId_blogId: {
             userId: user_id,
-            blogId: id,
+            blogId: blog.id,
           },
         },
       });
@@ -217,7 +216,7 @@ export const likeBlog = async (prevState, formData: FormData) => {
     await tx.like.create({
       data: {
         userId: user_id,
-        blogId: id,
+        blogId: blog.id,
       },
     });
     return "Blog liked";
@@ -227,7 +226,7 @@ export const likeBlog = async (prevState, formData: FormData) => {
   return null;
 };
 
-export const addComment = async (prevState, formData: FormData) => {
+export const addComment = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -235,7 +234,7 @@ export const addComment = async (prevState, formData: FormData) => {
     return "User not authenticated. Please login again!";
   }
 
-  const blogId = formData.get("blogId") as string;
+  const slug = formData.get("slug") as string;
   const content = formData.get("content") as string;
   const path = formData.get("path") as string;
 
@@ -244,8 +243,8 @@ export const addComment = async (prevState, formData: FormData) => {
   }
 
   const blog = await prisma.blog.findUnique({
-    where: { id: blogId },
-    select: { author: { select: { slug: true } }, slug: true },
+    where: { slug },
+    select: { id: true, author: { select: { slug: true } } },
   });
 
   if (!blog) {
@@ -255,7 +254,7 @@ export const addComment = async (prevState, formData: FormData) => {
   await prisma.comment.create({
     data: {
       content,
-      blog: { connect: { id: blogId } },
+      blog: { connect: { id: blog.id } },
       author: { connect: { id: user_id } },
     },
   });
