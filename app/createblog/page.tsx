@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useActionState, startTransition } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/button";
 import { createBlog } from "@/actions/handleBlog";
 import blogCategories from "@/utils/blogCategories.json";
@@ -76,7 +76,7 @@ const validateCategory = (category: string) => {
 
 export default function CreateBlog() {
   const [title, setTitle] = useState("");
-  const [state, formAction, isPending] = useActionState(createBlog, null);
+  const [error, action, isPending] = useActionState(createBlog, null);
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [blogCover, setBlogCover] = useState<File | null>(null);
@@ -126,9 +126,7 @@ export default function CreateBlog() {
 
   return (
     <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12">
-      <form action={formAction} className="flex flex-col gap-4 lg:gap-10">
-        {state?.toString() && <div>{state}</div>}
-
+      <div className="flex flex-col gap-4 lg:gap-10">
         <div className="flex flex-col gap-2 lg:gap-6">
           <div className="flex justify-between">
             <select
@@ -214,28 +212,31 @@ export default function CreateBlog() {
         {validationErrors.content && (
           <p className="text-red-500 text-sm">{validationErrors.content}</p>
         )}
+        {error?.toString() && <div>{error}</div>}
 
-        <div className="flex justify-end text-lg">
-          <Button
-            disabled={isPending || !isFormValid}
-            className="bg-[#EEEEEE] rounded-xl px-6 py-1.5 text-[#0F0F0F] font-semibold text-xl"
-            onClick={() => {
-              if (content && isFormValid) {
-                startTransition(() => {
-                  formAction({
-                    title,
-                    blogCover,
-                    content,
-                    category,
-                  });
-                });
-              }
-            }}
-          >
+        <form action={action} className="flex justify-end text-lg">
+          <input type="hidden" name="title" id="title" value={title} />
+          <input type="hidden" name="content" id="content" value={content} />
+          <input type="hidden" name="category" id="category" value={category} />
+          {blogCover && (
+            <input
+              type="file"
+              name="image"
+              className="hidden"
+              ref={(input) => {
+                if (input) {
+                  const dataTransfer = new DataTransfer();
+                  dataTransfer.items.add(blogCover);
+                  input.files = dataTransfer.files;
+                }
+              }}
+            />
+          )}
+          <Button disabled={isPending || !isFormValid}>
             {isPending ? "Publishing..." : "Publish"}
           </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

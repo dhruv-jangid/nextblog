@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 
 export const createBlog = async (
   prevState: any,
-  formData: any
+  formData: FormData
 ): Promise<string | void> => {
   const session = await auth();
   const user_id = session?.user.id;
@@ -21,7 +21,10 @@ export const createBlog = async (
     return "User not authenticated. Please login again!";
   }
 
-  const { title, blogCover, content, category } = formData;
+  const title = formData.get("title") as string;
+  const content = formData.get("content") as string;
+  const category = formData.get("category") as string;
+  const blogCover = formData.get("image") as File;
 
   const slug = title
     .toLowerCase()
@@ -56,7 +59,7 @@ export const createBlog = async (
       include: { author: { select: { id: true, slug: true } } },
     });
 
-    redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
+    redirect(`/${newBlog.author.slug}/${newBlog.slug}${"#"}`);
   }
 
   return "Error uploading cover";
