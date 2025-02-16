@@ -7,11 +7,12 @@ import {
   uploadImage,
   getPublicIdFromUrl,
 } from "@/utils/cloudinaryUtils";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export const createBlog = async (
-  prevState,
-  formData
+  prevState: any,
+  formData: any
 ): Promise<string | void> => {
   const session = await auth();
   const user_id = session?.user.id;
@@ -61,7 +62,7 @@ export const createBlog = async (
   return "Error uploading cover";
 };
 
-export const editBlog = async (prevState, formData: FormData) => {
+export const editBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -69,17 +70,16 @@ export const editBlog = async (prevState, formData: FormData) => {
     return "User not authenticated. Please login again!";
   }
 
-  const id = formData.get("id") as string;
+  const slug = formData.get("slug") as string;
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as string;
   const newImage = formData.get("image") as File | null;
 
   const blog = await prisma.blog.findUnique({
-    where: { id },
+    where: { slug },
     select: {
       authorId: true,
-      slug: true,
       author: { select: { slug: true } },
       image: true,
     },
@@ -101,7 +101,7 @@ export const editBlog = async (prevState, formData: FormData) => {
   const existingBlog = await prisma.blog.findFirst({
     where: {
       slug: newSlug,
-      id: { not: id },
+      NOT: { slug },
     },
   });
 
@@ -119,7 +119,7 @@ export const editBlog = async (prevState, formData: FormData) => {
   }
 
   await prisma.blog.update({
-    where: { id },
+    where: { slug },
     data: {
       title,
       slug: newSlug,
@@ -132,7 +132,7 @@ export const editBlog = async (prevState, formData: FormData) => {
   redirect(`/${blog.author.slug}/${newSlug}`);
 };
 
-export const deleteBlog = async (prevState, formData: FormData) => {
+export const deleteBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
@@ -140,10 +140,10 @@ export const deleteBlog = async (prevState, formData: FormData) => {
     return "User not authenticated. Please login again!";
   }
 
-  const id = formData.get("id") as string;
+  const slug = formData.get("slug") as string;
 
   const blog = await prisma.blog.findUnique({
-    where: { id },
+    where: { slug },
     select: { image: true, authorId: true },
   });
 
@@ -164,65 +164,117 @@ export const deleteBlog = async (prevState, formData: FormData) => {
     }
 
     await tx.blog.delete({
-      where: { id, authorId: user_id },
+      where: { slug, authorId: user_id },
     });
   });
 
   redirect("/");
 };
 
-export const likeBlog = async (id: string): Promise<string | void> => {
+export const likeBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
   const user_id = session?.user.id;
 
   if (!user_id) {
-    redirect("/login");
+    return "User not authenticated. Please login again!";
   }
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      const blog = await tx.blog.findUnique({
-        where: { id },
-        select: { id: true },
-      });
+  const slug = formData.get("slug") as string;
+  const path = formData.get("path") as string;
 
-      if (!blog) {
-        throw new Error("Blog not found");
-      }
+  await prisma.$transaction(async (tx) => {
+    const blog = await tx.blog.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
 
-      const existingLike = await tx.like.findUnique({
+    if (!blog) {
+      throw new Error("Blog not found");
+    }
+
+    const existingLike = await tx.like.findUnique({
+      where: {
+        userId_blogId: {
+          userId: user_id,
+          blogId: blog.id,
+        },
+      },
+    });
+
+    if (existingLike) {
+      await tx.like.delete({
         where: {
           userId_blogId: {
             userId: user_id,
-            blogId: id,
+            blogId: blog.id,
           },
         },
       });
-
-      if (existingLike) {
-        await tx.like.delete({
-          where: {
-            userId_blogId: {
-              userId: user_id,
-              blogId: id,
-            },
-          },
-        });
-        return "Blog unliked";
-      }
-
-      await tx.like.create({
-        data: {
-          userId: user_id,
-          blogId: id,
-        },
-      });
-      return "Blog liked";
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      return error.message;
+      return "Blog unliked";
     }
-    return "Failed to process like operation";
-  }
+
+    await tx.like.create({
+      data: {
+        userId: user_id,
+        blogId: blog.id,
+      },
+    });
+    return "Blog liked";
+  });
+
+  revalidatePath(path);
+  return null;
 };
+
+export const addComment = async (prevState: any, formData: FormData) => {
+  const session = await auth();
+  const user_id = session?.user.id;
+
+  if (!user_id) {
+    return "User not authenticated. Please login again!";
+  }
+
+  const slug = formData.get("slug") as string;
+  const content = formData.get("content") as string;
+  const path = formData.get("path") as string;
+
+  if (!content.trim()) {
+    return "Comment content cannot be empty";
+  }
+
+  const blog = await prisma.blog.findUnique({
+    where: { slug },
+    select: { id: true, author: { select: { slug: true } } },
+  });
+
+  if (!blog) {
+    return "Blog not found";
+  }
+
+  await prisma.comment.create({
+    data: {
+      content,
+      blog: { connect: { id: blog.id } },
+      author: { connect: { id: user_id } },
+    },
+  });
+
+  revalidatePath(path);
+  return null;
+};
+
+export async function deleteComment(prevState: any, formData: FormData) {
+  const commentId = formData.get("commentId") as string;
+  const path = formData.get("path") as string;
+
+  if (!commentId) return "Comment ID is required";
+
+  await prisma.comment.delete({
+    where: {
+      id: commentId,
+    },
+  });
+
+  revalidatePath(path);
+  return null;
+}

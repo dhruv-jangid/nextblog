@@ -1,6 +1,6 @@
 "use server";
 
-export const handleContact = async (prevState, formData: FormData) => {
+export const handleContact = async (prevState: any, formData: FormData) => {
   const name = formData.get("name");
   const email = formData.get("email");
   const subject = formData.get("subject");

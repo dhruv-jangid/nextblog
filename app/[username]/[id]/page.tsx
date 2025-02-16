@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import BlogPage from "@/components/blogpage";
-import { User, Blog as PrismaBlog, Like as PrismaLike } from "@prisma/client";
 import { auth } from "@/lib/auth";
+import { permanentRedirect } from "next/navigation";
 
 export default async function Blog({
   params,
@@ -12,7 +12,6 @@ export default async function Blog({
 
   const blog = await prisma.blog.findUnique({
     select: {
-      id: true,
       title: true,
       slug: true,
       image: true,
@@ -22,6 +21,17 @@ export default async function Blog({
       likes: {
         select: {
           userId: true,
+        },
+      },
+      comments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          author: { select: { name: true, image: true, slug: true } },
+          content: true,
+          createdAt: true,
         },
       },
       author: {
@@ -46,19 +56,20 @@ export default async function Blog({
   }
 
   const session = await auth();
+  if (!session) {
+    permanentRedirect("/");
+  }
   const userId = session ? session.user.id : null;
   const isAuthor = userId === blog.author.id;
   const isLiked = blog.likes.some((like) => like.userId === userId);
-
-  const transformedBlog = {
-    ...blog,
-    likes: blog.likes.map((like) => ({ userId: like.userId, blogId: blog.id })),
-  } as PrismaBlog & {
-    author: Pick<User, "id" | "name" | "slug" | "image">;
-    likes: PrismaLike[];
-  };
+  const userSlug = session.user.slug;
 
   return (
-    <BlogPage blog={transformedBlog} isAuthor={isAuthor} isLiked={isLiked} />
+    <BlogPage
+      blog={blog}
+      isAuthor={isAuthor}
+      isLiked={isLiked}
+      userSlug={userSlug}
+    />
   );
 }

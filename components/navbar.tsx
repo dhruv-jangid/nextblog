@@ -1,6 +1,5 @@
 "use client";
 
-import type { User } from "@prisma/client";
 import { Button } from "@/components/button";
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -20,7 +19,18 @@ const NAV_LINKS = [
   { href: "/createblog", label: "Create" },
 ];
 
-export const Navbar = ({ user }: { user: User | null }) => {
+export const Navbar = ({
+  user,
+}: {
+  user: {
+    id: string;
+    role: "USER" | "ADMIN";
+    slug: string;
+    email: string;
+    name: string;
+    image: string;
+  } | null;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();

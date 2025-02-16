@@ -9,21 +9,37 @@ import blogCategories from "@/utils/blogCategories.json";
 import Image from "next/image";
 import Link from "next/link";
 import { Like } from "@/components/like";
-import { Blog, User, Like as PrismaLike } from "@prisma/client";
 import { RichTextEditor } from "@/components/editor";
-import Account from "@/public/images/account.png";
+import { Comment } from "@/components/comment";
+import { Comment as CommentType } from "@/types";
 
 export default function BlogPage({
   blog,
   isAuthor,
   isLiked,
+  userSlug,
 }: {
-  blog: Blog & {
-    author: Pick<User, "id" | "name" | "slug" | "image">;
-    likes: PrismaLike[];
+  blog: {
+    title: string;
+    slug: string;
+    content: string;
+    image: string;
+    category: string;
+    createdAt: Date;
+    likes: {
+      userId: string;
+    }[];
+    comments: CommentType[];
+    author: {
+      id: string;
+      name: string;
+      slug: string;
+      image: string | null;
+    };
   };
   isAuthor: boolean;
   isLiked: boolean;
+  userSlug: string;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -39,6 +55,15 @@ export default function BlogPage({
   );
   const [editError, editAction, editIsPending] = useActionState(editBlog, null);
 
+  const hasChanges = () => {
+    return (
+      title !== blog.title ||
+      content !== blog.content ||
+      category !== blog.category ||
+      image !== null
+    );
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -53,12 +78,13 @@ export default function BlogPage({
     setContent(blog.content);
     setCategory(blog.category);
     setPreviewUrl(null);
+    setImage(null);
     setIsEditing(false);
   };
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:gap-8 lg:px-16 lg:py-10">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         {deleteError && (
           <div className="flex bg-red-800 justify-center text-xl font-medium rounded-2xl py-2">
             {deleteError}
@@ -74,6 +100,7 @@ export default function BlogPage({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              disabled={deleteIsPending || editIsPending}
               className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               {blogCategories.map((cat) => (
@@ -98,7 +125,12 @@ export default function BlogPage({
                   Cancel
                 </Button>
                 <form action={editAction}>
-                  <input type="hidden" name="id" id="id" value={blog.id} />
+                  <input
+                    type="hidden"
+                    name="slug"
+                    id="slug"
+                    value={blog.slug}
+                  />
                   <input type="hidden" name="title" id="title" value={title} />
                   <input
                     type="hidden"
@@ -126,7 +158,9 @@ export default function BlogPage({
                       }}
                     />
                   )}
-                  <Button disabled={editIsPending || deleteIsPending}>
+                  <Button
+                    disabled={editIsPending || deleteIsPending || !hasChanges()}
+                  >
                     {editIsPending ? "Saving..." : "Save"}
                   </Button>
                 </form>
@@ -161,7 +195,7 @@ export default function BlogPage({
             className="text-3xl lg:text-5xl rounded-2xl w-full font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
-          <h1 className="text-3xl lg:text-5xl rounded-lg w-4/5 font-semibold">
+          <h1 className="text-3xl lg:text-5xl rounded-lg w-4/5 font-semibold line-clamp-3">
             {title}
           </h1>
         )}
@@ -169,8 +203,8 @@ export default function BlogPage({
           <Author
             date={blog.createdAt.toISOString()}
             slug={blog.author.slug}
-            image={blog.author.image || Account}
-            name={blog.author.name}
+            image={blog.author.image}
+            name={blog.author.name!}
           />
         )}
       </div>
@@ -185,7 +219,7 @@ export default function BlogPage({
           />
         ) : (
           <Image
-            src={blog.image!}
+            src={blog.image}
             alt={blog.title}
             fill={true}
             priority={false}
@@ -235,7 +269,18 @@ export default function BlogPage({
       )}
 
       {!isEditing && (
-        <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
+        <>
+          <Like
+            blogSlug={blog.slug}
+            likes={blog.likes.length}
+            isLiked={isLiked}
+          />
+          <Comment
+            blogSlug={blog.slug}
+            comments={blog.comments}
+            userSlug={userSlug}
+          />
+        </>
       )}
 
       {showDeleteConfirm && (
@@ -254,7 +299,7 @@ export default function BlogPage({
                 Cancel
               </Button>
               <form action={deleteAction}>
-                <input type="hidden" name="id" id="id" value={blog.id} />
+                <input type="hidden" name="slug" id="slug" value={blog.slug} />
                 <button
                   disabled={deleteIsPending || editIsPending}
                   className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"

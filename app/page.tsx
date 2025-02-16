@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 export default async function Home() {
   const blogs = await prisma.blog.findMany({
     select: {
-      id: true,
       title: true,
       slug: true,
       image: true,

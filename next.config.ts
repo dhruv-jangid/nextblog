@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {};
-
-module.exports = {
+const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",
@@ -12,7 +10,6 @@ module.exports = {
       dynamic: 180,
     },
   },
-
   images: {
     remotePatterns: [
       {
@@ -32,4 +29,4 @@ module.exports = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
