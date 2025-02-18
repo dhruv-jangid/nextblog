@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import Account from "@/public/images/account.png";
+import { RxExternalLink } from "react-icons/rx";
 
 export default async function Profile({
   params,
@@ -75,11 +76,11 @@ export default async function Profile({
             )}
           </div>
           <div className="flex flex-col gap-3">
-            <div className="flex gap-6 items-center">
-              <h1 className="text-3xl font-medium">
+            <div className="flex gap-4 items-center">
+              <h1 className="flex items-center gap-2 text-3xl font-medium">
                 {user.slug}
                 {user.role === "ADMIN" && (
-                  <span className="text-blue-500">({user.role})</span>
+                  <span className="text-red-700 text-lg">({user.role})</span>
                 )}
               </h1>
               {user_slug === user.slug && (
@@ -88,6 +89,15 @@ export default async function Profile({
                   className="hidden md:block"
                 >
                   <Button>Edit Profile</Button>
+                </Link>
+              )}
+              {session?.user.role === "ADMIN" && (
+                <Link href={`/admin/dashboard`} className="hidden md:block">
+                  <Button>
+                    <span className="flex items-center gap-1">
+                      Dashboard <RxExternalLink />
+                    </span>
+                  </Button>
                 </Link>
               )}
             </div>

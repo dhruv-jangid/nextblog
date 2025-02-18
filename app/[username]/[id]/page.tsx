@@ -60,7 +60,8 @@ export default async function Blog({
     permanentRedirect("/");
   }
   const userId = session ? session.user.id : null;
-  const isAuthor = userId === blog.author.id;
+  const userRole = session ? session.user.role : null;
+  const isAuthor = userRole === "ADMIN" || userId === blog.author.id;
   const isLiked = blog.likes.some((like) => like.userId === userId);
   const userSlug = session.user.slug;
 

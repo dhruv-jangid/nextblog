@@ -92,47 +92,47 @@ export const editBlog = async (prevState: any, formData: FormData) => {
     return "Blog not found";
   }
 
-  if (blog.authorId !== user_id) {
+  if (blog.authorId === user_id || session.user.role === "ADMIN") {
+    const newSlug = title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "");
+
+    const existingBlog = await prisma.blog.findFirst({
+      where: {
+        slug: newSlug,
+        NOT: { slug },
+      },
+    });
+
+    if (existingBlog) {
+      return "Title already taken, please choose a different title!";
+    }
+
+    let imageUrl;
+    if (newImage && newImage.size > 0) {
+      if (blog.image) {
+        const publicId = getPublicIdFromUrl(blog.image);
+        await deleteImage(publicId!);
+      }
+      imageUrl = await uploadImage(newImage);
+    }
+
+    await prisma.blog.update({
+      where: { slug },
+      data: {
+        title,
+        slug: newSlug,
+        content,
+        category,
+        ...(imageUrl && { image: imageUrl }),
+      },
+    });
+
+    redirect(`/${blog.author.slug}/${newSlug}`);
+  } else {
     return "Unauthorized to edit this blog";
   }
-
-  const newSlug = title
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "");
-
-  const existingBlog = await prisma.blog.findFirst({
-    where: {
-      slug: newSlug,
-      NOT: { slug },
-    },
-  });
-
-  if (existingBlog) {
-    return "Title already taken, please choose a different title!";
-  }
-
-  let imageUrl;
-  if (newImage && newImage.size > 0) {
-    if (blog.image) {
-      const publicId = getPublicIdFromUrl(blog.image);
-      await deleteImage(publicId!);
-    }
-    imageUrl = await uploadImage(newImage);
-  }
-
-  await prisma.blog.update({
-    where: { slug },
-    data: {
-      title,
-      slug: newSlug,
-      content,
-      category,
-      ...(imageUrl && { image: imageUrl }),
-    },
-  });
-
-  redirect(`/${blog.author.slug}/${newSlug}`);
 };
 
 export const deleteBlog = async (prevState: any, formData: FormData) => {
@@ -154,24 +154,24 @@ export const deleteBlog = async (prevState: any, formData: FormData) => {
     return "Blog not found";
   }
 
-  if (blog.authorId !== user_id) {
+  if (blog.authorId === user_id || session.user.role === "ADMIN") {
+    await prisma.$transaction(async (tx) => {
+      if (blog.image) {
+        const publicId = getPublicIdFromUrl(blog.image);
+        if (publicId) {
+          await deleteImage(publicId);
+        }
+      }
+
+      await tx.blog.delete({
+        where: { slug },
+      });
+    });
+
+    redirect("/");
+  } else {
     return "Unauthorized to delete this blog";
   }
-
-  await prisma.$transaction(async (tx) => {
-    if (blog.image) {
-      const publicId = getPublicIdFromUrl(blog.image);
-      if (publicId) {
-        await deleteImage(publicId);
-      }
-    }
-
-    await tx.blog.delete({
-      where: { slug, authorId: user_id },
-    });
-  });
-
-  redirect("/");
 };
 
 export const likeBlog = async (prevState: any, formData: FormData) => {
@@ -179,7 +179,7 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
   const user_id = session?.user.id;
 
   if (!user_id) {
-    return "User not authenticated. Please login again!";
+    redirect("/signin");
   }
 
   const slug = formData.get("slug") as string;
