@@ -55,7 +55,7 @@ export const Navbar = ({
   }, [isOpen, isProfileOpen]);
 
   return (
-    <div className="flex justify-between items-center p-6 sticky top-0 z-50 backdrop-blur-2xl rounded-b-2xl">
+    <div className="flex justify-between items-center px-6 md:px-8 py-6 sticky top-0 z-50 backdrop-blur-2xl rounded-b-2xl">
       <button
         className="lg:hidden mobile-menu-container"
         onClick={() => setIsOpen(!isOpen)}

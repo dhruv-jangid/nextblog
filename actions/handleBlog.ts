@@ -270,7 +270,7 @@ export async function deleteComment(prevState: any, formData: FormData) {
   const commentId = formData.get("commentId") as string;
   const path = formData.get("path") as string;
 
-  if (!commentId) return "Comment ID is required";
+  if (!commentId) return "Comment is required!";
 
   await prisma.comment.delete({
     where: {

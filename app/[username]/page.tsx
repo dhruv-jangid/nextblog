@@ -77,12 +77,7 @@ export default async function Profile({
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex gap-4 items-center">
-              <h1 className="flex items-center gap-2 text-3xl font-medium">
-                {user.slug}
-                {user.role === "ADMIN" && (
-                  <span className="text-red-700 text-lg">({user.role})</span>
-                )}
-              </h1>
+              <h1 className="text-3xl font-medium">{user.slug}</h1>
               {user_slug === user.slug && (
                 <Link
                   href={`/${user.slug}/settings`}
@@ -115,7 +110,21 @@ export default async function Profile({
               </div>
             </div>
 
-            <div className="text-lg font-medium">{user.name}</div>
+            <div className="flex gap-2 items-center text-lg font-medium">
+              {user.name}
+              {user.role === "ADMIN" && (
+                <span className="text-red-700 text-lg">({user.role})</span>
+              )}
+            </div>
+            {session?.user.role === "ADMIN" && (
+              <Link href={`/admin/dashboard`} className="md:hidden">
+                <Button>
+                  <span className="flex items-center gap-1">
+                    Dashboard <RxExternalLink />
+                  </span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

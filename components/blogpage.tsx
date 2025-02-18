@@ -276,6 +276,7 @@ export default function BlogPage({
             isLiked={isLiked}
           />
           <Comment
+            isAuthor={isAuthor}
             blogSlug={blog.slug}
             comments={blog.comments}
             userSlug={userSlug}

@@ -16,7 +16,7 @@ export default async function Home() {
     orderBy: {
       createdAt: "desc",
     },
-    take: 4,
+    take: 7,
     cacheStrategy: {
       ttl: 60,
       swr: 60,

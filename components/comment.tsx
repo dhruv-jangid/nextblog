@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Account from "@/public/images/account.png";
-import { Button } from "./button";
+import { Button } from "@/components/button";
 import Link from "next/link";
 import { useActionState } from "react";
 import { addComment, deleteComment } from "@/actions/handleBlog";
@@ -14,10 +14,12 @@ import { Comment as CommentType } from "@/types";
 export const Comment = ({
   blogSlug,
   comments,
+  isAuthor,
   userSlug,
 }: {
   blogSlug: string;
   comments: CommentType[];
+  isAuthor: boolean;
   userSlug: string;
 }) => {
   const [error, action, isPending] = useActionState(addComment, null);
@@ -86,7 +88,7 @@ export const Comment = ({
                 <p className="text-gray-200 mt-2">{comment.content}</p>
               </div>
             </div>
-            {userSlug && comment.author.slug === userSlug && (
+            {(isAuthor || (userSlug && comment.author.slug === userSlug)) && (
               <>
                 <button
                   onClick={() => setCommentToDelete(comment.id)}
