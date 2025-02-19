@@ -35,8 +35,8 @@ const signUpSchema = z
   });
 
 export const credentialsSignin = async (prevState: any, formData: FormData) => {
-  const data = Object.fromEntries(formData.entries());
-  const { email, password } = data;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
   try {
     await signIn("credentials", {

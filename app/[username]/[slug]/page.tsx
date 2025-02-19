@@ -6,9 +6,9 @@ import { permanentRedirect } from "next/navigation";
 export default async function Blog({
   params,
 }: {
-  params: Promise<{ username: string; id: string }>;
+  params: Promise<{ username: string; slug: string }>;
 }) {
-  const { username, id } = await params;
+  const { username, slug } = await params;
 
   const blog = await prisma.blog.findUnique({
     select: {
@@ -43,7 +43,7 @@ export default async function Blog({
         },
       },
     },
-    where: { slug: id, author: { slug: username } },
+    where: { slug, author: { slug: username } },
     cacheStrategy: {
       ttl: 60,
       swr: 60,
@@ -57,12 +57,11 @@ export default async function Blog({
 
   const session = await auth();
   if (!session) {
-    permanentRedirect("/");
+    permanentRedirect("/signin");
   }
-  const userId = session ? session.user.id : null;
-  const userRole = session ? session.user.role : null;
-  const isAuthor = userRole === "ADMIN" || userId === blog.author.id;
-  const isLiked = blog.likes.some((like) => like.userId === userId);
+  const { id, role } = session.user;
+  const isAuthor = role === "ADMIN" || id === blog.author.id;
+  const isLiked = blog.likes.some((like) => like.userId === id);
   const userSlug = session.user.slug;
 
   return (

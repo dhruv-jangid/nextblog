@@ -9,7 +9,6 @@ import { addComment, deleteComment } from "@/actions/handleBlog";
 import { usePathname } from "next/navigation";
 import { TbTrash } from "react-icons/tb";
 import { useState } from "react";
-import { Comment as CommentType } from "@/types";
 
 export const Comment = ({
   blogSlug,
@@ -18,7 +17,16 @@ export const Comment = ({
   userSlug,
 }: {
   blogSlug: string;
-  comments: CommentType[];
+  comments: {
+    id: string;
+    content: string;
+    createdAt: Date;
+    author: {
+      name: string;
+      image: string | null;
+      slug: string;
+    };
+  }[];
   isAuthor: boolean;
   userSlug: string;
 }) => {

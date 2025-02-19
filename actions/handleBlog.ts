@@ -15,11 +15,10 @@ export const createBlog = async (
   formData: FormData
 ): Promise<string | void> => {
   const session = await auth();
-  const user_id = session?.user.id;
-
-  if (!user_id) {
+  if (!session) {
     return "User not authenticated. Please login again!";
   }
+  const user_id = session.user.id;
 
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
@@ -34,7 +33,6 @@ export const createBlog = async (
   const existingBlog = await prisma.blog.findUnique({
     where: { slug },
   });
-
   if (existingBlog) {
     return "Title already taken, please choose a different title!";
   }
@@ -67,11 +65,10 @@ export const createBlog = async (
 
 export const editBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
-  const user_id = session?.user.id;
-
-  if (!user_id) {
+  if (!session) {
     return "User not authenticated. Please login again!";
   }
+  const user_id = session.user.id;
 
   const slug = formData.get("slug") as string;
   const title = formData.get("title") as string;
@@ -87,7 +84,6 @@ export const editBlog = async (prevState: any, formData: FormData) => {
       image: true,
     },
   });
-
   if (!blog) {
     return "Blog not found";
   }
@@ -104,7 +100,6 @@ export const editBlog = async (prevState: any, formData: FormData) => {
         NOT: { slug },
       },
     });
-
     if (existingBlog) {
       return "Title already taken, please choose a different title!";
     }
@@ -137,11 +132,10 @@ export const editBlog = async (prevState: any, formData: FormData) => {
 
 export const deleteBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
-  const user_id = session?.user.id;
-
-  if (!user_id) {
+  if (!session) {
     return "User not authenticated. Please login again!";
   }
+  const user_id = session.user.id;
 
   const slug = formData.get("slug") as string;
 
@@ -149,7 +143,6 @@ export const deleteBlog = async (prevState: any, formData: FormData) => {
     where: { slug },
     select: { image: true, authorId: true },
   });
-
   if (!blog) {
     return "Blog not found";
   }
@@ -176,11 +169,10 @@ export const deleteBlog = async (prevState: any, formData: FormData) => {
 
 export const likeBlog = async (prevState: any, formData: FormData) => {
   const session = await auth();
-  const user_id = session?.user.id;
-
-  if (!user_id) {
+  if (!session) {
     redirect("/signin");
   }
+  const user_id = session.user.id;
 
   const slug = formData.get("slug") as string;
   const path = formData.get("path") as string;
@@ -190,7 +182,6 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
       where: { slug },
       select: { id: true },
     });
-
     if (!blog) {
       throw new Error("Blog not found");
     }
@@ -213,6 +204,7 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
           },
         },
       });
+
       return "Blog unliked";
     }
 
@@ -222,6 +214,7 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
         blogId: blog.id,
       },
     });
+
     return "Blog liked";
   });
 
@@ -231,11 +224,10 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
 
 export const addComment = async (prevState: any, formData: FormData) => {
   const session = await auth();
-  const user_id = session?.user.id;
-
-  if (!user_id) {
+  if (!session) {
     return "User not authenticated. Please login again!";
   }
+  const user_id = session.user.id;
 
   const slug = formData.get("slug") as string;
   const content = formData.get("content") as string;
@@ -249,7 +241,6 @@ export const addComment = async (prevState: any, formData: FormData) => {
     where: { slug },
     select: { id: true, author: { select: { slug: true } } },
   });
-
   if (!blog) {
     return "Blog not found";
   }
@@ -267,6 +258,11 @@ export const addComment = async (prevState: any, formData: FormData) => {
 };
 
 export async function deleteComment(prevState: any, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return "User not authenticated. Please login again!";
+  }
+
   const commentId = formData.get("commentId") as string;
   const path = formData.get("path") as string;
 

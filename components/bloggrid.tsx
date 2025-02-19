@@ -4,9 +4,28 @@ import Link from "next/link";
 import Image from "next/image";
 import { Like } from "@/components/like";
 import { auth } from "@/lib/auth";
-import { Blog } from "@/types";
 
-export const BlogGrid = async ({ blogs }: { blogs: Blog[] }) => {
+export const BlogGrid = async ({
+  blogs,
+}: {
+  blogs: {
+    title: string;
+    slug: string;
+    image: string;
+    category: string;
+    createdAt: Date;
+    likes: {
+      blogId: string;
+      userId: string;
+    }[];
+    author: {
+      id: string;
+      slug: string;
+      image: string | null;
+      name: string;
+    };
+  }[];
+}) => {
   const session = await auth();
   const userId = session?.user.id;
 

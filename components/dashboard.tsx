@@ -2,18 +2,32 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import type { AdminBlog, AdminUser } from "./page";
 import Account from "@/public/images/account.png";
 
-type AdminDashboardProps = {
-  blogs: AdminBlog[];
-  users: AdminUser[];
-};
-
-export default function AdminDashboardClient({
+export const Dashboard = ({
   blogs,
   users,
-}: AdminDashboardProps) {
+}: {
+  blogs: {
+    id: string;
+    title: string;
+    slug: string;
+    createdAt: Date;
+    image: string | null;
+    author: {
+      name: string;
+      slug: string;
+    };
+  }[];
+  users: {
+    id: string;
+    name: string | null;
+    slug: string | null;
+    image: string | null;
+    email: string;
+    role: string;
+  }[];
+}) => {
   return (
     <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12">
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -98,4 +112,4 @@ export default function AdminDashboardClient({
       </div>
     </div>
   );
-}
+};

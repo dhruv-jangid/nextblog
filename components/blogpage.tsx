@@ -11,7 +11,6 @@ import Link from "next/link";
 import { Like } from "@/components/like";
 import { RichTextEditor } from "@/components/editor";
 import { Comment } from "@/components/comment";
-import { Comment as CommentType } from "@/types";
 
 export default function BlogPage({
   blog,
@@ -29,7 +28,16 @@ export default function BlogPage({
     likes: {
       userId: string;
     }[];
-    comments: CommentType[];
+    comments: {
+      id: string;
+      content: string;
+      createdAt: Date;
+      author: {
+        name: string;
+        image: string | null;
+        slug: string;
+      };
+    }[];
     author: {
       id: string;
       name: string;

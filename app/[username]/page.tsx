@@ -86,7 +86,7 @@ export default async function Profile({
                   <Button>Edit Profile</Button>
                 </Link>
               )}
-              {session?.user.role === "ADMIN" && (
+              {session?.user.role === "ADMIN" && user_slug === user.slug && (
                 <Link href={`/admin/dashboard`} className="hidden md:block">
                   <Button>
                     <span className="flex items-center gap-1">
@@ -116,7 +116,7 @@ export default async function Profile({
                 <span className="text-red-700 text-lg">({user.role})</span>
               )}
             </div>
-            {session?.user.role === "ADMIN" && (
+            {session?.user.role === "ADMIN" && user_slug === user.slug && (
               <Link href={`/admin/dashboard`} className="md:hidden">
                 <Button>
                   <span className="flex items-center gap-1">

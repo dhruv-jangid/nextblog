@@ -1,9 +1,17 @@
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "MetaPress | Blogs | Category",
-  description: "Blogs on MetaPress",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
+  const { category } = await params;
+
+  return {
+    title: `Blogs | ${category}`,
+    description: `Blogs on MetaPress`,
+  };
+}
 
 export default function BlogCategoryLayout({
   children,

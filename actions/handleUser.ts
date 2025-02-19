@@ -8,11 +8,10 @@ import { permanentRedirect } from "next/navigation";
 
 export const removeUser = async () => {
   const session = await auth();
-  const id = session?.user.id;
-
-  if (!id) {
+  if (!session) {
     return "User not authenticated";
   }
+  const { id } = session.user;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -49,7 +48,6 @@ export const removeUser = async () => {
     await signOut({ redirect: false });
   } catch (error) {
     console.error("Error deleting user:", error);
-
     return "Failed to delete account";
   }
 

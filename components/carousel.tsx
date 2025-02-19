@@ -2,9 +2,28 @@ import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import Link from "next/link";
 import Image from "next/image";
-import { Blog } from "@/types";
 
-export const Carousel = ({ blog }: { blog: Blog }) => {
+export const Carousel = ({
+  blog,
+}: {
+  blog: {
+    title: string;
+    slug: string;
+    image: string;
+    category: string;
+    createdAt: Date;
+    likes: {
+      blogId: string;
+      userId: string;
+    }[];
+    author: {
+      id: string;
+      slug: string;
+      image: string | null;
+      name: string;
+    };
+  };
+}) => {
   return (
     <div className="relative h-[50vh] lg:h-[80vh] max-h-[24rem] sm:max-h-[40rem] w-full mb-10">
       <Image
