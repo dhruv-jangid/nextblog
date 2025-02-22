@@ -36,6 +36,7 @@ export const Comment = ({
     null
   );
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [content, setContent] = useState("");
   const path = usePathname();
 
   return (
@@ -52,9 +53,11 @@ export const Comment = ({
           className="w-full p-4 bg-[#191919] rounded-2xl resize-none min-h-[100px] disabled:cursor-not-allowed"
           maxLength={100}
           disabled={isPending}
+          onChange={(e) => setContent(e.target.value)}
+          value={content}
         />
         <div className="flex justify-end">
-          <Button disabled={isPending}>
+          <Button disabled={isPending || !content.trim()}>
             {isPending ? "Posting..." : "Post Comment"}
           </Button>
         </div>

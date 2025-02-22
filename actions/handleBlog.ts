@@ -2,11 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import {
-  deleteImage,
-  uploadImage,
-  getPublicIdFromUrl,
-} from "@/utils/cloudinaryUtils";
+import { deleteImage, uploadImage, getPublicIdFromUrl } from "@/lib/cloudinary";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 

@@ -3,8 +3,8 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
-import Account from "@/public/images/account.png";
 import { RxExternalLink } from "react-icons/rx";
+import ProfileImg from "@/components/profileimg";
 
 export default async function Profile({
   params,
@@ -59,12 +59,9 @@ export default async function Profile({
       <div className="flex flex-col gap-16 justify-center lg:flex-row items-center lg:text-base">
         <div className="flex lg:justify-center gap-8 xl:gap-16">
           <div className="relative h-30 w-30 lg:h-36 lg:w-36">
-            <Image
-              src={user.image || Account}
-              fill={true}
-              alt={user.name!}
-              quality={100}
-              className="rounded-full"
+            <ProfileImg
+              imageUrl={user.image}
+              isAuthor={user.slug === session?.user.slug}
             />
             {user_slug === user.slug && (
               <Link

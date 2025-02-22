@@ -1,4 +1,7 @@
 import { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata({
   params,
@@ -13,10 +16,18 @@ export async function generateMetadata({
   };
 }
 
-export default function SettingsLayout({
+export default async function SettingsLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ username: string }>;
 }) {
-  return <div>{children}</div>;
+  const { username } = await params;
+  const session = await auth();
+
+  if (username !== session?.user.slug) {
+    redirect("/");
+  }
+  return <SessionProvider>{children}</SessionProvider>;
 }

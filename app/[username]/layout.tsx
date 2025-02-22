@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 
 export async function generateMetadata({
   params,
@@ -18,5 +19,5 @@ export default function UserLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return <SessionProvider>{children}</SessionProvider>;
 }
