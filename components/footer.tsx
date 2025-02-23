@@ -14,7 +14,7 @@ export const Footer = () => {
   );
 
   return (
-    <div className="p-8 lg:p-16 bg-[#191919] rounded-t-2xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-10 gap-6 lg:gap-0">
+    <div className="p-8 pb-16 lg:px-16 lg:pt-14 lg:pb-24 bg-[#191919] rounded-t-2xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-10 gap-8 lg:gap-0 tracking-tight">
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold">About Me</h1>
         <div className="flex flex-col gap-2.5">

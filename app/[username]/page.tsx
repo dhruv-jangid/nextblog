@@ -55,7 +55,7 @@ export default async function Profile({
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 lg:p-12">
+    <div className="flex flex-col gap-6 p-4 lg:p-12 tracking-tight antialiased">
       <div className="flex flex-col gap-16 justify-center lg:flex-row items-center lg:text-base">
         <div className="flex lg:justify-center gap-8 xl:gap-16">
           <div className="relative h-30 w-30 lg:h-36 lg:w-36">

@@ -125,7 +125,7 @@ export default function CreateBlog() {
     content;
 
   return (
-    <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12">
+    <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12 tracking-tight">
       <div className="flex flex-col gap-4 lg:gap-10">
         <div className="flex flex-col gap-2 lg:gap-6">
           <div className="flex justify-between">

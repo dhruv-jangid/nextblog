@@ -35,11 +35,11 @@ export const Author = ({
       )}
       <div className="flex flex-col gap-1 md:gap-0 lg:text-lg">
         <Link href={`/${slug}`}>
-          <h3 className="text-white font-medium leading-none hover:text-[#EEEEEE]/80 transition-all duration-300">
+          <h3 className="text-white font-medium leading-none tracking-tight line-clamp-1 hover:text-[#EEEEEE]/80 transition-all duration-300">
             {name}
           </h3>
         </Link>
-        <h6 className="text-gray-300 leading-none text-sm md:text-base">
+        <h6 className="text-gray-300 leading-none tracking-tight text-sm md:text-base">
           {new Intl.DateTimeFormat("en-US", {
             month: "short",
             day: "2-digit",

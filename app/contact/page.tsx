@@ -11,12 +11,15 @@ export default function Contact() {
       <div className="flex flex-col w-full max-w-lg gap-8">
         <div className="flex flex-col items-center gap-1.5">
           <h1 className="text-3xl lg:text-4xl font-bold">Contact Us</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 tracking-tight text-lg">
             Send us a message and we&apos;ll get back to you soon
           </p>
         </div>
 
-        <form action={action} className="flex flex-col items-center gap-4">
+        <form
+          action={action}
+          className="flex flex-col items-center gap-4 tracking-tight"
+        >
           {error && (
             <div className="bg-red-800 bg-opacity-50 w-full text-wrap py-2 rounded-xl text-center">
               {error}
@@ -72,7 +75,7 @@ export default function Contact() {
 
           <button
             disabled={isPending}
-            className="w-full bg-[#EEEEEE] text-[#0F0F0F] font-medium py-2 rounded-xl cursor-pointer hover:bg-white/5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#EEEEEE] text-[#0F0F0F] font-medium py-2 rounded-xl cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {!isPending ? "Send Message" : "Sending..."}
           </button>

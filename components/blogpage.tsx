@@ -1,9 +1,25 @@
 "use client";
 
+import { useEditor, EditorContent } from "@tiptap/react";
+import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Heading from "@tiptap/extension-heading";
+import History from "@tiptap/extension-history";
+import TipTapLink from "@tiptap/extension-link";
+import TipTapImage from "@tiptap/extension-image";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
+import TextStyle from "@tiptap/extension-text-style";
+import CharacterCount from "@tiptap/extension-character-count";
+import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
 import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
-import { useState, useRef, useActionState } from "react";
+import { useState, useRef } from "react";
+import { useActionState } from "react";
 import { deleteBlog, editBlog } from "@/actions/handleBlog";
 import blogCategories from "@/utils/blogCategories.json";
 import Image from "next/image";
@@ -11,6 +27,45 @@ import Link from "next/link";
 import { Like } from "@/components/like";
 import { RichTextEditor } from "@/components/editor";
 import { Comment } from "@/components/comment";
+
+const ReadOnlyContent = ({ content }: { content: string }) => {
+  const editor = useEditor({
+    content,
+    editable: false,
+    extensions: [
+      Document,
+      Paragraph,
+      Text,
+      Bold,
+      Italic,
+      History,
+      Heading.configure({ levels: [1, 2, 3] }),
+      TipTapLink.configure({
+        openOnClick: false,
+        HTMLAttributes: { class: "text-blue-500 underline" },
+      }),
+      TipTapImage.configure({
+        HTMLAttributes: { class: "max-w-full h-auto rounded-lg" },
+        allowBase64: true,
+      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Underline,
+      TextStyle,
+      CharacterCount,
+      Placeholder.configure({ placeholder: "Start writing..." }),
+    ],
+  });
+
+  return (
+    <EditorContent
+      editor={editor}
+      className="prose max-w-none text-balance bg-white/5 p-6 rounded-2xl antialiased [&_.ProseMirror]:outline-none 
+          [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h3]:text-2xl [&_.ProseMirror_p]:text-xl
+          [&_.ProseMirror_h1]:mb-2 [&_.ProseMirror_h2]:mb-2 [&_.ProseMirror_h3]:mb-2
+          [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_li]:mb-2"
+    />
+  );
+};
 
 export default function BlogPage({
   blog,
@@ -25,25 +80,14 @@ export default function BlogPage({
     image: string;
     category: string;
     createdAt: Date;
-    likes: {
-      userId: string;
-    }[];
+    likes: { userId: string }[];
     comments: {
       id: string;
       content: string;
       createdAt: Date;
-      author: {
-        name: string;
-        image: string | null;
-        slug: string;
-      };
+      author: { name: string; image: string | null; slug: string };
     }[];
-    author: {
-      id: string;
-      name: string;
-      slug: string;
-      image: string | null;
-    };
+    author: { id: string; name: string; slug: string; image: string | null };
   };
   isAuthor: boolean;
   isLiked: boolean;
@@ -63,14 +107,11 @@ export default function BlogPage({
   );
   const [editError, editAction, editIsPending] = useActionState(editBlog, null);
 
-  const hasChanges = () => {
-    return (
-      title !== blog.title ||
-      content !== blog.content ||
-      category !== blog.category ||
-      image !== null
-    );
-  };
+  const hasChanges = () =>
+    title !== blog.title ||
+    content !== blog.content ||
+    category !== blog.category ||
+    image !== null;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -109,7 +150,7 @@ export default function BlogPage({
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               disabled={deleteIsPending || editIsPending}
-              className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
+              className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl tracking-tight text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               {blogCategories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -124,7 +165,7 @@ export default function BlogPage({
           )}
           {isAuthor &&
             (isEditing ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 tracking-tight">
                 <Button
                   onClick={handleCancel}
                   disabled={editIsPending || deleteIsPending}
@@ -178,7 +219,7 @@ export default function BlogPage({
                 <button
                   onClick={() => setIsEditing(true)}
                   disabled={editIsPending || deleteIsPending}
-                  className="flex items-center gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-[#0F0F0F] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center tracking-tight gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-[#0F0F0F] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Edit <TbEdit />
                 </button>
@@ -197,13 +238,12 @@ export default function BlogPage({
           <textarea
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            minLength={40}
             maxLength={80}
             placeholder="Title cannot be empty"
-            className="text-3xl lg:text-5xl rounded-2xl w-full font-semibold bg-[#191919] px-4 py-3 resize-none"
+            className="text-3xl lg:text-5xl text-balance antialiased rounded-2xl w-4/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
           />
         ) : (
-          <h1 className="text-3xl lg:text-5xl rounded-lg w-4/5 font-semibold line-clamp-3">
+          <h1 className="text-3xl lg:text-5xl text-balance antialiased rounded-lg w-4/5 font-semibold line-clamp-3">
             {title}
           </h1>
         )}
@@ -219,17 +259,12 @@ export default function BlogPage({
 
       <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-2xl overflow-hidden group max-h-[30rem]">
         {previewUrl ? (
-          <Image
-            src={previewUrl}
-            alt={title}
-            fill={true}
-            className="object-cover"
-          />
+          <Image src={previewUrl} alt={title} fill className="object-cover" />
         ) : (
           <Image
             src={blog.image}
             alt={blog.title}
-            fill={true}
+            fill
             priority={false}
             placeholder="empty"
             quality={90}
@@ -264,16 +299,7 @@ export default function BlogPage({
           onChange={(html: string) => setContent(html)}
         />
       ) : (
-        <div
-          className="text-lg rounded-lg prose dark:prose-invert max-w-none 
-          [&_h1]:text-4xl [&_h2]:text-3xl [&_h3]:text-2xl 
-          [&_h1]:mb-2 [&_h2]:mb-2 [&_h3]:mb-2 
-          [&_p]:mb-8 
-          [&_ul]:mb-4 [&_ol]:mb-4 
-          [&_li]:mb-2"
-          id="blogdesc"
-          dangerouslySetInnerHTML={{ __html: content }}
-        ></div>
+        <ReadOnlyContent content={content} />
       )}
 
       {!isEditing && (

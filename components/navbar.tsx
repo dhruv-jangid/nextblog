@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import logo from "@/public/images/logo.png";
+import logo from "@/app/favicon.ico";
 import { signOutCurrent } from "@/actions/handleAuth";
 import { GrMenu, GrClose } from "react-icons/gr";
 import { HiChevronDown } from "react-icons/hi2";
@@ -55,7 +55,7 @@ export const Navbar = ({
   }, [isOpen, isProfileOpen]);
 
   return (
-    <div className="flex justify-between items-center px-6 md:px-8 py-6 sticky top-0 z-50 backdrop-blur-2xl rounded-b-2xl">
+    <div className="flex justify-between items-center px-6 md:px-8 py-6 sticky top-0 z-50 backdrop-blur-2xl rounded-b-2xl tracking-tight">
       <button
         className="lg:hidden mobile-menu-container"
         onClick={() => setIsOpen(!isOpen)}
@@ -64,7 +64,7 @@ export const Navbar = ({
       </button>
 
       <div className="flex items-center gap-2">
-        <Image src={logo} alt="Logo" className="invert w-6" />
+        <Image src={logo} alt="Logo" className="w-6" />
         <h1 className="font-semibold text-xl">MetaPress</h1>
       </div>
 

@@ -18,7 +18,7 @@ export const Like = ({
   const [error, action, isPending] = useActionState(likeBlog, null);
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1 antialiased">
       {error && <div>{error}</div>}
       <form action={action}>
         <input type="hidden" name="slug" id="slug" value={blogSlug} />

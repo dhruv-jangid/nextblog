@@ -52,7 +52,11 @@ export default async function Blog({
   });
 
   if (!blog) {
-    return <div>Blog not found</div>;
+    return (
+      <div className="min-h-[80vh] flex justify-center items-center text-4xl">
+        Blog not found
+      </div>
+    );
   }
 
   const session = await auth();

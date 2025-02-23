@@ -19,7 +19,7 @@ const Section = ({
     <div className="flex flex-col min-h-[70vh]">
       <div>
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-400 text-sm">{description}</p>
+        <p className="text-gray-400">{description}</p>
       </div>
       {children}
     </div>
@@ -62,7 +62,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 tracking-tight">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
       <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-8">
         <div className="bg-[#191919] rounded-2xl p-4 h-fit">
@@ -106,7 +106,7 @@ export default function Settings() {
             >
               <div className="space-y-6 pt-6">
                 <div className="p-4 border border-yellow-500/20 rounded-xl bg-yellow-500/5 mb-4">
-                  <p className="text-yellow-500 text-sm">
+                  <p className="text-yellow-500">
                     Note: After changing your username, you will need to sign in
                     again.
                   </p>
@@ -118,7 +118,7 @@ export default function Settings() {
                 )}
                 <div className="flex items-center justify-between p-4 border border-white/10 rounded-xl">
                   <div className="flex-1">
-                    <h4 className="font-medium mb-1">Username</h4>
+                    <h4 className="font-medium mb-1 text-lg">Username</h4>
                     {editing === "username" ? (
                       <form
                         action={changeSlugAction}
@@ -151,7 +151,7 @@ export default function Settings() {
                         </div>
                       </form>
                     ) : (
-                      <p className="text-sm text-gray-400">{data?.user.slug}</p>
+                      <p className="text-gray-400">{data?.user.slug}</p>
                     )}
                   </div>
                   {!editing && (
@@ -161,7 +161,7 @@ export default function Settings() {
 
                 <div className="flex items-center justify-between p-4 border border-white/10 rounded-xl">
                   <div className="flex-1">
-                    <h4 className="font-medium mb-1">Display Name</h4>
+                    <h4 className="font-medium mb-1 text-lg">Display Name</h4>
                     {editing === "displayName" ? (
                       <form
                         onSubmit={handleNameChange}
@@ -192,7 +192,7 @@ export default function Settings() {
                         </div>
                       </form>
                     ) : (
-                      <p className="text-sm text-gray-400">{data?.user.name}</p>
+                      <p className="text-gray-400">{data?.user.name}</p>
                     )}
                   </div>
                   {!editing && (
@@ -210,10 +210,10 @@ export default function Settings() {
             >
               <div className="space-y-6 pt-6">
                 <div className="flex flex-col border border-red-500/20 rounded-2xl p-6 bg-red-500/5">
-                  <h4 className="text-lg font-semibold text-red-500 mb-2">
+                  <h4 className="text-xl font-semibold text-red-500 mb-1">
                     Delete Account
                   </h4>
-                  <p className="text-gray-400 text-sm mb-4">
+                  <p className="text-gray-400 mb-4">
                     Once you delete your account, there is no going back. Please
                     be certain.
                   </p>

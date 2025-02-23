@@ -40,7 +40,7 @@ export const Comment = ({
   const path = usePathname();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 tracking-tight text-balance">
       {error && <div>{error}</div>}
       {deleteError && <div>{deleteError}</div>}
       <form action={action} className="flex flex-col gap-3">
@@ -109,7 +109,7 @@ export const Comment = ({
                 </button>
 
                 {commentToDelete === comment.id && (
-                  <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="fixed inset-0 tr backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
                       <p className="mb-6">
                         Are you sure you want to delete this comment:

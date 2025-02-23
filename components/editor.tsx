@@ -156,10 +156,9 @@ export const RichTextEditor = ({
 
       <EditorContent
         editor={editor}
-        className="prose dark:prose-invert max-w-none p-4 min-h-[300px] bg-[#191919] [&_.ProseMirror]:outline-none 
-        [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h3]:text-2xl
+        className="prose max-w-none p-4 text-balance tracking-normal min-h-[300px] bg-[#191919] [&_.ProseMirror]:outline-none 
+        [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h3]:text-2xl [&_.ProseMirror_p]:text-xl
         [&_.ProseMirror_h1]:mb-2 [&_.ProseMirror_h2]:mb-2 [&_.ProseMirror_h3]:mb-2
-        [&_.ProseMirror_p]:mb-8
         [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ol]:mb-4
         [&_.ProseMirror_li]:mb-2"
       />

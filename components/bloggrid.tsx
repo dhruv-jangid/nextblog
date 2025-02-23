@@ -59,10 +59,10 @@ export const BlogGrid = async ({
               >
                 <Button>{category}</Button>
               </Link>
-              <h3 className="cursor-pointer text-xl font-medium line-clamp-3 w-10/12">
+              <h3 className="cursor-pointer text-xl font-medium line-clamp-3 w-5/6">
                 <Link
                   href={`/${author.slug}/${slug}`}
-                  className="line-clamp-2 lg:line-clamp-3 hover:text-[#EEEEEE]/80 transition-all duration-300"
+                  className="line-clamp-2 text-balance tracking-tight hover:text-[#EEEEEE]/80 transition-all duration-300"
                 >
                   {title}
                 </Link>
