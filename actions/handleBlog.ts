@@ -38,25 +38,25 @@ export const createBlog = async (
     .replace(/\s+/g, " ")
     .trim();
 
-  const image = await uploadImage(blogCover);
+  const imageUpload = await uploadImage(blogCover);
 
-  if (image) {
-    const newBlog = await prisma.blog.create({
-      data: {
-        title,
-        slug,
-        image,
-        content: cleanedContent,
-        category,
-        author: { connect: { id: user_id } },
-      },
-      include: { author: { select: { id: true, slug: true } } },
-    });
-
-    redirect(`/${newBlog.author.slug}/${newBlog.slug}${"#"}`);
+  if (!imageUpload.success) {
+    return imageUpload.result;
   }
 
-  return "Error uploading cover";
+  const newBlog = await prisma.blog.create({
+    data: {
+      title,
+      slug,
+      image: imageUpload.result,
+      content: cleanedContent,
+      category,
+      author: { connect: { id: user_id } },
+    },
+    include: { author: { select: { id: true, slug: true } } },
+  });
+
+  redirect(`/${newBlog.author.slug}/${newBlog.slug}${"#"}`);
 };
 
 export const editBlog = async (prevState: any, formData: FormData) => {
@@ -100,13 +100,19 @@ export const editBlog = async (prevState: any, formData: FormData) => {
       return "Title already taken, please choose a different title!";
     }
 
-    let imageUrl;
+    let imageUpload;
     if (newImage && newImage.size > 0) {
-      if (blog.image) {
-        const publicId = getPublicIdFromUrl(blog.image);
-        await deleteImage(publicId!);
+      imageUpload = await uploadImage(newImage);
+      if (!imageUpload.success) {
+        return imageUpload.result;
       }
-      imageUrl = await uploadImage(newImage);
+      const publicId = getPublicIdFromUrl(blog.image);
+      if (publicId) {
+        const result = await deleteImage(publicId);
+        if (!result.success) {
+          return result.message;
+        }
+      }
     }
 
     await prisma.blog.update({
@@ -116,7 +122,7 @@ export const editBlog = async (prevState: any, formData: FormData) => {
         slug: newSlug,
         content,
         category,
-        ...(imageUrl && { image: imageUrl }),
+        ...(imageUpload!.success && { image: imageUpload!.result }),
       },
     });
 

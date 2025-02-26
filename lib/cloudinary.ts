@@ -1,3 +1,4 @@
+import { checkNudity } from "@/utils/checkNudity";
 import { v2 as cloudinary } from "cloudinary";
 import { Readable } from "stream";
 
@@ -10,8 +11,12 @@ cloudinary.config({
 export const uploadImage = async (
   image: File,
   isAuthor: boolean = false
-): Promise<string> => {
+): Promise<{ success: boolean; result: string }> => {
   try {
+    const isSafe = await checkNudity(image);
+    if (!isSafe.safe) {
+      return { success: false, result: "Inappropriate content" };
+    }
     const fileBuffer = Buffer.from(await image.arrayBuffer());
     const readableStream = Readable.from(fileBuffer);
 
@@ -35,24 +40,19 @@ export const uploadImage = async (
               ],
         },
         (error, result) => {
-          if (error) {
-            reject(new Error("Upload Failed: " + error.message));
+          if (error || !result) {
+            reject({ success: false, result: "Upload failed" });
             return;
           }
-          if (!result) {
-            reject(
-              new Error("Upload failed: No result returned from Cloudinary")
-            );
-            return;
-          }
-          resolve(result.secure_url);
+          resolve({ success: true, result: result.secure_url });
         }
       );
 
       readableStream.pipe(uploadStream);
     });
   } catch (error) {
-    throw new Error("Upload failed: " + error);
+    console.log(error);
+    return { success: false, result: "Upload failed" };
   }
 };
 

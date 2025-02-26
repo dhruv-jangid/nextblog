@@ -29,19 +29,19 @@ export const changeProfileImg = async (image: File) => {
     }
   }
 
-  const imageUrl = await uploadImage(image, true);
-  if (!imageUrl) {
-    return { success: false, message: "Failed to upload image" };
+  const imageUpload = await uploadImage(image, true);
+  if (!imageUpload.success) {
+    return { success: false, message: imageUpload.result };
   }
 
   const result = await prisma.user.update({
     where: { id },
-    data: { image: imageUrl },
+    data: { image: imageUpload.result },
   });
 
   if (result) {
     revalidatePath(`/${session.user.slug}`);
-    return { success: true, message: imageUrl };
+    return { success: true, message: imageUpload.result };
   }
 
   return { success: false, message: "Failed to update image" };

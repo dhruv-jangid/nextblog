@@ -212,7 +212,11 @@ export default function CreateBlog() {
         {validationErrors.content && (
           <p className="text-red-500 text-sm">{validationErrors.content}</p>
         )}
-        {error?.toString() && <div>{error}</div>}
+        {error?.toString() && (
+          <div className="text-xl bg-red-800 py-2 font-medium tracking-tight text-center rounded-2xl">
+            {error}
+          </div>
+        )}
 
         <form action={action} className="flex justify-end text-lg">
           <input type="hidden" name="title" id="title" value={title} />

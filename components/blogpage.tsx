@@ -30,6 +30,7 @@ import { Comment } from "@/components/comment";
 
 const ReadOnlyContent = ({ content }: { content: string }) => {
   const editor = useEditor({
+    immediatelyRender: false,
     content,
     editable: false,
     extensions: [
