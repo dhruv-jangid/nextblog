@@ -6,6 +6,7 @@ import { getPublicIdFromUrl } from "@/lib/cloudinary";
 import { prisma } from "@/lib/db";
 import { permanentRedirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { checkProfanity } from "@/utils/checkProfanity";
 
 export const changeProfileImg = async (image: File) => {
   const session = await auth();
@@ -90,6 +91,13 @@ export const changeSlug = async (prevState: any, formData: FormData) => {
 
   const slug = formData.get("slug") as string;
 
+  if (checkProfanity(slug)) {
+    return {
+      success: false,
+      message: "Inappropriate language used!",
+    };
+  }
+
   if (slug === session.user.slug) {
     return {
       success: false,
@@ -121,6 +129,13 @@ export const changeName = async (name: string) => {
     return {
       success: false,
       message: "New name is the same as the current one",
+    };
+  }
+
+  if (checkProfanity(name)) {
+    return {
+      success: false,
+      message: "Inappropriate language used!",
     };
   }
 

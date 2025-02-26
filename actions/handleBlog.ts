@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { deleteImage, uploadImage, getPublicIdFromUrl } from "@/lib/cloudinary";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { checkProfanity } from "@/utils/checkProfanity";
 
 export const createBlog = async (
   prevState: any,
@@ -20,6 +21,10 @@ export const createBlog = async (
   const content = formData.get("content") as string;
   const category = formData.get("category") as string;
   const blogCover = formData.get("image") as File;
+
+  if (checkProfanity(title) || checkProfanity(content)) {
+    return "Inappropriate language used!";
+  }
 
   const slug = title
     .toLowerCase()
@@ -71,6 +76,10 @@ export const editBlog = async (prevState: any, formData: FormData) => {
   const content = formData.get("content") as string;
   const category = formData.get("category") as string;
   const newImage = formData.get("image") as File | null;
+
+  if (checkProfanity(title) || checkProfanity(content)) {
+    return "Inappropriate language used!";
+  }
 
   const blog = await prisma.blog.findUnique({
     where: { slug },
@@ -234,6 +243,10 @@ export const addComment = async (prevState: any, formData: FormData) => {
   const slug = formData.get("slug") as string;
   const content = formData.get("content") as string;
   const path = formData.get("path") as string;
+
+  if (checkProfanity(content)) {
+    return "Inappropriate language used!";
+  }
 
   if (!content.trim()) {
     return "Comment content cannot be empty";

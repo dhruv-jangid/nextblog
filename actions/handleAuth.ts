@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
+import { checkProfanity } from "@/utils/checkProfanity";
 
 const signUpSchema = z
   .object({
@@ -37,6 +38,10 @@ const signUpSchema = z
 export const credentialsSignin = async (prevState: any, formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+
+  if (checkProfanity(email)) {
+    return "Inappropriate language used!";
+  }
 
   try {
     await signIn("credentials", {
