@@ -18,9 +18,9 @@ export const Carousel = ({
     }[];
     author: {
       id: string;
+      name: string;
       slug: string;
       image: string | null;
-      name: string;
     };
   };
 }) => {
@@ -41,7 +41,7 @@ export const Carousel = ({
           <Button>{blog.category}</Button>
         </Link>
 
-        <Link href={`/${blog.author.slug}/${blog.slug}`}>
+        <Link href={`/${blog.author.name}/${blog.slug}`}>
           <h1 className="text-white text-xl antialiased md:text-3xl xl:text-4xl font-bold w-2/3 md:w-4/5 line-clamp-2 text-balance hover:text-[#EEEEEE]/80 transition-all duration-300 sm:line-clamp-3">
             {blog.title}
           </h1>
@@ -49,8 +49,8 @@ export const Carousel = ({
         <Author
           date={blog.createdAt.toISOString()}
           image={blog.author.image}
-          slug={blog.author.slug}
           name={blog.author.name}
+          slug={blog.author.slug}
         />
       </div>
     </div>

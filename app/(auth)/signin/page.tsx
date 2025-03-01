@@ -4,55 +4,73 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { PiEye, PiEyeClosed } from "react-icons/pi";
 import auth from "@/public/images/auth.jpg";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/button";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  googleAuth,
-  githubAuth,
-  credentialsSignin,
-} from "@/actions/handleAuth";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function Signin() {
-  const [credentialsError, credentialsAction, credentialsIsPending] =
-    useActionState(credentialsSignin, null);
-  const [googleAuthError, googleAuthAction, googleAuthIsPending] =
-    useActionState(googleAuth, null);
-  const [githubAuthError, githubAuthAction, githubAuthIsPending] =
-    useActionState(githubAuth, null);
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="grid xl:grid-cols-2 h-[80vh]">
       <div className="flex flex-col items-center justify-center gap-4 w-2/3 lg:w-1/2 place-self-center text-nowrap">
         <div className="flex items-center justify-center gap-4 w-full">
-          <form action={googleAuthAction} className="w-full">
-            <button
-              className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={
-                credentialsIsPending ||
-                googleAuthIsPending ||
-                githubAuthIsPending
-              }
-            >
-              <FcGoogle />
-              Google
-            </button>
-          </form>
-          <form action={githubAuthAction} className="w-full">
-            <button
-              className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={
-                credentialsIsPending ||
-                googleAuthIsPending ||
-                githubAuthIsPending
-              }
-            >
-              <FaGithub />
-              Github
-            </button>
-          </form>
+          <button
+            className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={pending}
+            onClick={async (e) => {
+              e.preventDefault();
+              setError(null);
+              setPending(true);
+
+              await authClient.signIn.social(
+                { provider: "google" },
+                {
+                  onRequest: () => {
+                    setPending(true);
+                  },
+                  onError: (ctx) => {
+                    setPending(false);
+                    setError(ctx.error.message);
+                  },
+                }
+              );
+            }}
+          >
+            <FcGoogle />
+            Google
+          </button>
+          <button
+            className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={async (e) => {
+              e.preventDefault();
+              setError(null);
+              setPending(true);
+
+              await authClient.signIn.social(
+                { provider: "github" },
+                {
+                  onRequest: () => {
+                    setPending(true);
+                  },
+                  onError: (ctx) => {
+                    setPending(false);
+                    setError(ctx.error.message);
+                  },
+                }
+              );
+            }}
+            disabled={pending}
+          >
+            <FaGithub />
+            Github
+          </button>
         </div>
 
         <div className="flex items-center justify-evenly w-full">
@@ -61,19 +79,41 @@ export default function Signin() {
           <hr className="w-1/3 border-gray-500" />
         </div>
 
-        <form
-          action={credentialsAction}
-          className="flex flex-col items-center justify-center gap-4 w-full text-gray-200 text-lg font-medium"
-        >
-          {(credentialsError || googleAuthError || githubAuthError) && (
-            <div
-              className="bg-red-800 bg-opacity-50 w-full text-base font-normal text-wrap px-3 py-2 rounded-xl text-center line-clamp-3"
-              dangerouslySetInnerHTML={{
-                __html: credentialsError! || googleAuthError || githubAuthError,
-              }}
-            ></div>
-          )}
+        {error && (
+          <div className="px-4 py-2 text-red-500 bg-red-500/10 border border-red-500/50 rounded-xl">
+            {error}
+          </div>
+        )}
 
+        <form
+          className="flex flex-col items-center justify-center gap-4 w-full text-gray-200 text-lg font-medium"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setError(null);
+            setPending(true);
+
+            const email = e.currentTarget.email.value;
+            const password = e.currentTarget.password.value;
+
+            await authClient.signIn.email(
+              { email, password },
+              {
+                onRequest: () => {
+                  setPending(true);
+                  setError(null);
+                },
+                onSuccess: async () => {
+                  router.push("/");
+                  router.refresh();
+                },
+                onError: (ctx) => {
+                  setPending(false);
+                  setError(ctx.error.message);
+                },
+              }
+            );
+          }}
+        >
           <div className="flex flex-col gap-2 w-full">
             <input
               type="email"
@@ -81,12 +121,9 @@ export default function Signin() {
               id="email"
               name="email"
               placeholder="Email"
+              autoComplete="email"
               required
-              disabled={
-                credentialsIsPending ||
-                googleAuthIsPending ||
-                githubAuthIsPending
-              }
+              disabled={pending}
             />
           </div>
 
@@ -98,22 +135,15 @@ export default function Signin() {
                 id="password"
                 name="password"
                 placeholder="Password"
+                autoComplete="new-password"
                 required
-                disabled={
-                  credentialsIsPending ||
-                  googleAuthIsPending ||
-                  githubAuthIsPending
-                }
+                disabled={pending}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-5 -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
-                disabled={
-                  credentialsIsPending ||
-                  googleAuthIsPending ||
-                  githubAuthIsPending
-                }
+                disabled={pending}
               >
                 {showPassword ? <PiEye size={20} /> : <PiEyeClosed size={20} />}
               </button>
@@ -121,12 +151,10 @@ export default function Signin() {
           </div>
 
           <Button
-            disabled={
-              credentialsIsPending || googleAuthIsPending || githubAuthIsPending
-            }
+            disabled={pending}
             className="w-full bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold py-1.5 rounded-xl cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {credentialsIsPending ? "Signing in..." : "Signin"}
+            {pending ? "Signing in..." : "Sign in"}
           </Button>
         </form>
         <div className="flex flex-col items-center justify-between gap-4 w-full text-gray-300 text-lg">
@@ -136,18 +164,8 @@ export default function Signin() {
               <Link
                 href="/signup"
                 className="text-[#EEEEEE] underline font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                tabIndex={
-                  credentialsIsPending ||
-                  googleAuthIsPending ||
-                  githubAuthIsPending
-                    ? -1
-                    : 0
-                }
-                aria-disabled={
-                  credentialsIsPending ||
-                  googleAuthIsPending ||
-                  githubAuthIsPending
-                }
+                tabIndex={pending ? -1 : 0}
+                aria-disabled={pending}
               >
                 Signup
               </Link>

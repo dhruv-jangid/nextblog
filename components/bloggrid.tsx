@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Like } from "@/components/like";
 import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const BlogGrid = async ({
   blogs,
@@ -26,7 +27,9 @@ export const BlogGrid = async ({
     };
   }[];
 }) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   const userId = session?.user.id;
 
   return (

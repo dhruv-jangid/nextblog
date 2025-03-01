@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import BlogPage from "@/components/blogpage";
 import { auth } from "@/lib/auth";
 import { permanentRedirect } from "next/navigation";
+import { headers } from "next/headers";
 
 export default async function Blog({
   params,
@@ -59,7 +60,9 @@ export default async function Blog({
     );
   }
 
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     permanentRedirect("/signin");
   }

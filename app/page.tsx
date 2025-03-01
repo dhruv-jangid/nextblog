@@ -11,7 +11,9 @@ export default async function Home() {
       category: true,
       createdAt: true,
       likes: { select: { blogId: true, userId: true } },
-      author: { select: { name: true, slug: true, id: true, image: true } },
+      author: {
+        select: { name: true, slug: true, id: true, image: true },
+      },
     },
     orderBy: {
       createdAt: "desc",

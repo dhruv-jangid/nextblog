@@ -10,6 +10,7 @@ import { signOutCurrent } from "@/actions/handleAuth";
 import { GrMenu, GrClose } from "react-icons/gr";
 import { HiChevronDown } from "react-icons/hi2";
 import Account from "@/public/images/account.png";
+import { Session } from "@/lib/auth";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -19,24 +20,13 @@ const NAV_LINKS = [
   { href: "/createblog", label: "Create" },
 ];
 
-export const Navbar = ({
-  user,
-}: {
-  user: {
-    id: string;
-    role: "USER" | "ADMIN";
-    slug: string;
-    email: string;
-    name: string;
-    image: string;
-  } | null;
-}) => {
+export const Navbar = ({ session }: { session: Session | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
 
-  const isProfileActive = pathname === `/${user?.slug}`;
-  const isSettingsActive = pathname === `/${user?.slug}/settings`;
+  const isProfileActive = pathname === `/${session?.user.name}`;
+  const isSettingsActive = pathname === "/settings";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -104,7 +94,7 @@ export const Navbar = ({
       </div>
 
       <div className="lg:hidden relative profile-menu-container">
-        {user ? (
+        {session?.user ? (
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -116,7 +106,7 @@ export const Navbar = ({
                 }`}
               />
               <Image
-                src={user.image || Account}
+                src={session.user.image || Account}
                 width={32}
                 height={32}
                 alt="Profile Picture"
@@ -131,7 +121,7 @@ export const Navbar = ({
               }`}
             >
               <Link
-                href={`/${user?.slug}`}
+                href={`/${session?.user.slug}`}
                 onClick={() => setIsProfileOpen(false)}
                 className={`px-3 py-1 rounded-xl whitespace-nowrap ${
                   isProfileActive ? "bg-white/10" : "hover:bg-white/5"
@@ -140,7 +130,7 @@ export const Navbar = ({
                 Profile
               </Link>
               <Link
-                href={`/${user?.slug}/settings`}
+                href="/settings"
                 onClick={() => setIsProfileOpen(false)}
                 className={`px-3 py-1 rounded-xl whitespace-nowrap ${
                   isSettingsActive ? "bg-white/10" : "hover:bg-white/5"
@@ -167,7 +157,7 @@ export const Navbar = ({
       </div>
 
       <div className="hidden lg:block text-lg profile-menu-container">
-        {user ? (
+        {session?.user ? (
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -179,7 +169,7 @@ export const Navbar = ({
                 }`}
               />
               <Image
-                src={user.image || Account}
+                src={session.user.image || Account}
                 width={38}
                 height={38}
                 alt="Profile Picture"
@@ -194,7 +184,7 @@ export const Navbar = ({
               }`}
             >
               <Link
-                href={`/${user?.slug}`}
+                href={`/${session?.user.slug}`}
                 onClick={() => setIsProfileOpen(false)}
                 className={`px-3 py-1 cursor-pointer rounded-xl ${
                   isProfileActive ? "bg-white/10" : "hover:bg-white/5"
@@ -203,7 +193,7 @@ export const Navbar = ({
                 Profile
               </Link>
               <Link
-                href={`/${user?.slug}/settings`}
+                href="/settings"
                 onClick={() => setIsProfileOpen(false)}
                 className={`px-3 py-1 cursor-pointer rounded-xl ${
                   isSettingsActive ? "bg-white/10" : "hover:bg-white/5"

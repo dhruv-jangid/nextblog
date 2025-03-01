@@ -5,6 +5,7 @@ import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { RxExternalLink } from "react-icons/rx";
 import ProfileImg from "@/components/profileimg";
+import { headers } from "next/headers";
 
 export default async function Profile({
   params,
@@ -12,15 +13,16 @@ export default async function Profile({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-  const session = await auth();
-  const user_slug = session ? session.user.slug : null;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   const user = await prisma.user.findUnique({
     where: { slug: username },
     select: {
-      slug: true,
-      role: true,
       name: true,
+      role: true,
+      slug: true,
       image: true,
       blogs: {
         select: {
@@ -63,9 +65,9 @@ export default async function Profile({
               imageUrl={user.image}
               isAuthor={user.slug === session?.user.slug}
             />
-            {user_slug === user.slug && (
+            {session?.user.slug === user.slug && (
               <Link
-                href={`/${user.slug}/settings`}
+                href="settings?tab=profile"
                 className="text-sm xl:text-base w-max md:hidden absolute left-1/2 -translate-x-1/2 -bottom-2 backdrop-blur-2xl text-[#EEEEEE] font-medium py-1.5 px-3 rounded-xl"
               >
                 Edit Profile
@@ -75,23 +77,21 @@ export default async function Profile({
           <div className="flex flex-col gap-3">
             <div className="flex gap-4 items-center">
               <h1 className="text-3xl font-medium">{user.slug}</h1>
-              {user_slug === user.slug && (
-                <Link
-                  href={`/${user.slug}/settings`}
-                  className="hidden md:block"
-                >
+              {session?.user.slug === user.slug && (
+                <Link href="settings?tab=profile" className="hidden md:block">
                   <Button>Edit Profile</Button>
                 </Link>
               )}
-              {session?.user.role === "ADMIN" && user_slug === user.slug && (
-                <Link href={`/admin/dashboard`} className="hidden md:block">
-                  <Button>
-                    <span className="flex items-center gap-1">
-                      Dashboard <RxExternalLink />
-                    </span>
-                  </Button>
-                </Link>
-              )}
+              {session?.user.role === "ADMIN" &&
+                session.user.slug === user.slug && (
+                  <Link href={`/admin/dashboard`} className="hidden md:block">
+                    <Button>
+                      <span className="flex items-center gap-1">
+                        Dashboard <RxExternalLink />
+                      </span>
+                    </Button>
+                  </Link>
+                )}
             </div>
 
             <div className="flex items-center gap-6 text-lg">
@@ -113,15 +113,16 @@ export default async function Profile({
                 <span className="text-red-700 text-lg">({user.role})</span>
               )}
             </div>
-            {session?.user.role === "ADMIN" && user_slug === user.slug && (
-              <Link href={`/admin/dashboard`} className="md:hidden">
-                <Button>
-                  <span className="flex items-center gap-1">
-                    Dashboard <RxExternalLink />
-                  </span>
-                </Button>
-              </Link>
-            )}
+            {session?.user.role === "ADMIN" &&
+              session.user.slug === user.slug && (
+                <Link href={`/admin/dashboard`} className="md:hidden">
+                  <Button>
+                    <span className="flex items-center gap-1">
+                      Dashboard <RxExternalLink />
+                    </span>
+                  </Button>
+                </Link>
+              )}
           </div>
         </div>
       </div>

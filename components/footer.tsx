@@ -59,8 +59,8 @@ export const Footer = () => {
           <div className="relative">
             <input
               type="email"
-              id="email"
-              name="email"
+              id="newsletter"
+              name="newsletter"
               placeholder="Email"
               className="bg-[#262626] rounded-xl p-2 px-4 w-full"
               disabled={isPending}

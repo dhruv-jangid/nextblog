@@ -1,15 +1,17 @@
 "use server";
 
 import { deleteImage, deleteImages, uploadImage } from "@/lib/cloudinary";
-import { auth, signOut } from "@/lib/auth";
 import { getPublicIdFromUrl } from "@/lib/cloudinary";
 import { prisma } from "@/lib/db";
-import { permanentRedirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { checkProfanity } from "@/utils/checkProfanity";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export const changeProfileImg = async (image: File) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
@@ -49,7 +51,9 @@ export const changeProfileImg = async (image: File) => {
 };
 
 export const removeProfileImg = async () => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
@@ -82,14 +86,14 @@ export const removeProfileImg = async () => {
   return { success: false, message: "No image to delete" };
 };
 
-export const changeSlug = async (prevState: any, formData: FormData) => {
-  const session = await auth();
+export const changeSlug = async (slug: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
   const { id } = session.user;
-
-  const slug = formData.get("slug") as string;
 
   if (checkProfanity(slug)) {
     return {
@@ -105,21 +109,34 @@ export const changeSlug = async (prevState: any, formData: FormData) => {
     };
   }
 
+  const existingUser = await prisma.user.findUnique({
+    where: { slug },
+  });
+
+  if (existingUser) {
+    return {
+      success: false,
+      message: "This username is already taken",
+    };
+  }
+
   const result = await prisma.user.update({
     where: { id },
     data: { slug },
   });
 
   if (result) {
-    await signOut({ redirect: false });
-    permanentRedirect("/signin");
+    revalidatePath("/settings");
+    return { success: true, message: "Username updated successfully!" };
   }
 
   return { success: false, message: "Failed to update username" };
 };
 
 export const changeName = async (name: string) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
@@ -145,19 +162,13 @@ export const changeName = async (name: string) => {
   });
 
   if (result) {
-    return { success: true, message: "Name updated successfully" };
+    return { success: true, message: "Display name updated successfully" };
   }
 
   return { success: false, message: "Failed to update name" };
 };
 
-export const removeUser = async () => {
-  const session = await auth();
-  if (!session) {
-    return "User not authenticated";
-  }
-  const { id } = session.user;
-
+export const removeImages = async (id: string) => {
   try {
     await prisma.$transaction(async (tx) => {
       const [blogs, user] = await Promise.all([
@@ -180,8 +191,6 @@ export const removeUser = async () => {
         : null;
       if (userImagePublicId) publicIds.push(userImagePublicId);
 
-      await tx.user.delete({ where: { id } });
-
       if (publicIds.length > 0) {
         const deleteResult = await deleteImages(publicIds);
         if (!deleteResult.success) {
@@ -189,21 +198,17 @@ export const removeUser = async () => {
         }
       }
     });
-
-    await signOut({ redirect: false });
   } catch (error) {
     console.error("Error deleting user:", error);
     return "Failed to delete account";
   }
-
-  permanentRedirect("/signin");
 };
 
 export const newsletterSubscription = async (
   prevState: any,
   formData: FormData
 ) => {
-  const email = formData.get("email") as string;
+  const email = formData.get("newsletter") as string;
   if (!email) {
     return "Email is required";
   }

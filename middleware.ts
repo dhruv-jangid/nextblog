@@ -1,21 +1,19 @@
-import authConfig from "@/auth.config";
-import NextAuth from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth";
 
-const { auth } = NextAuth(authConfig);
-
-export default auth(async function middleware(req) {
-  const isLoggedIn = !!req.auth;
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  if (path === "/" || path.startsWith("/_next")) {
-    return NextResponse.next();
-  }
+  const isLoggedIn = !!getSessionCookie(req, { cookiePrefix: "metapress" });
 
-  if (path === "/signin" || path === "/signup") {
+  if (["/signin", "/signup"].includes(path)) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/", req.url));
     }
+    return NextResponse.next();
+  }
+
+  if (path === "/") {
     return NextResponse.next();
   }
 
@@ -24,7 +22,7 @@ export default auth(async function middleware(req) {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],

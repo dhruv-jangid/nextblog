@@ -5,7 +5,6 @@ import Image from "next/image";
 import { FaPencilAlt } from "react-icons/fa";
 import { changeProfileImg, removeProfileImg } from "@/actions/handleUser";
 import Account from "@/public/images/account.png";
-import { useSession } from "next-auth/react";
 
 export default function ProfileImg({
   imageUrl,
@@ -14,7 +13,6 @@ export default function ProfileImg({
   imageUrl: string | null;
   isAuthor: boolean;
 }) {
-  const { data, update } = useSession();
   const [isEditingImage, setIsEditingImage] = useState(false);
 
   return (
@@ -31,13 +29,7 @@ export default function ProfileImg({
                 const file = e.target.files?.[0];
                 if (file) {
                   setIsEditingImage(false);
-                  const result = await changeProfileImg(file);
-                  if (result.success) {
-                    await update({
-                      ...data,
-                      user: { ...data?.user, image: result.message },
-                    });
-                  }
+                  await changeProfileImg(file);
                 }
               }}
             />
@@ -52,13 +44,7 @@ export default function ProfileImg({
               className="cursor-pointer w-full text-center p-3 px-6 hover:bg-[#EEEEEE] hover:text-[#0F0F0F] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={async () => {
                 setIsEditingImage(false);
-                const result = await removeProfileImg();
-                if (result.success) {
-                  await update({
-                    ...data,
-                    user: { ...data?.user, image: null },
-                  });
-                }
+                await removeProfileImg();
               }}
               disabled={!imageUrl}
             >

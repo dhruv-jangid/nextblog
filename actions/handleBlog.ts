@@ -6,12 +6,15 @@ import { deleteImage, uploadImage, getPublicIdFromUrl } from "@/lib/cloudinary";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { checkProfanity } from "@/utils/checkProfanity";
+import { headers } from "next/headers";
 
 export const createBlog = async (
   prevState: any,
   formData: FormData
 ): Promise<string | void> => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return "User not authenticated. Please login again!";
   }
@@ -65,7 +68,9 @@ export const createBlog = async (
 };
 
 export const editBlog = async (prevState: any, formData: FormData) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return "User not authenticated. Please login again!";
   }
@@ -142,7 +147,9 @@ export const editBlog = async (prevState: any, formData: FormData) => {
 };
 
 export const deleteBlog = async (prevState: any, formData: FormData) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return "User not authenticated. Please login again!";
   }
@@ -179,7 +186,9 @@ export const deleteBlog = async (prevState: any, formData: FormData) => {
 };
 
 export const likeBlog = async (prevState: any, formData: FormData) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     redirect("/signin");
   }
@@ -234,7 +243,9 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
 };
 
 export const addComment = async (prevState: any, formData: FormData) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return "User not authenticated. Please login again!";
   }
@@ -273,7 +284,9 @@ export const addComment = async (prevState: any, formData: FormData) => {
 };
 
 export async function deleteComment(prevState: any, formData: FormData) {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session) {
     return "User not authenticated. Please login again!";
   }
