@@ -41,7 +41,7 @@ export const Carousel = ({
           <Button>{blog.category}</Button>
         </Link>
 
-        <Link href={`/${blog.author.name}/${blog.slug}`}>
+        <Link href={`/${blog.author.slug}/${blog.slug}`}>
           <h1 className="text-white text-xl antialiased md:text-3xl xl:text-4xl font-bold w-2/3 md:w-4/5 line-clamp-2 text-balance hover:text-[#EEEEEE]/80 transition-all duration-300 sm:line-clamp-3">
             {blog.title}
           </h1>
