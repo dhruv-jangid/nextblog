@@ -149,6 +149,10 @@ export const Profile = ({
           )}
         </div>
       </div>
+      <div className="cursor-not-allowed opacity-50 flex flex-col">
+        <h3 className="text-lg font-medium">Email</h3>
+        <p className="text-sm">{data.email}</p>
+      </div>
     </div>
   );
 };

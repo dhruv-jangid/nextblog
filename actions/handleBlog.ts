@@ -136,7 +136,7 @@ export const editBlog = async (prevState: any, formData: FormData) => {
         slug: newSlug,
         content,
         category,
-        ...(imageUpload!.success && { image: imageUpload!.result }),
+        ...(imageUpload?.success && { image: imageUpload?.result }),
       },
     });
 

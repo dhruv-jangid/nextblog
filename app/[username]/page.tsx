@@ -1,7 +1,7 @@
 import { Button } from "@/components/button";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import Image from "next/image";
+import { BlogGrid } from "@/components/bloggrid";
 import { auth } from "@/lib/auth";
 import { RxExternalLink } from "react-icons/rx";
 import ProfileImg from "@/components/profileimg";
@@ -31,6 +31,10 @@ export default async function Profile({
           image: true,
           category: true,
           createdAt: true,
+          likes: { select: { blogId: true, userId: true } },
+          author: {
+            select: { name: true, slug: true, id: true, image: true },
+          },
           _count: {
             select: {
               likes: true,
@@ -132,62 +136,7 @@ export default async function Profile({
       </div>
 
       {user.blogs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {user.blogs.map((blog) => (
-            <Link
-              href={`/${user.slug}/${blog.slug}`}
-              key={blog.slug}
-              className="group bg-[#191919] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="relative w-full h-48">
-                <Image
-                  src={blog.image || "/default-blog-image.jpg"}
-                  alt={blog.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </div>
-
-              <div className="p-6">
-                <span className="text-gray-400 text-sm">
-                  {new Date(blog.createdAt).toLocaleString("en-US", {
-                    month: "short",
-                    day: "2-digit",
-                    year: "numeric",
-                  })}
-                </span>
-
-                <h2 className="text-xl font-semibold mt-2 mb-4 group-hover:text-blue-400 transition-colors line-clamp-2">
-                  {blog.title}
-                </h2>
-
-                <div className="flex items-center justify-between pt-4 border-t border-[#252525]">
-                  <div className="flex items-center gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-red-500"
-                      viewBox="0 0 24 24"
-                      fill={blog._count.likes > 0 ? "currentColor" : "none"}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                      />
-                    </svg>
-                    <span className="text-gray-400">{blog._count.likes}</span>
-                  </div>
-                  <span className="text-sm text-gray-400 px-3 py-1 bg-[#252525] rounded-full">
-                    {blog.category}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <BlogGrid blogs={user.blogs} />
       ) : (
         <div className="flex justify-center items-center min-h-[60vh] text-4xl rounded-lg w-3/4 mx-auto">
           Currently, this user has no published blogs!

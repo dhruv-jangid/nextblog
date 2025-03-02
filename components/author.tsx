@@ -12,7 +12,7 @@ export const Author = ({
   name: string;
   image: string | null;
   slug: string;
-  date: string;
+  date: Date;
   end?: boolean | undefined;
 }) => {
   return (

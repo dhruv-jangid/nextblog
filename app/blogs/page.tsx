@@ -27,7 +27,9 @@ export default async function Blogs() {
   return (
     <>
       {blogs.length > 0 ? (
-        <BlogGrid blogs={blogs} />
+        <div className="px-4 xl:px-8 mt-2">
+          <BlogGrid blogs={blogs} />
+        </div>
       ) : (
         <div className="flex justify-center items-center min-h-[80vh] text-4xl rounded-lg w-3/4 mx-auto">
           Sorry, no blogs available at this time!

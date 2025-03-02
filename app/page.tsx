@@ -32,7 +32,9 @@ export default async function Home() {
       {blogs.length > 0 ? (
         <>
           <Carousel blog={firstBlog} />
-          <BlogGrid blogs={remainingBlogs} />
+          <div className="px-4 xl:px-8">
+            <BlogGrid blogs={remainingBlogs} />
+          </div>
         </>
       ) : (
         <div className="flex justify-center items-center min-h-[80vh] text-4xl rounded-lg w-3/4 mx-auto">

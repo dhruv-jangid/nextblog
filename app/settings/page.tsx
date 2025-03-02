@@ -25,7 +25,7 @@ export default async function Settings({
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 tracking-tight">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
-      <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[14rem_1fr] gap-8">
         <div className="bg-[#191919] rounded-2xl p-4 h-fit">
           <nav>
             <ul className="space-y-2">
@@ -91,7 +91,7 @@ const Section = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="flex flex-col min-h-[70vh]">
+    <div className="flex flex-col md:min-h-[70vh]">
       <div>
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
         <p className="text-gray-400">{description}</p>

@@ -33,7 +33,7 @@ export const BlogGrid = async ({
   const userId = session?.user.id;
 
   return (
-    <div className="grid md:grid-cols-2 2xl:grid-cols-3 gap-8 px-4 lg:px-8">
+    <div className="grid md:grid-cols-2 2xl:grid-cols-3 gap-8">
       {blogs.map(
         ({ title, image, createdAt, category, slug, author, likes }) => {
           const isLiked = userId
@@ -43,9 +43,12 @@ export const BlogGrid = async ({
           return (
             <div
               key={slug}
-              className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[28rem] justify-between bg-linear-to-br from-[#191919] from-40% to-transparent"
+              className="rounded-3xl p-6 border border-gray-600 flex flex-col h-[25rem] lg:h-[26rem] justify-between bg-linear-to-br from-[#191919] from-40% to-transparent hover:-translate-y-1 hover:translate-x-1 transition-transform ease-out duration-500 hover:shadow-[-4px_4px_0px_rgba(0,0,0,1)] shadow-[#EEEEEE]"
             >
-              <div className="relative h-1/2 rounded-xl overflow-hidden">
+              <Link
+                href={`/${author.slug}/${slug}`}
+                className="relative h-1/2 rounded-xl overflow-hidden"
+              >
                 <Image
                   src={image}
                   alt={title}
@@ -55,7 +58,7 @@ export const BlogGrid = async ({
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="cursor-pointer object-cover"
                 />
-              </div>
+              </Link>
               <Link
                 href={`/blogs/${category}`}
                 className="text-sm xl:text-base w-max"
@@ -76,7 +79,7 @@ export const BlogGrid = async ({
                   image={author.image}
                   name={author.name}
                   slug={author.slug}
-                  date={createdAt.toISOString()}
+                  date={createdAt}
                   end
                 />
               </div>

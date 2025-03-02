@@ -47,7 +47,7 @@ export const Carousel = ({
           </h1>
         </Link>
         <Author
-          date={blog.createdAt.toISOString()}
+          date={blog.createdAt}
           image={blog.author.image}
           name={blog.author.name}
           slug={blog.author.slug}

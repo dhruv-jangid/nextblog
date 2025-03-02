@@ -199,8 +199,8 @@ export const removeImages = async (id: string) => {
       }
     });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    return "Failed to delete account";
+    console.error("Error deleting images:", error);
+    return "Failed to delete images";
   }
 };
 
@@ -214,4 +214,49 @@ export const newsletterSubscription = async (
   }
 
   return "Subscribed to newsletter";
+};
+
+export const removeUser = async (id: string) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session || session.user.role != "ADMIN") {
+    return { success: false, message: "User not authenticated" };
+  }
+  try {
+    await prisma.$transaction(async (tx) => {
+      const [blogs, user] = await Promise.all([
+        tx.blog.findMany({
+          where: { authorId: id },
+          select: { id: true, image: true },
+        }),
+        tx.user.findUnique({
+          where: { id },
+          select: { image: true },
+        }),
+      ]);
+
+      const publicIds = blogs
+        .map((blog) => blog.image && getPublicIdFromUrl(blog.image))
+        .filter((id): id is string => Boolean(id));
+
+      const userImagePublicId = user?.image
+        ? getPublicIdFromUrl(user.image, true)
+        : null;
+      if (userImagePublicId) publicIds.push(userImagePublicId);
+
+      await tx.user.delete({ where: { id } });
+
+      if (publicIds.length > 0) {
+        const deleteResult = await deleteImages(publicIds);
+        if (!deleteResult.success) {
+          throw new Error("Failed to delete images");
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return "Failed to delete account";
+  }
+  revalidatePath("/admin/dashboard");
 };

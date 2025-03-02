@@ -250,10 +250,10 @@ export default function BlogPage({
         )}
         {!isEditing && (
           <Author
-            date={blog.createdAt.toISOString()}
+            date={blog.createdAt}
             slug={blog.author.slug}
             image={blog.author.image}
-            name={blog.author.name!}
+            name={blog.author.name}
           />
         )}
       </div>
