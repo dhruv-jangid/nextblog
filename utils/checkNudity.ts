@@ -14,16 +14,16 @@ export const checkNudity = async (image: File) => {
     const data = await response.json();
 
     if (data.status !== "success") {
-      return { safe: false, reason: "API request failed." };
+      return { safe: false, reason: "Try again after sometime!" };
     }
 
-    if (data.nudity.raw >= 0.7 || data.nudity.partial >= 0.7) {
-      return { safe: false, reason: "NSFW content detected." };
+    if (data.nudity.raw >= 0.5 || data.nudity.safe >= 0.4) {
+      return { safe: false, reason: "NSFW content detected" };
     }
 
-    return { safe: true, reason: "Image is safe." };
+    return { safe: true, reason: "Image is safe" };
   } catch (error) {
     console.log(error);
-    return { safe: false, reason: "Failed to analyze image." };
+    return { safe: false, reason: "Failed to analyze image" };
   }
 };

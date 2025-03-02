@@ -15,7 +15,7 @@ export const uploadImage = async (
   try {
     const isSafe = await checkNudity(image);
     if (!isSafe.safe) {
-      return { success: false, result: "Inappropriate content" };
+      return { success: false, result: isSafe.reason };
     }
     const fileBuffer = Buffer.from(await image.arrayBuffer());
     const readableStream = Readable.from(fileBuffer);

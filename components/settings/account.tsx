@@ -17,7 +17,7 @@ export function Account() {
           Once you delete your account, there is no going back. Please be
           certain.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 text-end">
           <Button disabled={pending} onClick={() => setShowDeleteConfirm(true)}>
             Delete Account
           </Button>

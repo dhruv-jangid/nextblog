@@ -74,7 +74,7 @@ export const Profile = ({
               </Button>
               <input type="hidden" name="slug" id="slug" value={tempUsername} />
               <Button
-                disabled={isPending}
+                disabled={isPending || data.slug === tempUsername}
                 onClick={async () => {
                   setIsPending(true);
                   const result = await changeSlug(tempUsername);
@@ -134,7 +134,7 @@ export const Profile = ({
                   setError(result);
                   setIsPending(false);
                 }}
-                disabled={isPending}
+                disabled={isPending || data.name === tempDisplayName}
               >
                 Save
               </Button>

@@ -41,16 +41,16 @@ export const createBlog = async (
     return "Title already taken, please choose a different title!";
   }
 
-  const cleanedContent = content
-    .replace(/<p><br><\/p>/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
   const imageUpload = await uploadImage(blogCover);
 
   if (!imageUpload.success) {
     return imageUpload.result;
   }
+
+  const cleanedContent = content
+    .replace(/<p><br><\/p>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
   const newBlog = await prisma.blog.create({
     data: {
