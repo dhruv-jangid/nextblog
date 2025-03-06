@@ -1,5 +1,6 @@
 import { BlogGrid } from "@/components/bloggrid";
 import { prisma } from "@/lib/db";
+import { notFound } from "next/navigation";
 
 export default async function Blogs({
   params,
@@ -30,5 +31,12 @@ export default async function Blogs({
     },
   });
 
-  return <BlogGrid blogs={blogs} />;
+  if (blogs.length < 1) {
+    notFound();
+  }
+  return (
+    <div className="min-h-[80dvh] mt-2">
+      <BlogGrid blogs={blogs} />
+    </div>
+  );
 }

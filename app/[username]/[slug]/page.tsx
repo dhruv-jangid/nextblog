@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import BlogPage from "@/components/blogpage";
 import { auth } from "@/lib/auth";
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { headers } from "next/headers";
 
 export default async function Blog({
@@ -53,11 +53,7 @@ export default async function Blog({
   });
 
   if (!blog) {
-    return (
-      <div className="min-h-[80vh] flex justify-center items-center text-4xl">
-        Blog not found
-      </div>
-    );
+    notFound();
   }
 
   const session = await auth.api.getSession({

@@ -28,7 +28,7 @@ export function Account() {
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
             <h2 className="text-xl font-semibold mb-4">Confirm Delete?</h2>
-            <p className="mb-6">
+            <p className="mb-2">
               Are you sure you want to delete your account? This action cannot
               be undone.
             </p>
@@ -62,7 +62,6 @@ export function Account() {
                       onSuccess: async () => {
                         setPending(false);
                         setError("Email has been sent for confirmation!");
-                        setShowDeleteConfirm(false);
                       },
                       onError: (ctx) => {
                         setPending(false);

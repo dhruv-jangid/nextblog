@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { RxExternalLink } from "react-icons/rx";
 import ProfileImg from "@/components/profileimg";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
 export default async function Profile({
   params,
@@ -53,11 +54,7 @@ export default async function Profile({
   });
 
   if (!user) {
-    return (
-      <div className="flex justify-center items-center text-2xl w-full h-[70vh]">
-        No such user! Please double check the username.
-      </div>
-    );
+    notFound();
   }
 
   return (

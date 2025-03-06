@@ -105,9 +105,7 @@ export default function Signup() {
                 },
                 onSuccess: async () => {
                   setPending(false);
-                  setError(
-                    "Verification email sent! Please check your inbox to signin."
-                  );
+                  setError("Verification email sent to your gmail inbox!");
                 },
                 onError: (ctx) => {
                   setPending(false);
