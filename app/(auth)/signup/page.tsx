@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { generateSlug } from "@/utils/generateSlug";
+import { checkProfanity } from "@/utils/checkProfanity";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -94,6 +95,11 @@ export default function Signup() {
             const email = e.currentTarget.email.value as string;
             const password = e.currentTarget.password.value as string;
             const slug = e.currentTarget.slug.value as string;
+            if (checkProfanity(slug)) {
+              setPending(false);
+              setError("Inappropriate language!");
+              return null;
+            }
             const actualSlug = generateSlug(slug);
 
             await authClient.signUp.email(
