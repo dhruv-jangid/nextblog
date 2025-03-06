@@ -166,6 +166,7 @@ export default function Signin() {
                 className="text-[#EEEEEE] underline font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 tabIndex={pending ? -1 : 0}
                 aria-disabled={pending}
+                replace
               >
                 Signup
               </Link>

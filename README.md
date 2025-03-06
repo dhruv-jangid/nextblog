@@ -6,15 +6,15 @@ A feature-rich blogging platform built with the latest Next.js 15, focusing on p
 
 Visit the live application at [metapress.vercel.app](https://metapress.vercel.app)
 
-## Tech Stack
+## Stack
 
-- **Framework**: Next.js 15.1.6 with React 19
-- **Database**: PostgreSQL with Prisma 6.3.1
-- **Authentication**: NextAuth.js 5.0 beta
+- **Framework**: Next.js 15 with React 19
+- **Database**: PostgreSQL with Prisma (Vercel's NeonDB in production)
+- **Authentication**: BetterAuth
 - **Image Storage**: Cloudinary
-- **Editor**: TipTap 2.11
-- **Styling**: Tailwind CSS 4.0
-- **Type Safety**: TypeScript 5.7
+- **Text Editor**: TipTap
+- **Styling**: Tailwind CSS
+- **Type Safety**: TypeScript
 
 ## Features
 
@@ -46,16 +46,35 @@ Visit the live application at [metapress.vercel.app](https://metapress.vercel.ap
 Required environment variables:
 
 ```env
-DATABASE_URL=
+- Database (Use this in production or if not using Vercel's DB)
+DATABASE_POSTGRES_PRISMA_URL=
+
+- Cloudinary (for media storage and image processing)
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
-AUTH_SECRET=
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
-AUTH_GITHUB_ID=
-AUTH_GITHUB_SECRET=
-AUTH_TRUST_HOST=
+CLOUDINARY_URL=
+
+- TinyMCE (for rich text editing)
+NEXT_PUBLIC_TINYMCE_API_KEY=
+
+- OAuth Providers (Google & GitHub Authentication)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+
+- BetterAuth (Authentication & Security)
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=
+
+- SendGrid (Service for email handling)
+SENDGRID_API_KEY=
+SENDGRID_EMAIL_FROM=
+
+- SightEngine (API for content moderation)
+SIGHTENGINE_API_USER=
+SIGHTENGINE_API_SECRET=
 ```
 
 ## Getting Started
@@ -93,10 +112,6 @@ Visit `http://localhost:3000` to see your application.
 - `/prisma`: Database schema and client
 - `/public`: Static assets
 - `/components`: React components
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ## Acknowledgments
 
