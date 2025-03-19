@@ -14,7 +14,7 @@ export const Profile = ({
     name: string;
     createdAt: Date;
     updatedAt: Date;
-    image?: string | null | undefined | undefined;
+    image?: string | null;
     role: string;
     slug: string;
   };
@@ -25,7 +25,10 @@ export const Profile = ({
   const [tempUsername, setTempUsername] = useState(data.slug);
   const [tempDisplayName, setTempDisplayName] = useState(data.name);
   const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<{ success: boolean; message: string }>();
+  const [error, setError] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   return (
     <div className="space-y-6 pt-6">
@@ -64,6 +67,7 @@ export const Profile = ({
             <>
               <Button
                 onClick={() => {
+                  setError(null);
                   setEditingField(null);
                   setTempUsername(data.slug);
                   setTempDisplayName(data.name);
@@ -72,10 +76,10 @@ export const Profile = ({
               >
                 Cancel
               </Button>
-              <input type="hidden" name="slug" id="slug" value={tempUsername} />
               <Button
                 disabled={isPending || data.slug === tempUsername}
                 onClick={async () => {
+                  setError(null);
                   setIsPending(true);
                   const result = await changeSlug(tempUsername);
                   setEditingField(null);
@@ -88,7 +92,10 @@ export const Profile = ({
             </>
           ) : (
             <Button
-              onClick={() => setEditingField("username")}
+              onClick={() => {
+                setError(null);
+                setEditingField("username");
+              }}
               disabled={isPending}
             >
               Change
@@ -118,6 +125,7 @@ export const Profile = ({
             <>
               <Button
                 onClick={() => {
+                  setError(null);
                   setEditingField(null);
                   setTempUsername(data.slug);
                   setTempDisplayName(data.name);
@@ -128,6 +136,7 @@ export const Profile = ({
               </Button>
               <Button
                 onClick={async () => {
+                  setError(null);
                   setIsPending(true);
                   const result = await changeName(tempDisplayName);
                   setEditingField(null);
@@ -141,7 +150,10 @@ export const Profile = ({
             </>
           ) : (
             <Button
-              onClick={() => setEditingField("displayName")}
+              onClick={() => {
+                setError(null);
+                setEditingField("displayName");
+              }}
               disabled={isPending}
             >
               Change

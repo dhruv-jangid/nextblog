@@ -9,7 +9,6 @@ export default function ErrorBoundary({
   error: Error;
   reset: () => void;
 }) {
-  console.log(error);
   console.log(error.message);
 
   return (

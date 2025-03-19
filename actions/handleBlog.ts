@@ -3,10 +3,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { deleteImage, uploadImage, getPublicIdFromUrl } from "@/lib/cloudinary";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { permanentRedirect, redirect, RedirectType } from "next/navigation";
 import { checkProfanity } from "@/utils/checkProfanity";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export const createBlog = async (
   prevState: any,
@@ -18,8 +18,8 @@ export const createBlog = async (
   if (!session) {
     return "User not authenticated. Please login again!";
   }
-  const user_id = session.user.id;
 
+  const { id } = session.user;
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as string;
@@ -29,13 +29,13 @@ export const createBlog = async (
     return "Inappropriate language used!";
   }
 
-  const slug = title
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "");
-
   const existingBlog = await prisma.blog.findUnique({
-    where: { slug },
+    where: {
+      slug: title
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, ""),
+    },
   });
   if (existingBlog) {
     return "Title already taken, please choose a different title!";
@@ -47,40 +47,42 @@ export const createBlog = async (
     return imageUpload.result;
   }
 
-  const cleanedContent = content
-    .replace(/<p><br><\/p>/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
   const newBlog = await prisma.blog.create({
     data: {
       title,
-      slug,
+      slug: title
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, ""),
       image: imageUpload.result,
-      content: cleanedContent,
+      content: content
+        .replace(/<p><br><\/p>/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
       category,
-      author: { connect: { id: user_id } },
+      author: { connect: { id } },
     },
     include: { author: { select: { id: true, slug: true } } },
   });
 
-  redirect(`/${newBlog.author.slug}/${newBlog.slug}${"#"}`);
+  redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
 };
 
-export const editBlog = async (prevState: any, formData: FormData) => {
+export const editBlog = async (
+  slug: string,
+  title: string,
+  content: string,
+  category: string,
+  newImage: File | null
+) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
     return "User not authenticated. Please login again!";
   }
-  const user_id = session.user.id;
 
-  const slug = formData.get("slug") as string;
-  const title = formData.get("title") as string;
-  const content = formData.get("content") as string;
-  const category = formData.get("category") as string;
-  const newImage = formData.get("image") as File | null;
+  const { id } = session.user;
 
   if (checkProfanity(title) || checkProfanity(content)) {
     return "Inappropriate language used!";
@@ -98,7 +100,7 @@ export const editBlog = async (prevState: any, formData: FormData) => {
     return "Blog not found";
   }
 
-  if (blog.authorId === user_id || session.user.role === "ADMIN") {
+  if (blog.authorId === id || session.user.role === "ADMIN") {
     const newSlug = title
       .toLowerCase()
       .replace(/\s+/g, "-")
@@ -140,33 +142,36 @@ export const editBlog = async (prevState: any, formData: FormData) => {
       },
     });
 
-    redirect(`/${blog.author.slug}/${newSlug}`);
-  } else {
-    return "Unauthorized to edit this blog";
+    if (newSlug !== slug) {
+      redirect(`/${blog.author.slug}/${newSlug}`, RedirectType.replace);
+    }
+
+    return revalidatePath(`/${blog.author.slug}/${newSlug}`);
   }
+
+  return "Unauthorized to edit this blog";
 };
 
-export const deleteBlog = async (prevState: any, formData: FormData) => {
+export const deleteBlog = async (blogSlug: string) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
-    return "User not authenticated. Please login again!";
+    permanentRedirect("/signin");
   }
-  const user_id = session.user.id;
 
-  const slug = formData.get("slug") as string;
+  const { id } = session.user;
 
   const blog = await prisma.blog.findUnique({
-    where: { slug },
+    where: { slug: blogSlug },
     select: { image: true, authorId: true },
   });
   if (!blog) {
     return "Blog not found";
   }
 
-  if (blog.authorId === user_id || session.user.role === "ADMIN") {
-    await prisma.$transaction(async (tx) => {
+  if (blog.authorId === id || session.user.role === "ADMIN") {
+    await prisma.$transaction(async (tx: any) => {
       if (blog.image) {
         const publicId = getPublicIdFromUrl(blog.image);
         if (publicId) {
@@ -175,31 +180,29 @@ export const deleteBlog = async (prevState: any, formData: FormData) => {
       }
 
       await tx.blog.delete({
-        where: { slug },
+        where: { slug: blogSlug },
       });
     });
 
-    redirect("/");
-  } else {
-    return "Unauthorized to delete this blog";
+    redirect("/", RedirectType.replace);
   }
+
+  return "Unauthorized to delete this blog";
 };
 
-export const likeBlog = async (prevState: any, formData: FormData) => {
+export const likeBlog = async (blogSlug: string) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
-    redirect("/signin");
+    permanentRedirect("/signin");
   }
-  const user_id = session.user.id;
 
-  const slug = formData.get("slug") as string;
-  const path = formData.get("path") as string;
+  const { id } = session.user;
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: any) => {
     const blog = await tx.blog.findUnique({
-      where: { slug },
+      where: { slug: blogSlug },
       select: { id: true },
     });
     if (!blog) {
@@ -209,7 +212,7 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
     const existingLike = await tx.like.findUnique({
       where: {
         userId_blogId: {
-          userId: user_id,
+          userId: id,
           blogId: blog.id,
         },
       },
@@ -219,7 +222,7 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
       await tx.like.delete({
         where: {
           userId_blogId: {
-            userId: user_id,
+            userId: id,
             blogId: blog.id,
           },
         },
@@ -230,7 +233,7 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
 
     await tx.like.create({
       data: {
-        userId: user_id,
+        userId: id,
         blogId: blog.id,
       },
     });
@@ -238,33 +241,27 @@ export const likeBlog = async (prevState: any, formData: FormData) => {
     return "Blog liked";
   });
 
-  revalidatePath(path);
-  return null;
+  return;
 };
 
-export const addComment = async (prevState: any, formData: FormData) => {
+export const addComment = async (comment: string, blogSlug: string) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
-    return "User not authenticated. Please login again!";
+    permanentRedirect("/signin");
   }
-  const user_id = session.user.id;
 
-  const slug = formData.get("slug") as string;
-  const content = formData.get("content") as string;
-  const path = formData.get("path") as string;
+  const { id } = session.user;
 
-  if (checkProfanity(content)) {
+  if (checkProfanity(comment)) {
     return "Inappropriate language used!";
   }
 
-  if (!content.trim()) {
-    return "Comment content cannot be empty";
-  }
+  if (!comment.trim()) return "Comment content cannot be empty";
 
   const blog = await prisma.blog.findUnique({
-    where: { slug },
+    where: { slug: blogSlug },
     select: { id: true, author: { select: { slug: true } } },
   });
   if (!blog) {
@@ -273,26 +270,22 @@ export const addComment = async (prevState: any, formData: FormData) => {
 
   await prisma.comment.create({
     data: {
-      content,
+      content: comment,
       blog: { connect: { id: blog.id } },
-      author: { connect: { id: user_id } },
+      author: { connect: { id } },
     },
   });
 
-  revalidatePath(path);
-  return null;
+  return;
 };
 
-export async function deleteComment(prevState: any, formData: FormData) {
+export const deleteComment = async (commentId: string) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
-    return "User not authenticated. Please login again!";
+    permanentRedirect("/signin");
   }
-
-  const commentId = formData.get("commentId") as string;
-  const path = formData.get("path") as string;
 
   if (!commentId) return "Comment is required!";
 
@@ -302,6 +295,5 @@ export async function deleteComment(prevState: any, formData: FormData) {
     },
   });
 
-  revalidatePath(path);
-  return null;
-}
+  return;
+};

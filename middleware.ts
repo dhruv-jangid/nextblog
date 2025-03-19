@@ -2,18 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 export async function middleware(req: NextRequest) {
-  const path = req.nextUrl.pathname;
-
+  const { pathname } = req.nextUrl;
   const isLoggedIn = !!getSessionCookie(req, { cookiePrefix: "metapress" });
 
-  if (["/signin", "/signup"].includes(path)) {
+  if (["/signin", "/signup"].includes(pathname)) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();
   }
 
-  if (path === "/") {
+  if (pathname === "/") {
     return NextResponse.next();
   }
 

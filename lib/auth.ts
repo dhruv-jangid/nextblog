@@ -8,13 +8,14 @@ import z from "zod";
 import { nextCookies } from "better-auth/next-js";
 import { removeImages } from "@/actions/handleUser";
 import { APIError } from "better-auth/api";
+import { openAPI } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  plugins: [nextCookies()],
+  plugins: [nextCookies(), openAPI()],
   appName: "Metapress",
   advanced: { cookiePrefix: "metapress" },
   user: {
@@ -34,7 +35,7 @@ export const auth = betterAuth({
         await sendEmail({
           to: user.email,
           subject: "Account Deletion",
-          text: `Click the link to delete your account ${url}`,
+          text: `Click the link to delete your MetaPress account ${url}`,
         });
       },
       beforeDelete: async ({ id, email, createdAt }) => {

@@ -1,10 +1,11 @@
 "use client";
 
+import { removeUser } from "@/actions/handleUser";
 import { Button } from "@/components/button";
-import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 
 export function Account() {
+  const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>();
   const [pending, setPending] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -33,44 +34,43 @@ export function Account() {
               be undone.
             </p>
             {error && (
-              <div className="bg-red-500/5 px-4 py-3 rounded-2xl border border-red-500/20 text-lg text-red-500 mb-4">
+              <div className="bg-red-500/5 px-4 py-2 rounded-2xl border border-red-500/20 text-lg text-red-500 mb-3 leading-tight">
                 {error}
               </div>
             )}
+            <input
+              type="text"
+              className="w-full py-1.5 px-4 border border-red-900 text-lg rounded-2xl focus:outline-hidden mb-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              id="password"
+              name="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              required
+              disabled={pending}
+            />
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => {
                   setShowDeleteConfirm(false);
                   setError(null);
+                  setPassword("");
                 }}
                 disabled={pending}
               >
                 Cancel
               </Button>
               <Button
-                onClick={async (e) => {
-                  e.preventDefault();
-                  await authClient.deleteUser(
-                    {
-                      callbackURL: "/",
-                    },
-                    {
-                      onRequest: () => {
-                        setPending(true);
-                        setError(null);
-                      },
-                      onSuccess: async () => {
-                        setPending(false);
-                        setError("Email has been sent for confirmation!");
-                      },
-                      onError: (ctx) => {
-                        setPending(false);
-                        setError(ctx.error.message);
-                      },
-                    }
-                  );
+                onClick={async () => {
+                  setError(null);
+                  setPending(true);
+                  const response = await removeUser(password);
+                  setError(response);
+                  setPending(false);
                 }}
-                disabled={pending}
+                disabled={pending || password.trim() === ""}
                 className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pending ? "Deleting..." : "Delete"}

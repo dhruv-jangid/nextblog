@@ -1,9 +1,9 @@
 "use client";
 
 import { likeBlog } from "@/actions/handleBlog";
-import { usePathname } from "next/navigation";
-import { useActionState } from "react";
-import { IoMdHeartEmpty, IoMdHeart } from "react-icons/io";
+import { Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export const Like = ({
   blogSlug,
@@ -14,38 +14,42 @@ export const Like = ({
   likes: number;
   isLiked: boolean;
 }) => {
-  const pathname = usePathname();
-  const [error, action, isPending] = useActionState(likeBlog, null);
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
 
   return (
     <div className="flex items-center gap-1 antialiased">
-      {error && <div>{error}</div>}
-      <form action={action}>
-        <input type="hidden" name="slug" id="slug" value={blogSlug} />
-        <input type="hidden" name="path" id="path" value={pathname} />
+      <div>
         <button
-          type="submit"
+          onClick={async () => {
+            setIsPending(true);
+            await likeBlog(blogSlug);
+            setIsPending(false);
+            router.refresh();
+          }}
           disabled={isPending}
           className="flex disabled:opacity-50 transition-all duration-300"
         >
           {isLiked ? (
-            <IoMdHeart
+            <Heart
+              stroke="red"
+              fill="red"
               size={32}
               className={`${
                 isPending ? "cursor-not-allowed" : "cursor-pointer"
-              } fill-red-600`}
-              color="#EEEEEE"
+              }`}
             />
           ) : (
-            <IoMdHeartEmpty
+            <Heart
+              stroke="#EEE"
               size={32}
               className={`${
                 isPending ? "cursor-not-allowed" : "cursor-pointer"
-              } fill-red-600`}
+              }`}
             />
           )}
         </button>
-      </form>
+      </div>
       <span className="text-lg">{likes}</span>
     </div>
   );

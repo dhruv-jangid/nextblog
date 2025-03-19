@@ -4,10 +4,9 @@ import Image from "next/image";
 import Account from "@/public/images/account.png";
 import { Button } from "@/components/button";
 import Link from "next/link";
-import { useActionState } from "react";
 import { addComment, deleteComment } from "@/actions/handleBlog";
-import { usePathname } from "next/navigation";
-import { TbTrash } from "react-icons/tb";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export const Comment = ({
@@ -30,38 +29,39 @@ export const Comment = ({
   isAuthor: boolean;
   userSlug: string;
 }) => {
-  const [error, action, isPending] = useActionState(addComment, null);
-  const [deleteError, deleteAction, deleteIsPending] = useActionState(
-    deleteComment,
-    null
-  );
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
-  const [content, setContent] = useState("");
-  const path = usePathname();
+  const [comment, setComment] = useState("");
 
   return (
     <div className="flex flex-col gap-6 tracking-tight text-balance">
-      {error && <div>{error}</div>}
-      {deleteError && <div>{deleteError}</div>}
-      <form action={action} className="flex flex-col gap-3">
-        <input type="hidden" name="slug" id="slug" value={blogSlug} />
-        <input type="hidden" name="path" id="path" value={path} />
+      <div className="flex flex-col gap-3">
         <textarea
-          name="content"
-          id="content"
+          name="comment"
+          id="comment"
           placeholder="Add a comment..."
           className="w-full p-4 bg-[#191919] rounded-2xl resize-none min-h-[100px] disabled:cursor-not-allowed"
           maxLength={100}
           disabled={isPending}
-          onChange={(e) => setContent(e.target.value)}
-          value={content}
+          onChange={(e) => setComment(e.target.value)}
+          value={comment}
         />
         <div className="flex justify-end">
-          <Button disabled={isPending || !content.trim()}>
+          <Button
+            onClick={async () => {
+              setComment("");
+              setIsPending(true);
+              await addComment(comment, blogSlug);
+              setIsPending(false);
+              router.refresh();
+            }}
+            disabled={isPending || !comment.trim()}
+          >
             {isPending ? "Posting..." : "Post Comment"}
           </Button>
         </div>
-      </form>
+      </div>
 
       <div className="flex flex-col gap-4">
         {comments.map((comment) => (
@@ -105,7 +105,7 @@ export const Comment = ({
                   onClick={() => setCommentToDelete(comment.id)}
                   className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer flex p-1.5"
                 >
-                  <TbTrash size={20} />
+                  <Trash2 size={18} />
                 </button>
 
                 {commentToDelete === comment.id && (
@@ -119,24 +119,29 @@ export const Comment = ({
                       <div className="flex justify-end gap-3">
                         <Button
                           onClick={() => setCommentToDelete(null)}
-                          disabled={deleteIsPending}
+                          disabled={isPending}
                         >
                           Cancel
                         </Button>
-                        <form action={deleteAction}>
+                        <div>
                           <input
                             type="hidden"
                             name="commentId"
                             value={comment.id}
                           />
-                          <input type="hidden" name="path" value={path} />
                           <button
-                            disabled={deleteIsPending}
+                            onClick={async () => {
+                              setIsPending(true);
+                              await deleteComment(comment.id);
+                              setIsPending(false);
+                              router.refresh();
+                            }}
+                            disabled={isPending}
                             className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {deleteIsPending ? "Deleting..." : "Delete"}
+                            {isPending ? "Deleting..." : "Delete"}
                           </button>
-                        </form>
+                        </div>
                       </div>
                     </div>
                   </div>

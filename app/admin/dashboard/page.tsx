@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
 import { BlogGrid } from "@/components/bloggrid";
 import { Author } from "@/components/author";
-import { TbTrash } from "react-icons/tb";
+import { Trash2 } from "lucide-react";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -61,32 +61,41 @@ export default async function AdminDashboard() {
       <div className="flex flex-col gap-6">
         <h2 className="text-2xl font-semibold">Users</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {users.map((user) => (
-            <div
-              key={user.slug}
-              className="bg-[#1F1F1F] rounded-2xl p-4 flex flex-col gap-4"
-            >
-              <div className="flex justify-between items-center">
-                <Author
-                  date={user.createdAt}
-                  image={user.image}
-                  name={user.name}
-                  slug={user.slug}
-                />
-                <button className="h-fit bg-red-700 cursor-pointer p-2 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                  <TbTrash />
-                </button>
+          {users.map(
+            (user: {
+              slug: string;
+              image: string | null;
+              createdAt: Date;
+              name: string;
+              role: string;
+              email: string;
+            }) => (
+              <div
+                key={user.slug}
+                className="bg-[#1F1F1F] rounded-2xl p-4 flex flex-col gap-4"
+              >
+                <div className="flex justify-between items-center">
+                  <Author
+                    date={user.createdAt}
+                    image={user.image}
+                    name={user.name}
+                    slug={user.slug}
+                  />
+                  <button className="h-fit bg-red-700 cursor-pointer p-2 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <Trash2 />
+                  </button>
+                </div>
+                <div className="flex justify-between">
+                  <p className="bg-white/90 text-black rounded-xl py-1 px-3 w-fit">
+                    {user.role}
+                  </p>
+                  <h1 className="bg-white/90 text-black rounded-xl py-1 px-3 w-fit">
+                    {user.email}
+                  </h1>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <p className="bg-white/90 text-black rounded-xl py-1 px-3 w-fit">
-                  {user.role}
-                </p>
-                <h1 className="bg-white/90 text-black rounded-xl py-1 px-3 w-fit">
-                  {user.email}
-                </h1>
-              </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
     </div>

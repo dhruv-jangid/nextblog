@@ -64,7 +64,9 @@ export default async function Blog({
   }
   const { id, role } = session.user;
   const isAuthor = role === "ADMIN" || id === blog.author.id;
-  const isLiked = blog.likes.some((like) => like.userId === id);
+  const isLiked = blog.likes.some(
+    (like: { userId: string }) => like.userId === id
+  );
   const userSlug = session.user.slug;
 
   return (

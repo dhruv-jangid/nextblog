@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { BlogGrid } from "@/components/bloggrid";
 import { auth } from "@/lib/auth";
-import { RxExternalLink } from "react-icons/rx";
+import { SquareArrowOutUpRight } from "lucide-react";
 import ProfileImg from "@/components/profileimg";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -88,7 +88,7 @@ export default async function Profile({
                   <Link href={`/admin/dashboard`} className="hidden md:block">
                     <Button>
                       <span className="flex items-center gap-1">
-                        Dashboard <RxExternalLink />
+                        Dashboard <SquareArrowOutUpRight />
                       </span>
                     </Button>
                   </Link>
@@ -102,7 +102,11 @@ export default async function Profile({
               </div>
               <div className="flex items-center gap-2">
                 <h1 className="font-semibold">
-                  {user.blogs.reduce((sum, blog) => sum + blog._count.likes, 0)}
+                  {user.blogs.reduce(
+                    (sum: number, blog: { _count: { likes: number } }) =>
+                      sum + blog._count.likes,
+                    0
+                  )}
                 </h1>
                 <div>Likes</div>
               </div>
@@ -119,7 +123,7 @@ export default async function Profile({
                 <Link href={`/admin/dashboard`} className="md:hidden">
                   <Button>
                     <span className="flex items-center gap-1">
-                      Dashboard <RxExternalLink />
+                      Dashboard <SquareArrowOutUpRight />
                     </span>
                   </Button>
                 </Link>

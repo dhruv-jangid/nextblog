@@ -1,6 +1,6 @@
 import { Profile } from "@/components/settings/profile";
 import { Account } from "@/components/settings/account";
-import { HiOutlineUser, HiOutlineCog6Tooth } from "react-icons/hi2";
+import { UserRound, Cog } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -38,7 +38,7 @@ export default async function Settings({
                       : "text-gray-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <HiOutlineUser className="w-5 h-5" />
+                  <UserRound className="w-5 h-5" />
                   Profile
                 </Link>
               </li>
@@ -51,7 +51,7 @@ export default async function Settings({
                       : "text-gray-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <HiOutlineCog6Tooth className="w-5 h-5" />
+                  <Cog className="w-5 h-5" />
                   Account
                 </Link>
               </li>

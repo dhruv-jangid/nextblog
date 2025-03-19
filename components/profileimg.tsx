@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { FaPencilAlt } from "react-icons/fa";
+import { ImagePlus } from "lucide-react";
 import { changeProfileImg, removeProfileImg } from "@/actions/handleUser";
 import Account from "@/public/images/account.png";
 
@@ -71,7 +71,7 @@ export default function ProfileImg({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {isAuthor && (
-          <FaPencilAlt
+          <ImagePlus
             className="absolute top-2 right-2 text-white cursor-pointer"
             onClick={() => setIsEditingImage(true)}
           />

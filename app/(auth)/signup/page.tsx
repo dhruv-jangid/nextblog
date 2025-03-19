@@ -1,16 +1,14 @@
 "use client";
 
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
-import { PiEye, PiEyeClosed } from "react-icons/pi";
+import Google from "@/public/images/google.png";
+import Github from "@/public/images/github.png";
+import { Eye, EyeClosed } from "lucide-react";
 import auth from "@/public/images/auth.jpg";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import Image from "next/image";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { generateSlug } from "@/utils/generateSlug";
-import { checkProfanity } from "@/utils/checkProfanity";
+import { credentialSignUp, socialSignIn } from "@/actions/handleAuth";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,51 +22,33 @@ export default function Signup() {
           <button
             className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={pending}
-            onClick={async (e) => {
-              e.preventDefault();
+            onClick={async () => {
               setError(null);
               setPending(true);
-
-              await authClient.signIn.social(
-                { provider: "google" },
-                {
-                  onRequest: () => {
-                    setPending(true);
-                  },
-                  onError: (ctx) => {
-                    setPending(false);
-                    setError(ctx.error.message);
-                  },
-                }
-              );
+              const error = await socialSignIn("google");
+              if (error) {
+                setPending(false);
+                setError(error);
+              }
             }}
           >
-            <FcGoogle />
+            <Image src={Google} alt="Google's icon" width={16} height={16} />
             Google
           </button>
           <button
             className="flex items-center justify-center gap-2 bg-[#EEEEEE] text-[#0f0f0f] text-lg font-semibold w-full px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={async (e) => {
-              e.preventDefault();
+            onClick={async () => {
               setError(null);
               setPending(true);
-
-              await authClient.signIn.social(
-                { provider: "github" },
-                {
-                  onRequest: () => {
-                    setPending(true);
-                  },
-                  onError: (ctx) => {
-                    setPending(false);
-                    setError(ctx.error.message);
-                  },
-                }
-              );
+              const error = await socialSignIn("github");
+              if (error) {
+                setPending(false);
+                setError(error);
+              }
             }}
             disabled={pending}
           >
-            <FaGithub />
+            <Image src={Github} alt="Github's icon" width={18} height={18} />
             Github
           </button>
         </div>
@@ -95,30 +75,12 @@ export default function Signup() {
             const email = e.currentTarget.email.value as string;
             const password = e.currentTarget.password.value as string;
             const slug = e.currentTarget.slug.value as string;
-            if (checkProfanity(slug)) {
-              setPending(false);
-              setError("Inappropriate language!");
-              return null;
-            }
-            const actualSlug = generateSlug(slug);
 
-            await authClient.signUp.email(
-              { email, password, name: slug, slug: actualSlug },
-              {
-                onRequest: () => {
-                  setPending(true);
-                  setError(null);
-                },
-                onSuccess: async () => {
-                  setPending(false);
-                  setError("Verification email sent to your gmail inbox!");
-                },
-                onError: (ctx) => {
-                  setPending(false);
-                  setError(ctx.error.message);
-                },
-              }
-            );
+            const error = await credentialSignUp(slug, email, password);
+            if (error) {
+              setPending(false);
+              setError(error);
+            }
           }}
         >
           <div className="flex flex-col gap-2 w-full">
@@ -145,26 +107,24 @@ export default function Signup() {
             />
           </div>
 
-          <div className="flex flex-col gap-2 w-full">
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="w-full p-1.5 px-3 border bg-white/5 border-gray-500 rounded-xl focus:outline-hidden mb-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                id="password"
-                name="password"
-                placeholder="Password"
-                required
-                disabled={pending}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-5 -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
-                disabled={pending}
-              >
-                {showPassword ? <PiEye size={20} /> : <PiEyeClosed size={20} />}
-              </button>
-            </div>
+          <div className="relative flex flex-col gap-2 w-full h-24">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="w-full p-1.5 px-3 border bg-white/5 border-gray-500 rounded-xl focus:outline-hidden mb-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              id="password"
+              name="password"
+              placeholder="Password"
+              required
+              disabled={pending}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-5 -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
+              disabled={pending}
+            >
+              {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
+            </button>
             <input
               type="password"
               className="w-full p-1.5 px-3 border bg-white/5 border-gray-500 rounded-xl focus:outline-hidden mb-1.5 disabled:opacity-50 disabled:cursor-not-allowed"

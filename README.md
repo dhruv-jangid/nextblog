@@ -1,6 +1,6 @@
 # NextBlog - Modern Blogging Platform
 
-A feature-rich blogging platform built with the latest Next.js 15, focusing on performance, security, and user experience.
+A feature-rich blogging platform built with the latest Next.js features, now refactored with the new App Router, enhanced server components, and an optimized architecture for performance and scalability.
 
 ## Live Demo
 
@@ -8,7 +8,7 @@ Visit the live application at [metapress.vercel.app](https://metapress.vercel.ap
 
 ## Stack
 
-- **Framework**: Next.js 15 with React 19
+- **Framework**: Next.js with the new App Router and React Server Components
 - **Database**: PostgreSQL with Prisma (Vercel's NeonDB in production)
 - **Authentication**: BetterAuth
 - **Image Storage**: Cloudinary
@@ -30,7 +30,7 @@ Visit the live application at [metapress.vercel.app](https://metapress.vercel.ap
 - Rich text editing with TipTap
 - Image upload and management
 - Category organization
-- URL slugs for SEO
+- SEO-friendly URL slugs
 - Like system
 - Commenting system
 
@@ -87,7 +87,7 @@ cd nextblog
 npm install
 ```
 
-2. Set up your environment variables following the example above
+2. Set up your environment variables following the example above.
 
 3. Initialize the database:
 
@@ -106,12 +106,12 @@ Visit `http://localhost:3000` to see your application.
 
 ## Project Structure
 
-- `/actions`: Server actions for data operations
-- `/app`: Next.js app router pages and layouts
-- `/lib`: Utility functions and configurations
-- `/prisma`: Database schema and client
-- `/public`: Static assets
-- `/components`: React components
+- `/actions` - Server actions for data operations
+- `/app` - Next.js App Router pages, layouts, and server components
+- `/lib` - Utility functions and configurations
+- `/prisma` - Database schema and client
+- `/public` - Static assets
+- `/components` - React components
 
 ## Acknowledgments
 

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { MdOutlineEmail } from "react-icons/md";
-import { FaGithub, FaInstagram } from "react-icons/fa";
+import { Mail } from "lucide-react";
+import Instagram from "@/public/images/instagram.png";
+import Github from "@/public/images/github.png";
 import categories from "@/utils/blogCategories.json";
 import { useActionState } from "react";
 import { newsletterSubscription } from "@/actions/handleUser";
+import Image from "next/image";
 
 export const Footer = () => {
   const [error, action, isPending] = useActionState(
@@ -19,13 +21,24 @@ export const Footer = () => {
         <h1 className="text-2xl font-bold">About Me</h1>
         <div className="flex flex-col gap-2.5">
           <div className="flex gap-2 items-center">
-            <FaGithub size={20} />
+            <Image
+              src={Github}
+              alt="Github Icon"
+              width={16}
+              height={16}
+              className="invert"
+            />
             <Link href="https://github.com/toxic-lmao" target="_blank">
               Github
             </Link>
           </div>
           <div className="flex gap-2 items-center">
-            <FaInstagram size={20} />
+            <Image
+              src={Instagram}
+              alt="Instagram Icon"
+              width={16}
+              height={16}
+            />
             <Link href="https://www.instagram.com/toxic.lmao/" target="_blank">
               Instagram
             </Link>
@@ -66,7 +79,7 @@ export const Footer = () => {
               disabled={isPending}
               autoComplete="email"
             />
-            <MdOutlineEmail
+            <Mail
               className="absolute right-4 top-1/2 -translate-y-1/2"
               color="gray"
               size={20}

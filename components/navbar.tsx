@@ -7,8 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import logo from "@/app/favicon.ico";
 import { signOutCurrent } from "@/actions/handleAuth";
-import { GrMenu, GrClose } from "react-icons/gr";
-import { HiChevronDown } from "react-icons/hi2";
+import { Menu, X, ChevronDown } from "lucide-react";
 import Account from "@/public/images/account.png";
 import { Session } from "@/lib/auth";
 
@@ -50,7 +49,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
         className="lg:hidden mobile-menu-container"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? <GrClose size={24} /> : <GrMenu size={24} />}
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       <div className="flex items-center gap-2">
@@ -100,7 +99,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-1.5 bg-[#EEEEEE]/10 transition-all duration-300 rounded-full pl-2 pr-1 py-1"
             >
-              <HiChevronDown
+              <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   isProfileOpen ? "rotate-180" : ""
                 }`}
@@ -163,7 +162,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-1.5 bg-[#EEEEEE]/10 hover:bg-[#EEEEEE]/20 transition-all duration-300 rounded-full pl-2 pr-1 py-1 cursor-pointer"
             >
-              <HiChevronDown
+              <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   isProfileOpen ? "rotate-180" : ""
                 }`}

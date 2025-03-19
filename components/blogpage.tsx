@@ -17,9 +17,8 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
-import { TbEdit, TbPhotoUp, TbTrash } from "react-icons/tb";
+import { PencilLine, ImageUp, Trash2 } from "lucide-react";
 import { useState, useRef } from "react";
-import { useActionState } from "react";
 import { deleteBlog, editBlog } from "@/actions/handleBlog";
 import blogCategories from "@/utils/blogCategories.json";
 import Image from "next/image";
@@ -102,47 +101,15 @@ export default function BlogPage({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [image, setImage] = useState<File | null>(null);
-  const [deleteError, deleteAction, deleteIsPending] = useActionState(
-    deleteBlog,
-    null
-  );
-  const [editError, editAction, editIsPending] = useActionState(editBlog, null);
-
-  const hasChanges = () =>
-    title !== blog.title ||
-    content !== blog.content ||
-    category !== blog.category ||
-    image !== null;
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    }
-  };
-
-  const handleCancel = () => {
-    setTitle(blog.title);
-    setContent(blog.content);
-    setCategory(blog.category);
-    setPreviewUrl(null);
-    setImage(null);
-    setIsEditing(false);
-  };
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:gap-8 lg:px-16 lg:py-10">
       <div className="flex flex-col gap-6">
-        {deleteError && (
+        {error && (
           <div className="flex bg-red-800 justify-center text-xl font-medium rounded-2xl py-2">
-            {deleteError}
-          </div>
-        )}
-        {editError && (
-          <div className="flex bg-red-800 justify-center text-xl font-medium rounded-2xl py-2">
-            {editError}
+            {error}
           </div>
         )}
         <div className="flex justify-between">
@@ -150,7 +117,7 @@ export default function BlogPage({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              disabled={deleteIsPending || editIsPending}
+              disabled={isPending}
               className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl tracking-tight text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               {blogCategories.map((cat) => (
@@ -168,68 +135,62 @@ export default function BlogPage({
             (isEditing ? (
               <div className="flex gap-2 tracking-tight">
                 <Button
-                  onClick={handleCancel}
-                  disabled={editIsPending || deleteIsPending}
+                  onClick={() => {
+                    setTitle(blog.title);
+                    setContent(blog.content);
+                    setCategory(blog.category);
+                    setPreviewUrl(null);
+                    setImage(null);
+                    setError(null);
+                    setIsEditing(false);
+                  }}
+                  disabled={isPending}
                   className="flex items-center gap-1 bg-red-700 text-sm xl:text-base text-white cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </Button>
-                <form action={editAction}>
-                  <input
-                    type="hidden"
-                    name="slug"
-                    id="slug"
-                    value={blog.slug}
-                  />
-                  <input type="hidden" name="title" id="title" value={title} />
-                  <input
-                    type="hidden"
-                    name="content"
-                    id="content"
-                    value={content}
-                  />
-                  <input
-                    type="hidden"
-                    name="category"
-                    id="category"
-                    value={category}
-                  />
-                  {image && (
-                    <input
-                      type="file"
-                      name="image"
-                      className="hidden"
-                      ref={(input) => {
-                        if (input) {
-                          const dataTransfer = new DataTransfer();
-                          dataTransfer.items.add(image);
-                          input.files = dataTransfer.files;
-                        }
-                      }}
-                    />
-                  )}
-                  <Button
-                    disabled={editIsPending || deleteIsPending || !hasChanges()}
-                  >
-                    {editIsPending ? "Saving..." : "Save"}
-                  </Button>
-                </form>
+                <Button
+                  onClick={async () => {
+                    setIsPending(true);
+                    const error = await editBlog(
+                      blog.slug,
+                      title,
+                      content,
+                      category,
+                      image && image
+                    );
+                    if (error) {
+                      setError(error);
+                    }
+                    setIsPending(false);
+                    if (!error) setIsEditing(false);
+                  }}
+                  disabled={
+                    isPending ||
+                    (title === blog.title &&
+                      content === blog.content &&
+                      category === blog.category &&
+                      !image)
+                  }
+                >
+                  {isPending ? "Saving..." : "Save"}
+                </Button>
               </div>
             ) : (
               <div className="flex gap-2">
                 <button
                   onClick={() => setIsEditing(true)}
-                  disabled={editIsPending || deleteIsPending}
+                  disabled={isPending}
                   className="flex items-center tracking-tight gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-[#0F0F0F] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Edit <TbEdit />
+                  Edit <PencilLine size={16} />
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  disabled={deleteIsPending || editIsPending}
+                  disabled={isPending}
                   className="flex items-center gap-1.5 bg-red-700 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <TbTrash />
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))}
@@ -277,7 +238,14 @@ export default function BlogPage({
             <input
               type="file"
               ref={fileInputRef}
-              onChange={handleImageChange}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImage(file);
+                  const url = URL.createObjectURL(file);
+                  setPreviewUrl(url);
+                }
+              }}
               accept="image/*"
               className="hidden"
             />
@@ -286,7 +254,7 @@ export default function BlogPage({
               className="absolute inset-0 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
             >
               <div className="flex items-center gap-2 text-white">
-                <TbPhotoUp size={24} />
+                <ImageUp size={24} />
                 <span>Change Image</span>
               </div>
             </div>
@@ -330,19 +298,21 @@ export default function BlogPage({
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleteIsPending || editIsPending}
+                disabled={isPending}
               >
                 Cancel
               </Button>
-              <form action={deleteAction}>
-                <input type="hidden" name="slug" id="slug" value={blog.slug} />
-                <button
-                  disabled={deleteIsPending || editIsPending}
-                  className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {deleteIsPending ? "Deleting..." : "Delete"}
-                </button>
-              </form>
+              <button
+                onClick={async () => {
+                  setIsPending(true);
+                  await deleteBlog(blog.slug);
+                  setIsPending(false);
+                }}
+                disabled={isPending}
+                className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPending ? "Deleting..." : "Delete"}
+              </button>
             </div>
           </div>
         </div>

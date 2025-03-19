@@ -15,7 +15,13 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
-import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from "react-icons/fa";
+import {
+  Bold as BoldIcon,
+  Italic as ItalicIcon,
+  Underline as UnderlineIcon,
+  Undo,
+  Redo,
+} from "lucide-react";
 
 interface MenuButtonProps {
   onClick: () => void;
@@ -120,21 +126,21 @@ export const RichTextEditor = ({
             isActive={editor?.isActive("bold")}
             tooltip="Bold"
           >
-            <FaBold />
+            <BoldIcon size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor?.chain().focus().toggleItalic().run()}
             isActive={editor?.isActive("italic")}
             tooltip="Italic"
           >
-            <FaItalic />
+            <ItalicIcon size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
             isActive={editor?.isActive("underline")}
             tooltip="Underline"
           >
-            <FaUnderline />
+            <UnderlineIcon size={18} />
           </MenuButton>
         </div>
 
@@ -143,13 +149,13 @@ export const RichTextEditor = ({
             onClick={() => editor?.chain().focus().undo().run()}
             tooltip="Undo"
           >
-            <FaUndo />
+            <Undo size={18} />
           </MenuButton>
           <MenuButton
             onClick={() => editor?.chain().focus().redo().run()}
             tooltip="Redo"
           >
-            <FaRedo />
+            <Redo size={18} />
           </MenuButton>
         </div>
       </div>

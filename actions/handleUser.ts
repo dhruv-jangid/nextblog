@@ -1,12 +1,18 @@
 "use server";
 
-import { deleteImage, deleteImages, uploadImage } from "@/lib/cloudinary";
-import { getPublicIdFromUrl } from "@/lib/cloudinary";
+import {
+  deleteImage,
+  deleteImages,
+  uploadImage,
+  getPublicIdFromUrl,
+} from "@/lib/cloudinary";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { checkProfanity } from "@/utils/checkProfanity";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { APIError } from "better-auth/api";
+import { redirect } from "next/navigation";
 
 export const changeProfileImg = async (image: File) => {
   const session = await auth.api.getSession({
@@ -15,6 +21,7 @@ export const changeProfileImg = async (image: File) => {
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
+
   const { id } = session.user;
 
   const user = await prisma.user.findUnique({
@@ -57,6 +64,7 @@ export const removeProfileImg = async () => {
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
+
   const { id } = session.user;
 
   const user = await prisma.user.findUnique({
@@ -93,6 +101,7 @@ export const changeSlug = async (slug: string) => {
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
+
   const { id } = session.user;
 
   if (checkProfanity(slug)) {
@@ -140,6 +149,7 @@ export const changeName = async (name: string) => {
   if (!session) {
     return { success: false, message: "User not authenticated" };
   }
+
   const { id } = session.user;
 
   if (name === session.user.name) {
@@ -170,7 +180,7 @@ export const changeName = async (name: string) => {
 
 export const removeImages = async (id: string) => {
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       const [blogs, user] = await Promise.all([
         tx.blog.findMany({
           where: { authorId: id },
@@ -183,8 +193,8 @@ export const removeImages = async (id: string) => {
       ]);
 
       const publicIds = blogs
-        .map((blog) => blog.image && getPublicIdFromUrl(blog.image))
-        .filter((id): id is string => Boolean(id));
+        .map((blog: any) => blog.image && getPublicIdFromUrl(blog.image))
+        .filter((id: any): id is string => Boolean(id));
 
       const userImagePublicId = user?.image
         ? getPublicIdFromUrl(user.image, true)
@@ -200,6 +210,7 @@ export const removeImages = async (id: string) => {
     });
   } catch (error) {
     console.error("Error deleting images:", error);
+
     return "Failed to delete images";
   }
 };
@@ -216,47 +227,26 @@ export const newsletterSubscription = async (
   return "Subscribed to newsletter";
 };
 
-export const removeUser = async (id: string) => {
+export const removeUser = async (password: string) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  if (!session || session.user.role != "ADMIN") {
-    return { success: false, message: "User not authenticated" };
+  if (!session) {
+    redirect("/signin");
   }
+
   try {
-    await prisma.$transaction(async (tx) => {
-      const [blogs, user] = await Promise.all([
-        tx.blog.findMany({
-          where: { authorId: id },
-          select: { id: true, image: true },
-        }),
-        tx.user.findUnique({
-          where: { id },
-          select: { image: true },
-        }),
-      ]);
-
-      const publicIds = blogs
-        .map((blog) => blog.image && getPublicIdFromUrl(blog.image))
-        .filter((id): id is string => Boolean(id));
-
-      const userImagePublicId = user?.image
-        ? getPublicIdFromUrl(user.image, true)
-        : null;
-      if (userImagePublicId) publicIds.push(userImagePublicId);
-
-      await tx.user.delete({ where: { id } });
-
-      if (publicIds.length > 0) {
-        const deleteResult = await deleteImages(publicIds);
-        if (!deleteResult.success) {
-          throw new Error("Failed to delete images");
-        }
-      }
+    await auth.api.deleteUser({
+      body: { password },
+      headers: await headers(),
     });
+
+    return "Account deletion request sent to your email";
   } catch (error) {
-    console.error("Error deleting user:", error);
-    return "Failed to delete account";
+    if (error instanceof APIError) {
+      return error.message;
+    }
+
+    return "Failed to delete account. Please try again after sometime!";
   }
-  revalidatePath("/admin/dashboard");
 };

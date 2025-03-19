@@ -6,7 +6,7 @@ import { Button } from "@/components/button";
 import { createBlog } from "@/actions/handleBlog";
 import blogCategories from "@/utils/blogCategories.json";
 import { z } from "zod";
-import { TbPhotoUp } from "react-icons/tb";
+import { ImageUp } from "lucide-react";
 import Image from "next/image";
 import { RichTextEditor } from "@/components/editor";
 
@@ -177,7 +177,7 @@ export default function CreateBlog() {
           ) : (
             <div className="w-full h-full bg-gray-800 flex items-center justify-center">
               <div className="text-center">
-                <TbPhotoUp size={48} className="mx-auto mb-2" />
+                <ImageUp size={48} className="mx-auto mb-2" />
                 <span>Click to upload cover image</span>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function CreateBlog() {
             className="absolute inset-0 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
           >
             <div className="flex items-center gap-2 text-white">
-              <TbPhotoUp size={24} />
+              <ImageUp size={24} />
               <span>{blogCover ? "Change Image" : "Upload Image"}</span>
             </div>
           </div>
