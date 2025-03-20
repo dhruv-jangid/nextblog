@@ -18,5 +18,5 @@ export default function BlogCategoryLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return <>{children}</>;
 }

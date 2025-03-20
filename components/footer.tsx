@@ -1,26 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Send } from "lucide-react";
 import Instagram from "@/public/images/instagram.png";
 import Github from "@/public/images/github.png";
 import categories from "@/utils/blogCategories.json";
-import { useActionState } from "react";
 import { newsletterSubscription } from "@/actions/handleUser";
 import Image from "next/image";
+import { useState } from "react";
 
 export const Footer = () => {
-  const [error, action, isPending] = useActionState(
-    newsletterSubscription,
-    null
-  );
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
   return (
-    <div className="p-8 pb-16 lg:px-16 lg:pt-14 lg:pb-24 bg-[#191919] rounded-t-2xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-10 gap-8 lg:gap-0 tracking-tight">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">About Me</h1>
+    <div className="p-8 pb-16 lg:px-16 lg:pt-14 lg:pb-24 bg-neutral-900 text-neutral-300 rounded-t-4xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-12 gap-8 lg:gap-0 tracking-tight">
+      <div className="flex flex-col gap-4 w-fit">
+        <h1 className="text-2xl font-bold text-rose-300">About Me</h1>
         <div className="flex flex-col gap-2.5">
-          <div className="flex gap-2 items-center">
+          <div
+            className="flex gap-2 items-center cursor-pointer w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
+            onClick={() => {
+              window.open("https://github.com/toxic-lmao", "_blank");
+            }}
+          >
             <Image
               src={Github}
               alt="Github Icon"
@@ -28,71 +31,95 @@ export const Footer = () => {
               height={16}
               className="invert"
             />
-            <Link href="https://github.com/toxic-lmao" target="_blank">
-              Github
-            </Link>
+            Github
           </div>
-          <div className="flex gap-2 items-center">
+          <div
+            className="flex gap-2 items-center cursor-pointer w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
+            onClick={() => {
+              window.open("https://www.instagram.com/toxic.lmao/", "_blank");
+            }}
+          >
             <Image
               src={Instagram}
               alt="Instagram Icon"
               width={16}
               height={16}
             />
-            <Link href="https://www.instagram.com/toxic.lmao/" target="_blank">
-              Instagram
-            </Link>
+            Instagram
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">Quick Links</h1>
+      <div className="flex flex-col gap-4 w-fit">
+        <h1 className="text-2xl font-bold text-rose-300">Quick Links</h1>
         <div className="flex flex-col gap-2.5">
-          <Link href="/">Home</Link>
-          <Link href="/blogs">Blogs</Link>
-          <Link href="/contact">Contact</Link>
+          <Link
+            href="/"
+            className="w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
+          >
+            Home
+          </Link>
+          <Link
+            href="/blogs"
+            className="w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
+          >
+            Blogs
+          </Link>
+          <Link
+            href="/contact"
+            className="w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
+          >
+            Contact
+          </Link>
         </div>
       </div>
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">Categories</h1>
+      <div className="flex flex-col gap-4 w-fit">
+        <h1 className="text-2xl font-bold text-rose-300">Categories</h1>
         <div className="flex flex-col gap-2.5">
           {categories.slice(0, 4).map((category, index) => (
-            <Link href={`/blogs/${category}`} key={index}>
+            <Link
+              href={`/blogs/${category}`}
+              key={index}
+              className="w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
+            >
               {category}
             </Link>
           ))}
         </div>
       </div>
       <div className="flex flex-col gap-4 md:col-span-3 lg:col-span-1">
-        <h1 className="text-2xl font-bold">Newsletter</h1>
-        <form action={action} className="flex flex-col gap-2.5">
-          {error && (
-            <p className="text-center bg-red-800 py-1.5 rounded-xl">{error}</p>
-          )}
-          <div className="relative">
-            <input
-              type="email"
-              id="newsletter"
-              name="newsletter"
-              placeholder="Email"
-              className="bg-[#262626] rounded-xl p-2 px-4 w-full"
-              disabled={isPending}
-              autoComplete="email"
-            />
-            <Mail
-              className="absolute right-4 top-1/2 -translate-y-1/2"
-              color="gray"
-              size={20}
-            />
-          </div>
+        <h1 className="text-2xl font-bold text-rose-300">Newsletter</h1>
+        <div className="relative flex flex-col gap-1">
+          <input
+            type="email"
+            id="newsletter"
+            name="newsletter"
+            placeholder="Email"
+            className="w-full py-2.5 px-5 leading-tight border border-neutral-700 rounded-4xl focus:outline-hidden mb-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+          />
           <button
-            type="submit"
-            disabled={isPending}
-            className="bg-[#EEEEEE] text-[#0F0F0F] py-2 rounded-xl cursor-pointer hover:bg-[#EEEEEE]/80 transition-all duration-300"
+            onClick={async () => {
+              setEmail("");
+              const error = await newsletterSubscription(email);
+              setError(error);
+            }}
+            className={`absolute right-5 top-3 text-neutral-500 ${
+              email.length > 3 && "text-rose-300"
+            } cursor-pointer disabled:cursor-not-allowed`}
+            disabled={email.length < 4}
           >
-            {isPending ? "Subscribing..." : "Subscribe"}
+            <Send size={18} />
           </button>
-        </form>
+          {error && (
+            <p className="px-5 py-2.5 leading-tight text-red-500 bg-red-500/10 border border-red-500/50 rounded-4xl text-center">
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

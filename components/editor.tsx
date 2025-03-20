@@ -44,8 +44,8 @@ const MenuButton = ({
 }: MenuButtonProps) => (
   <button
     onClick={onClick}
-    className={`p-2 rounded-md transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-      isActive ? "bg-gray-200 dark:bg-gray-700" : ""
+    className={`p-2 rounded-full transition-all duration-200 ${
+      isActive && "bg-neutral-700"
     }`}
     type="button"
     title={tooltip}
@@ -101,9 +101,9 @@ export const RichTextEditor = ({
   });
 
   return (
-    <div className="border border-gray-300 dark:border-gray-700 rounded-2xl overflow-hidden">
-      <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
-        <div className="flex flex-wrap items-center gap-1 py-1.5 px-3 border-b border-gray-300 dark:border-gray-700">
+    <div className="rounded-4xl overflow-hidden">
+      <div className="bg-neutral-900">
+        <div className="flex flex-wrap items-center gap-1 py-2.5 leading-tight px-4 border-b border-neutral-800">
           {[1, 2, 3].map((level) => (
             <MenuButton
               key={level}
@@ -120,7 +120,7 @@ export const RichTextEditor = ({
               H{level}
             </MenuButton>
           ))}
-          <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
+          <div className="h-6 w-px bg-neutral-700 mx-1" />
           <MenuButton
             onClick={() => editor?.chain().focus().toggleBold().run()}
             isActive={editor?.isActive("bold")}
@@ -144,7 +144,7 @@ export const RichTextEditor = ({
           </MenuButton>
         </div>
 
-        <div className="flex gap-1 px-3 py-2">
+        <div className="flex gap-1 px-4 py-2 leading-tight">
           <MenuButton
             onClick={() => editor?.chain().focus().undo().run()}
             tooltip="Undo"
@@ -162,8 +162,8 @@ export const RichTextEditor = ({
 
       <EditorContent
         editor={editor}
-        className="prose max-w-none p-4 text-balance tracking-normal min-h-[300px] bg-[#191919] [&_.ProseMirror]:outline-none 
-        [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h3]:text-2xl [&_.ProseMirror_p]:text-xl
+        className="prose max-w-none p-6 rounded-b-4xl text-balance tracking-normal min-h-[300px] [&_.ProseMirror]:outline-none border border-t-0 border-neutral-800
+        [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_p]:text-lg
         [&_.ProseMirror_h1]:mb-2 [&_.ProseMirror_h2]:mb-2 [&_.ProseMirror_h3]:mb-2
         [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ol]:mb-4
         [&_.ProseMirror_li]:mb-2"

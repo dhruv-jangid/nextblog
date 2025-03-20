@@ -215,11 +215,7 @@ export const removeImages = async (id: string) => {
   }
 };
 
-export const newsletterSubscription = async (
-  prevState: any,
-  formData: FormData
-) => {
-  const email = formData.get("newsletter") as string;
+export const newsletterSubscription = async (email: string) => {
   if (!email) {
     return "Email is required";
   }

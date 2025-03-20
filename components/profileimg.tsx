@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ImagePlus } from "lucide-react";
+import { ImageUp } from "lucide-react";
 import { changeProfileImg, removeProfileImg } from "@/actions/handleUser";
 import Account from "@/public/images/account.png";
 
@@ -19,7 +19,7 @@ export default function ProfileImg({
     <div className="flex flex-col gap-16 justify-center lg:flex-row items-center lg:text-base">
       {isEditingImage && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-75 flex justify-center items-center z-50">
-          <div className="flex flex-col items-center rounded-2xl bg-[#0F0F0F] overflow-hidden border border-[#EEEEEE]/20">
+          <div className="flex flex-col text-center items-center rounded-4xl bg-neutral-950 overflow-hidden ring ring-neutral-800">
             <input
               id="fileInput"
               type="file"
@@ -34,14 +34,14 @@ export default function ProfileImg({
               }}
             />
             <button
-              className="w-full text-center p-3 px-6 cursor-pointer hover:bg-[#EEEEEE] hover:text-[#0F0F0F] border-b border-[#EEEEEE]/20 transition-all duration-200"
+              className="w-full p-3 px-6 cursor-pointer hover:bg-rose-300 hover:text-neutral-950 border-b border-neutral-800 transition-all duration-200"
               onClick={() => document.getElementById("fileInput")?.click()}
             >
               Upload Image
             </button>
             <button
               type="submit"
-              className="cursor-pointer w-full text-center p-3 px-6 hover:bg-[#EEEEEE] hover:text-[#0F0F0F] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer w-full p-3 px-6 hover:bg-rose-300 hover:text-neutral-950 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={async () => {
                 setIsEditingImage(false);
                 await removeProfileImg();
@@ -51,7 +51,7 @@ export default function ProfileImg({
               Remove Current Photo
             </button>
             <div
-              className="w-full text-center p-3 px-6 cursor-pointer hover:bg-[#EEEEEE] hover:text-[#0F0F0F] border-t border-[#EEEEEE]/20 transition-all duration-200"
+              className="w-full p-3 px-6 cursor-pointer hover:bg-rose-300 hover:text-neutral-950 border-t border-neutral-800 transition-all duration-200"
               onClick={() => {
                 setIsEditingImage(false);
               }}
@@ -71,8 +71,8 @@ export default function ProfileImg({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {isAuthor && (
-          <ImagePlus
-            className="absolute top-2 right-2 text-white cursor-pointer"
+          <ImageUp
+            className="absolute top-2 right-2 text-rose-300 cursor-pointer hover:animate-bounce"
             onClick={() => setIsEditingImage(true)}
           />
         )}

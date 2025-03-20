@@ -24,28 +24,25 @@ export const Like = ({
           onClick={async () => {
             setIsPending(true);
             await likeBlog(blogSlug);
-            setIsPending(false);
             router.refresh();
+            setIsPending(false);
           }}
           disabled={isPending}
           className="flex disabled:opacity-50 transition-all duration-300"
         >
           {isLiked ? (
             <Heart
-              stroke="red"
-              fill="red"
               size={32}
               className={`${
                 isPending ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
+              } stroke-red-700 fill-red-700`}
             />
           ) : (
             <Heart
-              stroke="#EEE"
               size={32}
               className={`${
                 isPending ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
+              } stroke-red-700`}
             />
           )}
         </button>

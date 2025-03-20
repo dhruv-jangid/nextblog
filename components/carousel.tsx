@@ -31,9 +31,9 @@ export const Carousel = ({
         alt={blog.title}
         fill={true}
         priority={true}
-        className="rounded-3xl bg-linear-to-bl from-[#191919] from-40% to-transparent object-cover"
+        className="rounded-4xl object-cover"
       />
-      <div className="absolute left-8 md:left-14 bottom-8 md:bottom-14 text-base flex flex-col gap-2 sm:gap-4">
+      <div className="absolute left-8 md:left-14 bottom-8 md:bottom-14 text-base flex flex-col gap-2 sm:gap-4 w-2/3 md:w-1/2">
         <Link
           href={`/blogs/${blog.category}`}
           className="text-sm xl:text-base w-max"
@@ -42,7 +42,7 @@ export const Carousel = ({
         </Link>
 
         <Link href={`/${blog.author.slug}/${blog.slug}`}>
-          <h1 className="text-white text-xl antialiased md:text-3xl xl:text-4xl font-bold w-2/3 md:w-4/5 line-clamp-2 text-balance hover:text-[#EEEEEE]/80 transition-all duration-300 sm:line-clamp-3">
+          <h1 className="text-xl antialiased md:text-3xl xl:text-4xl font-bold line-clamp-2 text-balance hover:animate-pulse transition-all duration-300 sm:line-clamp-3">
             {blog.title}
           </h1>
         </Link>

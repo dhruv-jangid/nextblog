@@ -8,14 +8,13 @@ import z from "zod";
 import { nextCookies } from "better-auth/next-js";
 import { removeImages } from "@/actions/handleUser";
 import { APIError } from "better-auth/api";
-import { openAPI } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  plugins: [nextCookies(), openAPI()],
+  plugins: [nextCookies()],
   appName: "Metapress",
   advanced: { cookiePrefix: "metapress" },
   user: {

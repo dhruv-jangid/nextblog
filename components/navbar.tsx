@@ -24,7 +24,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
 
-  const isProfileActive = pathname === `/${session?.user.name}`;
+  const isProfileActive = pathname === `/${session?.user.slug}`;
   const isSettingsActive = pathname === "/settings";
 
   useEffect(() => {
@@ -44,17 +44,27 @@ export const Navbar = ({ session }: { session: Session | null }) => {
   }, [isOpen, isProfileOpen]);
 
   return (
-    <div className="flex justify-between items-center px-6 md:px-8 py-6 sticky top-0 z-50 backdrop-blur-2xl rounded-b-2xl tracking-tight">
+    <div className="flex justify-between items-center px-6 md:px-8 py-6 sticky top-0 z-50 backdrop-blur-3xl rounded-b-4xl tracking-tight">
       <button
         className="lg:hidden mobile-menu-container"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? (
+          <X
+            size={36}
+            className="text-neutral-300 border border-b-transparent border-neutral-700 rounded-xl rounded-bl-none p-1.5"
+          />
+        ) : (
+          <Menu
+            size={36}
+            className="text-neutral-300 border border-neutral-700 rounded-xl p-1.5"
+          />
+        )}
       </button>
 
-      <div className="flex items-center gap-2">
-        <Image src={logo} alt="Logo" className="w-6" />
-        <h1 className="font-semibold text-xl">MetaPress</h1>
+      <div className="flex items-center gap-2 cursor-default hover:animate-pulse">
+        <Image src={logo} alt="Logo" width={24} />
+        <h1 className="font-semibold text-xl text-rose-300">MetaPress</h1>
       </div>
 
       <div className="hidden lg:flex gap-6 items-center text-lg">
@@ -62,8 +72,10 @@ export const Navbar = ({ session }: { session: Session | null }) => {
           <Link
             key={href}
             href={href}
-            className={`rounded-xl py-1 px-3 transition-all duration-300 text-[#EEEEEE] ${
-              pathname === href ? "bg-white/10" : "hover:bg-white/5"
+            className={`rounded-xl py-1 px-3 transition-all duration-300 ${
+              pathname === href
+                ? "bg-rose-500/10 text-rose-300"
+                : "hover:bg-rose-500/10"
             }`}
           >
             {label}
@@ -72,18 +84,20 @@ export const Navbar = ({ session }: { session: Session | null }) => {
       </div>
 
       <div
-        className={`lg:hidden absolute top-16 left-7 mobile-menu-container ${
+        className={`lg:hidden absolute top-16 left-6 mobile-menu-container ${
           isOpen ? "block" : "hidden"
         }`}
       >
-        <div className="flex flex-col items-center rounded-2xl gap-4 py-2.5 px-1 bg-[#191919] shadow-md outline-1 outline-gray-600/80">
+        <div className="flex flex-col items-center rounded-2xl gap-4 py-2.5 px-1 bg-neutral-950 border rounded-tl-none border-neutral-700">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setIsOpen(false)}
               className={`rounded-xl py-1 px-3 transition-all duration-300 ${
-                pathname === href ? "bg-white/10" : "hover:bg-white/5"
+                pathname === href
+                  ? "bg-rose-500/10 text-rose-300"
+                  : "hover:bg-rose-500/10"
               }`}
             >
               {label}
@@ -97,11 +111,13 @@ export const Navbar = ({ session }: { session: Session | null }) => {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-1.5 bg-[#EEEEEE]/10 transition-all duration-300 rounded-full pl-2 pr-1 py-1"
+              className={`flex items-center gap-1.5 border border-neutral-700 transition-all duration-300 ${
+                isProfileOpen && "rounded-br-none border-b-transparent"
+              } rounded-full pl-2 pr-1 py-1`}
             >
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
-                  isProfileOpen ? "rotate-180" : ""
+                  isProfileOpen && "rotate-180"
                 }`}
               />
               <Image
@@ -113,17 +129,17 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               />
             </button>
             <div
-              className={`flex flex-col absolute right-0 mt-1 p-1.5 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
+              className={`flex flex-col absolute right-0 p-2 w-max bg-neutral-950 shadow-md border border-neutral-800 rounded-3xl transition-all duration-300 transform ${
                 isProfileOpen
-                  ? "opacity-100 scale-100 visible"
+                  ? "opacity-100 scale-100 visible rounded-tr-none"
                   : "opacity-0 scale-95 invisible"
               }`}
             >
               <Link
                 href={`/${session?.user.slug}`}
                 onClick={() => setIsProfileOpen(false)}
-                className={`px-3 py-1 rounded-xl whitespace-nowrap ${
-                  isProfileActive ? "bg-white/10" : "hover:bg-white/5"
+                className={`px-3 py-1 rounded-3xl whitespace-nowrap ${
+                  isProfileActive ? "bg-rose-500/10" : "hover:bg-rose-500/10"
                 }`}
               >
                 Profile
@@ -131,14 +147,14 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               <Link
                 href="/settings"
                 onClick={() => setIsProfileOpen(false)}
-                className={`px-3 py-1 rounded-xl whitespace-nowrap ${
-                  isSettingsActive ? "bg-white/10" : "hover:bg-white/5"
+                className={`px-3 py-1 rounded-3xl whitespace-nowrap ${
+                  isSettingsActive ? "bg-rose-500/10" : "hover:bg-rose-500/10"
                 }`}
               >
-                Settings
+                Setting
               </Link>
               <div
-                className="px-3 py-1 rounded-xl whitespace-nowrap"
+                className="px-3 py-1 rounded-3xl whitespace-nowrap"
                 onClick={() => {
                   setIsProfileOpen(false);
                   signOutCurrent();
@@ -160,11 +176,13 @@ export const Navbar = ({ session }: { session: Session | null }) => {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-1.5 bg-[#EEEEEE]/10 hover:bg-[#EEEEEE]/20 transition-all duration-300 rounded-full pl-2 pr-1 py-1 cursor-pointer"
+              className={`flex items-center gap-1.5 border border-neutral-700 hover:bg-rose-950/80 transition-all duration-300 ${
+                isProfileOpen && "rounded-br-none border-b-transparent"
+              } rounded-full pl-2 pr-1 py-1 cursor-pointer`}
             >
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
-                  isProfileOpen ? "rotate-180" : ""
+                  isProfileOpen && "rotate-180"
                 }`}
               />
               <Image
@@ -176,7 +194,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               />
             </button>
             <div
-              className={`flex flex-col absolute right-0 text-lg mt-1 p-2 w-max bg-[#191919] shadow-md outline-1 outline-gray-600/80 rounded-2xl transition-all duration-300 transform ${
+              className={`flex flex-col absolute right-0 text-lg p-2 w-max bg-neutral-950 shadow-md border border-neutral-700 rounded-tr-none rounded-3xl transition-all duration-300 transform ${
                 isProfileOpen
                   ? "opacity-100 scale-100 visible"
                   : "opacity-0 scale-95 invisible"
@@ -185,8 +203,8 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               <Link
                 href={`/${session?.user.slug}`}
                 onClick={() => setIsProfileOpen(false)}
-                className={`px-3 py-1 cursor-pointer rounded-xl ${
-                  isProfileActive ? "bg-white/10" : "hover:bg-white/5"
+                className={`px-3 py-1 cursor-pointer rounded-3xl ${
+                  isProfileActive ? "bg-rose-500/10" : "hover:bg-rose-500/10"
                 }`}
               >
                 Profile
@@ -194,14 +212,14 @@ export const Navbar = ({ session }: { session: Session | null }) => {
               <Link
                 href="/settings"
                 onClick={() => setIsProfileOpen(false)}
-                className={`px-3 py-1 cursor-pointer rounded-xl ${
-                  isSettingsActive ? "bg-white/10" : "hover:bg-white/5"
+                className={`px-3 py-1 cursor-pointer rounded-3xl ${
+                  isSettingsActive ? "bg-rose-500/10" : "hover:bg-rose-500/10"
                 }`}
               >
                 Setting
               </Link>
               <div
-                className="px-3 py-1 hover:bg-white/5 cursor-pointer rounded-xl"
+                className="px-3 py-1 hover:bg-rose-500/10 cursor-pointer rounded-3xl"
                 onClick={() => {
                   setIsProfileOpen(false);
                   signOutCurrent();

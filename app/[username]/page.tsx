@@ -58,7 +58,7 @@ export default async function Profile({
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 lg:p-12 tracking-tight antialiased">
+    <div className="flex flex-col gap-6 p-4 lg:p-12">
       <div className="flex flex-col gap-16 justify-center lg:flex-row items-center lg:text-base">
         <div className="flex lg:justify-center gap-8 xl:gap-16">
           <div className="relative h-30 w-30 lg:h-36 lg:w-36">
@@ -97,11 +97,13 @@ export default async function Profile({
 
             <div className="flex items-center gap-6 text-lg">
               <div className="flex items-center gap-2">
-                <h1 className="font-semibold">{user.blogs.length}</h1>
+                <h1 className="font-semibold text-rose-300">
+                  {user.blogs.length}
+                </h1>
                 <div>Blogs</div>
               </div>
               <div className="flex items-center gap-2">
-                <h1 className="font-semibold">
+                <h1 className="font-semibold text-rose-300">
                   {user.blogs.reduce(
                     (sum: number, blog: { _count: { likes: number } }) =>
                       sum + blog._count.likes,
@@ -112,10 +114,10 @@ export default async function Profile({
               </div>
             </div>
 
-            <div className="flex gap-2 items-center text-lg font-medium">
+            <div className="flex gap-2 items-center text-lg font-medium text-rose-300">
               {user.name}
               {user.role === "ADMIN" && (
-                <span className="text-red-700 text-lg">({user.role})</span>
+                <span className="text-red-800 text-lg">({user.role})</span>
               )}
             </div>
             {session?.user.role === "ADMIN" &&
@@ -133,7 +135,7 @@ export default async function Profile({
       </div>
 
       <div className="flex justify-center my-6">
-        <hr className="col-span-2 w-full md:w-3/4 border-gray-500" />
+        <hr className="col-span-2 w-full md:w-3/4 border-neutral-700" />
       </div>
 
       {user.blogs.length > 0 ? (

@@ -17,7 +17,7 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/button";
 import { Author } from "@/components/author";
-import { PencilLine, ImageUp, Trash2 } from "lucide-react";
+import { PencilLine, ImageUp, Trash2, CheckCheck, X } from "lucide-react";
 import { useState, useRef } from "react";
 import { deleteBlog, editBlog } from "@/actions/handleBlog";
 import blogCategories from "@/utils/blogCategories.json";
@@ -59,10 +59,11 @@ const ReadOnlyContent = ({ content }: { content: string }) => {
   return (
     <EditorContent
       editor={editor}
-      className="prose max-w-none text-balance bg-white/5 p-6 rounded-2xl antialiased [&_.ProseMirror]:outline-none 
-          [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h3]:text-2xl [&_.ProseMirror_p]:text-xl
-          [&_.ProseMirror_h1]:mb-2 [&_.ProseMirror_h2]:mb-2 [&_.ProseMirror_h3]:mb-2
-          [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_li]:mb-2"
+      className="prose max-w-none p-2 text-balance tracking-normal [&_.ProseMirror]:outline-none
+        [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_p]:text-lg
+        [&_.ProseMirror_h1]:mb-2 [&_.ProseMirror_h2]:mb-2 [&_.ProseMirror_h3]:mb-2
+        [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ol]:mb-4
+        [&_.ProseMirror_li]:mb-2"
     />
   );
 };
@@ -118,10 +119,14 @@ export default function BlogPage({
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               disabled={isPending}
-              className="bg-[#EEEEEE] px-3 py-1.5 rounded-xl tracking-tight text-sm xl:text-base text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
+              className="bg-rose-300 text-neutral-950 px-3.5 py-1.5 leading-tight rounded-2xl focus:outline-none tracking-tight max-w-2/5 cursor-pointer hover:bg-neutral-800 hover:text-rose-300 transition-colors"
             >
               {blogCategories.map((cat) => (
-                <option key={cat} value={cat}>
+                <option
+                  key={cat}
+                  value={cat}
+                  className="bg-neutral-800 text-neutral-200"
+                >
                   {cat}
                 </option>
               ))}
@@ -134,7 +139,7 @@ export default function BlogPage({
           {isAuthor &&
             (isEditing ? (
               <div className="flex gap-2 tracking-tight">
-                <Button
+                <button
                   onClick={() => {
                     setTitle(blog.title);
                     setContent(blog.content);
@@ -145,10 +150,11 @@ export default function BlogPage({
                     setIsEditing(false);
                   }}
                   disabled={isPending}
-                  className="flex items-center gap-1 bg-red-700 text-sm xl:text-base text-white cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 bg-red-800 text-sm xl:text-base text-white cursor-pointer px-3.5 py-2 leading-tight rounded-2xl hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
-                </Button>
+                  <X size={16} />
+                </button>
                 <Button
                   onClick={async () => {
                     setIsPending(true);
@@ -167,6 +173,7 @@ export default function BlogPage({
                   }}
                   disabled={
                     isPending ||
+                    content.length < 100 ||
                     (title === blog.title &&
                       content === blog.content &&
                       category === blog.category &&
@@ -174,6 +181,7 @@ export default function BlogPage({
                   }
                 >
                   {isPending ? "Saving..." : "Save"}
+                  <CheckCheck size={16} />
                 </Button>
               </div>
             ) : (
@@ -181,17 +189,15 @@ export default function BlogPage({
                 <button
                   onClick={() => setIsEditing(true)}
                   disabled={isPending}
-                  className="flex items-center tracking-tight gap-1.5 bg-[#EEEEEE] text-sm xl:text-base text-[#0F0F0F] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center tracking-tight gap-1.5 bg-rose-300 text-sm xl:text-base text-neutral-950 cursor-pointer px-3.5 py-2 leading-tight rounded-2xl hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Edit <PencilLine size={16} />
                 </button>
-                <button
+                <Trash2
+                  size={16}
                   onClick={() => setShowDeleteConfirm(true)}
-                  disabled={isPending}
-                  className="flex items-center gap-1.5 bg-red-700 text-sm xl:text-base text-[#EEEEEE] cursor-pointer px-3 py-1.5 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Trash2 size={16} />
-                </button>
+                  className="w-fit h-full bg-red-800 text-sm xl:text-base cursor-pointer px-3.5 py-2 leading-tight rounded-2xl hover:bg-neutral-800 hover:text-red-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
               </div>
             ))}
         </div>
@@ -202,10 +208,10 @@ export default function BlogPage({
             onChange={(e) => setTitle(e.target.value)}
             maxLength={80}
             placeholder="Title cannot be empty"
-            className="text-3xl lg:text-5xl text-balance antialiased rounded-2xl w-4/5 font-semibold bg-[#191919] px-4 py-3 resize-none"
+            className="text-xl md:text-3xl lg:text-5xl text-balance rounded-4xl w-4/5 font-semibold ring ring-neutral-800 px-6 py-5 resize-none focus:outline-none"
           />
         ) : (
-          <h1 className="text-3xl lg:text-5xl text-balance antialiased rounded-lg w-4/5 font-semibold line-clamp-3">
+          <h1 className="text-3xl lg:text-5xl text-balance rounded-lg w-4/5 font-semibold line-clamp-3">
             {title}
           </h1>
         )}
@@ -219,7 +225,7 @@ export default function BlogPage({
         )}
       </div>
 
-      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-2xl overflow-hidden group max-h-[30rem]">
+      <div className="relative w-full h-[40vh] lg:h-[60vh] rounded-4xl overflow-hidden group max-h-[30rem]">
         {previewUrl ? (
           <Image src={previewUrl} alt={title} fill className="object-cover" />
         ) : (
@@ -289,8 +295,10 @@ export default function BlogPage({
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
-            <h2 className="text-xl font-semibold mb-4">Confirm Delete?</h2>
+          <div className="bg-[#0F0F0F] p-6 rounded-4xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
+            <h2 className="text-xl font-semibold mb-1 text-red-800">
+              Confirm Delete?
+            </h2>
             <p className="mb-6">
               Are you sure you want to delete this blog post? This action cannot
               be undone.
@@ -301,6 +309,7 @@ export default function BlogPage({
                 disabled={isPending}
               >
                 Cancel
+                <X size={16} />
               </Button>
               <button
                 onClick={async () => {
@@ -309,9 +318,10 @@ export default function BlogPage({
                   setIsPending(false);
                 }}
                 disabled={isPending}
-                className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-red-800 flex items-center gap-1.5 cursor-pointer hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 px-3.5 py-2 leading-tight rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isPending ? "Deleting..." : "Delete"}
+                <Trash2 size={16} />
               </button>
             </div>
           </div>

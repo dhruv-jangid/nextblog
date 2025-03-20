@@ -1,3 +1,5 @@
+"use client";
+
 import { ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -7,7 +9,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = ({ children, ...props }: ButtonProps) => {
   return (
     <button
-      className="bg-[#EEEEEE] text-[#0F0F0F] tracking-tight cursor-pointer px-3 py-1.5 rounded-xl w-max hover:bg-[#EEEEEE]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="bg-rose-300 text-neutral-950 tracking-tight cursor-pointer px-3.5 py-2 leading-tight rounded-2xl w-max hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
       {...props}
     >
       {children}

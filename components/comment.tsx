@@ -36,17 +36,20 @@ export const Comment = ({
 
   return (
     <div className="flex flex-col gap-6 tracking-tight text-balance">
-      <div className="flex flex-col gap-3">
+      <div className="relative flex flex-col gap-3">
         <textarea
           name="comment"
           id="comment"
           placeholder="Add a comment..."
-          className="w-full p-4 bg-[#191919] rounded-2xl resize-none min-h-[100px] disabled:cursor-not-allowed"
+          className="w-full px-5 py-4 bg-neutral-900 rounded-4xl focus:outline-none resize-none min-h-28 disabled:cursor-not-allowed ring ring-neutral-800 focus:ring-rose-300 transition-all duration-300"
           maxLength={100}
           disabled={isPending}
           onChange={(e) => setComment(e.target.value)}
           value={comment}
         />
+        <p className="absolute bottom-15 right-6 text-xs text-neutral-400">
+          {comment.length}/100
+        </p>
         <div className="flex justify-end">
           <Button
             onClick={async () => {
@@ -63,94 +66,92 @@ export const Comment = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            className="flex justify-between p-4 rounded-2xl bg-[#191919]"
-          >
-            <div className="flex gap-3">
-              <Link href={`/${comment.author.slug}`}>
-                <Image
-                  src={comment.author.image || Account}
-                  alt={comment.author.name}
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
+      {comments.map((comment) => (
+        <div
+          key={comment.id}
+          className="flex justify-between px-6 py-5 rounded-4xl bg-neutral-900"
+        >
+          <div className="flex gap-3">
+            <Link href={`/${comment.author.slug}`}>
+              <Image
+                src={comment.author.image || Account}
+                alt={comment.author.name}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+            </Link>
+            <div className="flex flex-col">
+              <Link
+                href={`/${comment.author.slug}`}
+                className="font-medium hover:underline underline-offset-2 text-rose-300"
+              >
+                {comment.author.name}
               </Link>
-              <div className="flex flex-col">
-                <Link
-                  href={`/${comment.author.slug}`}
-                  className="font-medium hover:underline"
-                >
-                  {comment.author.name}
-                </Link>
-                <span className="text-sm text-gray-400">
-                  {new Intl.DateTimeFormat("en-US", {
-                    month: "short",
-                    day: "2-digit",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "numeric",
-                    hour12: true,
-                  }).format(new Date(comment.createdAt))}
-                </span>
-                <p className="text-gray-200 mt-2">{comment.content}</p>
-              </div>
+              <span className="text-sm text-neutral-400 leading-2.5">
+                {new Intl.DateTimeFormat("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                }).format(new Date(comment.createdAt))}
+              </span>
+              <p className="mt-4">{comment.content}</p>
             </div>
-            {(isAuthor || (userSlug && comment.author.slug === userSlug)) && (
-              <>
-                <button
-                  onClick={() => setCommentToDelete(comment.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer flex p-1.5"
-                >
-                  <Trash2 size={18} />
-                </button>
+          </div>
+          {(isAuthor || (userSlug && comment.author.slug === userSlug)) && (
+            <>
+              <Trash2
+                size={18}
+                onClick={() => setCommentToDelete(comment.id)}
+                className="text-neutral-400 hover:text-rose-300 transition-all duration-300 cursor-pointer"
+              />
 
-                {commentToDelete === comment.id && (
-                  <div className="fixed inset-0 tr backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
-                      <p className="mb-6">
-                        Are you sure you want to delete this comment:
-                        <br />
-                        {comment.content}
-                      </p>
-                      <div className="flex justify-end gap-3">
-                        <Button
-                          onClick={() => setCommentToDelete(null)}
+              {commentToDelete === comment.id && (
+                <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-neutral-900 p-6 rounded-4xl max-w-sm w-full mx-4">
+                    <p className="mb-6">
+                      Are you sure you want to delete this comment:
+                      <br />
+                      {comment.content}
+                    </p>
+                    <div className="flex justify-end gap-3">
+                      <Button
+                        onClick={() => setCommentToDelete(null)}
+                        disabled={isPending}
+                      >
+                        Cancel
+                      </Button>
+                      <div>
+                        <input
+                          type="hidden"
+                          name="commentId"
+                          value={comment.id}
+                        />
+                        <button
+                          onClick={async () => {
+                            setIsPending(true);
+                            await deleteComment(comment.id);
+                            router.refresh();
+                            setIsPending(false);
+                            setCommentToDelete(null);
+                          }}
                           disabled={isPending}
+                          className="bg-red-800 cursor-pointer hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 px-3.5 py-2 leading-tight rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Cancel
-                        </Button>
-                        <div>
-                          <input
-                            type="hidden"
-                            name="commentId"
-                            value={comment.id}
-                          />
-                          <button
-                            onClick={async () => {
-                              setIsPending(true);
-                              await deleteComment(comment.id);
-                              setIsPending(false);
-                              router.refresh();
-                            }}
-                            disabled={isPending}
-                            className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {isPending ? "Deleting..." : "Delete"}
-                          </button>
-                        </div>
+                          {isPending ? "Deleting..." : "Delete"}
+                        </button>
                       </div>
                     </div>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

@@ -25,41 +25,39 @@ export default async function Settings({
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 tracking-tight">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
-      <div className="grid grid-cols-1 md:grid-cols-[14rem_1fr] gap-8">
-        <div className="bg-[#191919] rounded-2xl p-4 h-fit">
-          <nav>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="settings?tab=profile"
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-base rounded-xl cursor-pointer transition-colors ${
-                    activeTab === "profile"
-                      ? "bg-white/10 text-white"
-                      : "text-gray-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <UserRound className="w-5 h-5" />
-                  Profile
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="settings?tab=account"
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-base rounded-xl cursor-pointer transition-colors ${
-                    activeTab === "account"
-                      ? "bg-white/10 text-white"
-                      : "text-gray-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <Cog className="w-5 h-5" />
-                  Account
-                </Link>
-              </li>
-            </ul>
+      <div className="flex flex-col gap-6">
+        <div className="border-b border-neutral-800">
+          <nav className="flex gap-1">
+            <Link
+              href="settings?tab=profile"
+              className={`px-6 py-3 text-base cursor-pointer transition-colors relative ${
+                activeTab === "profile"
+                  ? "text-rose-300 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-rose-300"
+                  : "text-neutral-400 hover:text-rose-300"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <UserRound size={20} />
+                Profile
+              </span>
+            </Link>
+            <Link
+              href="settings?tab=account"
+              className={`px-6 py-3 text-base cursor-pointer transition-colors relative ${
+                activeTab === "account"
+                  ? "text-rose-300 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-rose-300"
+                  : "text-neutral-400 hover:text-rose-300"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Cog size={20} />
+                Account
+              </span>
+            </Link>
           </nav>
         </div>
 
-        <div className="bg-[#191919] rounded-2xl p-6 md:p-8">
+        <div className="bg-neutral-900 rounded-4xl p-6 md:p-8">
           {activeTab === "profile" ? (
             <Section
               title="Profile Settings"
@@ -92,9 +90,9 @@ const Section = ({
 }) => {
   return (
     <div className="flex flex-col md:min-h-[70vh]">
-      <div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-400">{description}</p>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2 text-rose-300">{title}</h3>
+        <p className="text-neutral-400">{description}</p>
       </div>
       {children}
     </div>

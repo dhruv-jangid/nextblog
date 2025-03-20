@@ -127,16 +127,16 @@ export default function CreateBlog() {
   return (
     <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12 tracking-tight">
       <div className="flex flex-col gap-4 lg:gap-10">
-        <div className="flex flex-col gap-2 lg:gap-6">
+        <div className="flex flex-col gap-3.5 lg:gap-6">
           <div className="flex justify-between">
             <select
               id="category"
               value={category}
               onChange={handleCategoryChange}
-              className="bg-[#EEEEEE] text-sm lg:text-lg px-3 py-1.5 rounded-xl text-black cursor-pointer hover:bg-[#E0E0E0] transition-colors"
+              className="bg-rose-300 text-sm lg:text-lg px-3.5 leading-tight py-1.5 rounded-2xl text-neutral-950 cursor-pointer hover:bg-[#E0E0E0] transition-colors"
             >
               <option value="" disabled>
-                Select a category
+                Category
               </option>
               {blogCategories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -150,8 +150,8 @@ export default function CreateBlog() {
             id="title"
             value={title}
             onChange={handleTitleChange}
-            placeholder="Enter your blog title (10-100 characters)"
-            className="md:text-3xl lg:text-5xl rounded-2xl w-full font-semibold bg-[#191919] px-4 py-3 resize-none"
+            placeholder="Title (10-100 characters)"
+            className="text-xl md:text-3xl lg:text-5xl rounded-4xl w-4/5 font-semibold ring ring-neutral-800 px-6 py-5 resize-none focus:outline-none"
             required
           />
           {validationErrors.title && (
@@ -159,7 +159,7 @@ export default function CreateBlog() {
           )}
         </div>
 
-        <div className="relative w-full h-[30vh] xl:h-[60vh] rounded-2xl overflow-hidden group">
+        <div className="relative w-full h-[30vh] xl:h-[60vh] rounded-4xl overflow-hidden group">
           <input
             id="blogcover"
             type="file"
@@ -171,22 +171,22 @@ export default function CreateBlog() {
             <Image
               src={URL.createObjectURL(blogCover)}
               alt="Blog cover preview"
-              className="object-cover"
+              className="object-cover rounded-4xl"
               fill={true}
             />
           ) : (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+            <div className="w-full h-full border rounded-4xl border-neutral-800 flex items-center justify-center text-neutral-300">
               <div className="text-center">
-                <ImageUp size={48} className="mx-auto mb-2" />
+                <ImageUp size={32} className="mx-auto mb-2" />
                 <span>Click to upload cover image</span>
               </div>
             </div>
           )}
           <div
             onClick={() => document.getElementById("blogcover")?.click()}
-            className="absolute inset-0 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+            className="absolute inset-0 backdrop-blur-md opacity-0 rounded-4xl group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
           >
-            <div className="flex items-center gap-2 text-white">
+            <div className="flex items-center gap-2">
               <ImageUp size={24} />
               <span>{blogCover ? "Change Image" : "Upload Image"}</span>
             </div>

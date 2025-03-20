@@ -3,6 +3,7 @@
 import { removeUser } from "@/actions/handleUser";
 import { Button } from "@/components/button";
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 
 export function Account() {
   const [password, setPassword] = useState<string>("");
@@ -11,25 +12,31 @@ export function Account() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   return (
-    <div className="space-y-6 pt-6">
-      <div className="flex flex-col border border-red-500/20 rounded-2xl p-6 bg-red-500/5">
-        <h3 className="text-lg font-medium text-red-500">Delete Account</h3>
-        <p className="text-sm text-gray-500 mt-2">
-          Once you delete your account, there is no going back. Please be
-          certain.
-        </p>
-        <div className="mt-4 text-end">
-          <Button disabled={pending} onClick={() => setShowDeleteConfirm(true)}>
-            Delete Account
-          </Button>
+    <div className="flex flex-col gap-4">
+      <div className="px-6 py-5 rounded-4xl border border-neutral-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-red-500">Delete Account</h3>
+            <p className="text-neutral-500">
+              Once you delete your account, there is no going back. Please be
+              certain.
+            </p>
+          </div>
+          <Trash2
+            size={18}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="mr-1.5 text-rose-300 hover:text-neutral-200 cursor-pointer transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          />
         </div>
       </div>
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#0F0F0F] p-6 rounded-2xl bg-linear-to-br from-[#191919] from-40% to-transparent max-w-sm w-full mx-4">
-            <h2 className="text-xl font-semibold mb-4">Confirm Delete?</h2>
-            <p className="mb-2">
+          <div className="p-6 rounded-4xl bg-neutral-900 max-w-sm border border-neutral-800">
+            <h2 className="text-xl font-semibold mb-1 text-red-800">
+              Confirm Delete? 🥺
+            </h2>
+            <p className="mb-4">
               Are you sure you want to delete your account? This action cannot
               be undone.
             </p>
@@ -40,7 +47,7 @@ export function Account() {
             )}
             <input
               type="text"
-              className="w-full py-1.5 px-4 border border-red-900 text-lg rounded-2xl focus:outline-hidden mb-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-1 px-0.5 border-b border-neutral-600 text-lg bg-transparent focus:outline-none mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
               id="password"
               name="password"
               placeholder="Password"
@@ -62,7 +69,7 @@ export function Account() {
               >
                 Cancel
               </Button>
-              <Button
+              <button
                 onClick={async () => {
                   setError(null);
                   setPending(true);
@@ -71,10 +78,10 @@ export function Account() {
                   setPending(false);
                 }}
                 disabled={pending || password.trim() === ""}
-                className="bg-red-700 cursor-pointer text-white hover:bg-red-700/80 transition-all duration-300 px-3 py-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-red-800 flex items-center gap-1.5 cursor-pointer hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 px-3.5 py-2 leading-tight rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pending ? "Deleting..." : "Delete"}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
