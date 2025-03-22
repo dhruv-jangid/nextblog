@@ -1,25 +1,25 @@
 import crypto from "crypto";
 
+// Allowed characters: a-z, 0-9, . and _
+// Convert the name to lowercase and replace any character not allowed with an underscore.
+const sanitize = (input: string): string =>
+  input
+    .toLowerCase()
+    .replace(/[^a-z0-9._]+/g, "_")
+    .replace(/^_+|_+$/g, ""); // also trim any leading/trailing underscores
+
+// Generate a short hash from idSub using SHA-256.
+// Using hex gives us only 0-9 and a-f which fits our allowed characters.
+const generateHash = (input: string, length: number): string => {
+  const fullHash = crypto.createHash("sha256").update(input).digest("hex");
+  return fullHash.slice(0, length);
+};
+
 export const generateSlug = (name: string, idSub: string): string => {
-  // Allowed characters: a-z, 0-9, . and _
-  // Convert the name to lowercase and replace any character not allowed with an underscore.
-  const sanitize = (input: string): string =>
-    input
-      .toLowerCase()
-      .replace(/[^a-z0-9._]+/g, "_")
-      .replace(/^_+|_+$/g, ""); // also trim any leading/trailing underscores
-
-  // Generate a short hash from idSub using SHA-256.
-  // Using hex gives us only 0-9 and a-f which fits our allowed characters.
-  const generateHash = (input: string, length: number): string => {
-    const fullHash = crypto.createHash("sha256").update(input).digest("hex");
-    return fullHash.slice(0, length);
-  };
-
   // Sanitize the provided name.
   let base = sanitize(name);
   // We'll use 8 characters from the hash (you can adjust this if needed).
-  const hashPart = generateHash(idSub, 8);
+  const hashPart = generateHash(idSub.toString(), 8);
 
   // If there's a sanitized name, join it with the hash using an underscore.
   // Otherwise, use just the hash.
