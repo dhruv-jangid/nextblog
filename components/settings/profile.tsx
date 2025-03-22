@@ -63,8 +63,8 @@ export const Profile = ({
                     onChange={(e) => setTempUsername(e.target.value)}
                     spellCheck="false"
                     autoFocus
-                    className="text-rose-300 border-b border-neutral-600 w-fit focus:outline-none"
-                    maxLength={30}
+                    className="text-rose-300 border-b border-neutral-600 w-32 focus:outline-none"
+                    maxLength={16}
                   />
                 ) : (
                   <p className="text-base font-medium">{data.slug}</p>
@@ -136,7 +136,7 @@ export const Profile = ({
                     onChange={(e) => setTempDisplayName(e.target.value)}
                     spellCheck="false"
                     autoFocus
-                    className="text-rose-300 border-b border-neutral-600 w-fit focus:outline-none"
+                    className="text-rose-300 border-b border-neutral-600 w-32 focus:outline-none"
                     maxLength={30}
                   />
                 ) : (

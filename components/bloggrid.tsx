@@ -5,40 +5,32 @@ import Image from "next/image";
 import { Like } from "@/components/like";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import type { Blog, Like as LikeType, User } from "@prisma/client";
 
 export const BlogGrid = async ({
   blogs,
 }: {
-  blogs: {
-    title: string;
-    slug: string;
-    image: string;
-    category: string;
-    createdAt: Date;
-    likes: {
-      blogId: string;
-      userId: string;
-    }[];
-    author: {
-      id: string;
-      slug: string;
-      image: string | null;
-      name: string;
-    };
-  }[];
+  blogs: (Omit<Blog, "id" | "content" | "authorId" | "updatedAt"> & {
+    likes: Pick<LikeType, "userId" | "blogId">[];
+    author: Pick<User, "id" | "name" | "slug" | "image">;
+  })[];
 }) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   const userId = session?.user.id;
 
+  const likedBlogIds = new Set(
+    blogs.flatMap((blog) =>
+      blog.likes.filter((like) => like.userId === userId).map(() => blog.slug)
+    )
+  );
+
   return (
     <div className="grid md:grid-cols-2 2xl:grid-cols-3 gap-10">
       {blogs.map(
         ({ title, image, createdAt, category, slug, author, likes }) => {
-          const isLiked = userId
-            ? likes.find((like) => userId === like.userId) !== undefined
-            : false;
+          const isLiked = likedBlogIds.has(slug);
 
           return (
             <div
@@ -61,7 +53,7 @@ export const BlogGrid = async ({
                 />
               </Link>
               <div className="flex flex-col gap-6 p-6 justify-between h-1/2 rounded-t-3xl">
-                <div className="flex justify-between gap-6 cursor-pointer text-xl font-medium line-clamp-3 w-full">
+                <div className="flex justify-between gap-6 cursor-pointer text-xl font-medium line-clamp-3 w-full overflow-visible">
                   <Link
                     href={`/${author.slug}/${slug}`}
                     className="line-clamp-2 text-balance tracking-tight hover:animate-pulse transition-all duration-300"
@@ -72,7 +64,7 @@ export const BlogGrid = async ({
                     href={`/blogs/${category}`}
                     className="text-sm xl:text-base w-max"
                   >
-                    <Button>{category}</Button>
+                    <Button roseVariant>{category}</Button>
                   </Link>
                 </div>
                 <div className="flex justify-between items-center">

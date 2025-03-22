@@ -3,15 +3,14 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "@prisma/client";
 import { sendEmail } from "@/utils/sendEmail";
 import argon2 from "argon2";
-import { generateSlug } from "@/utils/generateSlug";
-import z from "zod";
 import { nextCookies } from "better-auth/next-js";
 import { removeImages } from "@/actions/handleUser";
 import { APIError } from "better-auth/api";
+import { generateSlug } from "@/utils/generateSlug";
+import { slugValidator } from "@/utils/zod";
 
-const prisma = new PrismaClient();
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
+  database: prismaAdapter(new PrismaClient(), {
     provider: "postgresql",
   }),
   plugins: [nextCookies()],
@@ -65,14 +64,7 @@ export const auth = betterAuth({
         required: true,
         unique: true,
         validator: {
-          input: z
-            .string({ required_error: "Username is required!" })
-            .min(3, "Username must have at least 3 characters")
-            .max(20, "Username must be less than 20 characters")
-            .regex(
-              /^[a-z][a-z0-9_.]*$/,
-              "Must start with lowercase letter and contain only a-z, 0-9, . and _"
-            ),
+          input: slugValidator,
         },
       },
     },
@@ -108,7 +100,7 @@ export const auth = betterAuth({
       mapProfileToUser: (profile) => {
         return {
           role: "USER",
-          slug: generateSlug(profile.name),
+          slug: generateSlug(profile.login, profile.id),
         };
       },
     },
@@ -118,7 +110,7 @@ export const auth = betterAuth({
       mapProfileToUser: (profile) => {
         return {
           role: "USER",
-          slug: generateSlug(profile.name),
+          slug: generateSlug(profile.name, profile.sub),
         };
       },
     },

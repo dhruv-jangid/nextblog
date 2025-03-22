@@ -141,7 +141,7 @@ export default async function Profile({
       {user.blogs.length > 0 ? (
         <BlogGrid blogs={user.blogs} />
       ) : (
-        <div className="flex justify-center items-center min-h-[60vh] text-4xl rounded-lg w-3/4 mx-auto">
+        <div className="flex justify-center items-center min-h-[60vh] text-4xl rounded-4xl w-3/4 mx-auto">
           Currently, this user has no published blogs!
         </div>
       )}

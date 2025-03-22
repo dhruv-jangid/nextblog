@@ -5,9 +5,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
 import { checkProfanity } from "@/utils/checkProfanity";
-import { generateSlug } from "@/utils/generateSlug";
+import { ZodError } from "zod";
+import { passwordValidator } from "@/utils/zod";
 
-export const socialSignIn = async (provider: "google" | "github") => {
+export const socialAuth = async (provider: "google" | "github") => {
   const result = await auth.api.signInSocial({
     body: {
       provider,
@@ -24,10 +25,11 @@ export const socialSignIn = async (provider: "google" | "github") => {
 };
 
 export const credentialSignIn = async (email: string, password: string) => {
-  let done: boolean = false;
+  let done = false;
 
   try {
     const result = await auth.api.signInEmail({ body: { email, password } });
+
     if (result) {
       done = true;
     }
@@ -35,6 +37,7 @@ export const credentialSignIn = async (email: string, password: string) => {
     if (error instanceof APIError) {
       return error.message;
     }
+
     return "Something went wrong!";
   }
 
@@ -46,25 +49,39 @@ export const credentialSignIn = async (email: string, password: string) => {
 };
 
 export const credentialSignUp = async (
-  name: string,
+  slug: string,
   email: string,
   password: string
 ) => {
-  if (checkProfanity(name)) {
+  if (checkProfanity(slug)) {
     return "Inappropriate language!";
   }
 
+  const checkPassword = passwordValidator.safeParse(password);
+  if (!checkPassword.success) {
+    return checkPassword.error.format()._errors[0];
+  }
+
   try {
-    const result = await auth.api.signUpEmail({
-      body: { name, email, password, slug: generateSlug(name) },
+    await auth.api.signUpEmail({
+      body: { name: slug, email, password, slug },
     });
 
-    if (result) return "Verification email sent to your gmail inbox!";
-
-    return "Something went wrong!";
+    return "Verification email sent to your gmail inbox!";
   } catch (error) {
     if (error instanceof APIError) {
-      return error.message;
+      switch (error.body?.code) {
+        case "FAILED_TO_CREATE_USER":
+          return "Username not available";
+        case "USER_ALREADY_EXISTS":
+          return "Email already registered";
+        default:
+          return error.message;
+      }
+    }
+
+    if (error instanceof ZodError) {
+      return error.errors[0].message;
     }
 
     return "Something went wrong!";

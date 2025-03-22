@@ -33,7 +33,7 @@ export function Account() {
       {showDeleteConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
           <div className="p-6 rounded-4xl bg-neutral-900 max-w-sm border border-neutral-800">
-            <h2 className="text-xl font-semibold mb-1 text-red-800">
+            <h2 className="text-xl font-semibold mb-1 text-red-700">
               Confirm Delete? 🥺
             </h2>
             <p className="mb-4">
@@ -66,10 +66,11 @@ export function Account() {
                   setPassword("");
                 }}
                 disabled={pending}
+                roseVariant
               >
                 Cancel
               </Button>
-              <button
+              <Button
                 onClick={async () => {
                   setError(null);
                   setPending(true);
@@ -78,10 +79,9 @@ export function Account() {
                   setPending(false);
                 }}
                 disabled={pending || password.trim() === ""}
-                className="bg-red-800 flex items-center gap-1.5 cursor-pointer hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 px-3.5 py-2 leading-tight rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pending ? "Deleting..." : "Delete"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

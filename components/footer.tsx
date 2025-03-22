@@ -14,14 +14,14 @@ export const Footer = () => {
   const [error, setError] = useState("");
 
   return (
-    <div className="p-8 pb-16 lg:px-16 lg:pt-14 lg:pb-24 bg-neutral-900 text-neutral-300 rounded-t-4xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-12 gap-8 lg:gap-0 tracking-tight">
+    <div className="p-10 lg:pb-36 lg:p-14 bg-neutral-900 rounded-t-4xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-12 gap-y-8 lg:gap-0 tracking-tight">
       <div className="flex flex-col gap-4 w-fit">
-        <h1 className="text-2xl font-bold text-rose-300">About Me</h1>
+        <h3 className="text-2xl font-bold text-rose-300">About Me</h3>
         <div className="flex flex-col gap-2.5">
           <div
             className="flex gap-2 items-center cursor-pointer w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
             onClick={() => {
-              window.open("https://github.com/toxic-lmao", "_blank");
+              window.open("https://github.com/toxic-lmao");
             }}
           >
             <Image
@@ -36,7 +36,7 @@ export const Footer = () => {
           <div
             className="flex gap-2 items-center cursor-pointer w-fit relative after:absolute after:-bottom-0.5 after:left-0 after:h-[1px] after:w-0 after:bg-neutral-400 hover:after:w-full after:transition-all after:duration-300"
             onClick={() => {
-              window.open("https://www.instagram.com/toxic.lmao/", "_blank");
+              window.open("https://www.instagram.com/toxic.lmao");
             }}
           >
             <Image
@@ -50,7 +50,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="flex flex-col gap-4 w-fit">
-        <h1 className="text-2xl font-bold text-rose-300">Quick Links</h1>
+        <h3 className="text-2xl font-bold text-rose-300">Quick Links</h3>
         <div className="flex flex-col gap-2.5">
           <Link
             href="/"
@@ -73,7 +73,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="flex flex-col gap-4 w-fit">
-        <h1 className="text-2xl font-bold text-rose-300">Categories</h1>
+        <h3 className="text-2xl font-bold text-rose-300">Categories</h3>
         <div className="flex flex-col gap-2.5">
           {categories.slice(0, 4).map((category, index) => (
             <Link
@@ -115,7 +115,7 @@ export const Footer = () => {
             <Send size={18} />
           </button>
           {error && (
-            <p className="px-5 py-2.5 leading-tight text-red-500 bg-red-500/10 border border-red-500/50 rounded-4xl text-center">
+            <p className="px-5 py-2.5 leading-tight font-semibold text-red-500 bg-red-500/10 border border-red-500/50 rounded-4xl text-center">
               {error}
             </p>
           )}

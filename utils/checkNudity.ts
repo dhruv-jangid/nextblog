@@ -17,7 +17,8 @@ export const checkNudity = async (image: File) => {
       return { safe: false, reason: "Try again after sometime!" };
     }
 
-    if (data.nudity.raw >= 0.5 || data.nudity.safe <= 0.4) {
+    if (data.nudity.raw >= 0.6 || data.nudity.safe <= 0.4) {
+      console.log("Nudity detected!");
       return { safe: false, reason: "NSFW content detected" };
     }
 

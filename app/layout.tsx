@@ -26,7 +26,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={degular.className}>
-      <body className="bg-neutral-950 text-neutral-100 antialiased w-[90vw] lg:w-[80vw] xl:w-[70vw] mx-auto selection:bg-rose-950">
+      <body className="bg-neutral-950 text-neutral-100 antialiased w-11/12 lg:w-4/5 xl:w-2/3 mx-auto selection:bg-neutral-700">
         <Navbar session={session} />
         {children}
         <Footer />
