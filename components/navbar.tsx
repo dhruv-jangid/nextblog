@@ -117,7 +117,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
                 : "opacity-0 scale-95 invisible"
             }`}
           >
-            <Link href={session?.user.slug}>
+            <Link href={`/${session?.user.slug}`}>
               <Button
                 onClick={() => {
                   setIsProfileOpen(false);
