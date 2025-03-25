@@ -41,7 +41,7 @@ export const Comment = ({
           name="comment"
           id="comment"
           placeholder="Add a comment..."
-          className="w-full px-5 py-4 bg-neutral-900 rounded-4xl focus:outline-none resize-none min-h-28 disabled:cursor-not-allowed ring ring-neutral-800 focus:ring-rose-300 transition-all duration-300"
+          className="w-full px-5 py-4 bg-neutral-900 rounded-4xl focus:outline-none resize-none min-h-28 disabled:cursor-not-allowed disabled:opacity-50 ring ring-neutral-800 focus:ring-rose-300 transition-all duration-300"
           maxLength={100}
           disabled={isPending}
           onChange={(e) => setComment(e.target.value)}
@@ -78,13 +78,13 @@ export const Comment = ({
                 alt={comment.author.name}
                 width={40}
                 height={40}
-                className="rounded-full"
+                className="rounded-full hover:animate-pulse"
               />
             </Link>
             <div className="flex flex-col">
               <Link
                 href={`/${comment.author.slug}`}
-                className="font-medium hover:underline underline-offset-2 text-rose-300"
+                className="font-medium hover:underline hover:animate-pulse underline-offset-2 text-rose-300"
               >
                 {comment.author.name}
               </Link>
@@ -112,11 +112,10 @@ export const Comment = ({
               {commentToDelete === comment.id && (
                 <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
                   <div className="bg-neutral-900 p-6 rounded-4xl max-w-sm w-full mx-4">
-                    <p className="mb-6">
+                    <div className="mb-6 text-red-700">
                       Are you sure you want to delete this comment:
-                      <br />
-                      {comment.content}
-                    </p>
+                      <p className="text-neutral-100">{comment.content}</p>
+                    </div>
                     <div className="flex justify-end gap-3">
                       <Button
                         onClick={() => setCommentToDelete(null)}
@@ -125,12 +124,7 @@ export const Comment = ({
                         Cancel
                       </Button>
                       <div>
-                        <input
-                          type="hidden"
-                          name="commentId"
-                          value={comment.id}
-                        />
-                        <button
+                        <Button
                           onClick={async () => {
                             setIsPending(true);
                             await deleteComment(comment.id);
@@ -138,11 +132,10 @@ export const Comment = ({
                             setIsPending(false);
                             setCommentToDelete(null);
                           }}
-                          disabled={isPending}
-                          className="bg-red-800 cursor-pointer hover:bg-neutral-800 hover:text-rose-300 transition-all duration-300 px-3.5 py-2 leading-tight rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+                          roseVariant
                         >
                           {isPending ? "Deleting..." : "Delete"}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
