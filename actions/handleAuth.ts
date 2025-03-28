@@ -9,6 +9,11 @@ import { ZodError } from "zod";
 import { passwordValidator } from "@/utils/zod";
 
 export const socialAuth = async (provider: "google" | "github") => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) {
+    permanentRedirect("/");
+  }
+
   const result = await auth.api.signInSocial({
     body: {
       provider,
@@ -25,6 +30,11 @@ export const socialAuth = async (provider: "google" | "github") => {
 };
 
 export const credentialSignIn = async (email: string, password: string) => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) {
+    permanentRedirect("/");
+  }
+
   let done = false;
 
   try {
@@ -53,6 +63,11 @@ export const credentialSignUp = async (
   email: string,
   password: string
 ) => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) {
+    permanentRedirect("/");
+  }
+
   if (checkProfanity(slug)) {
     return "Inappropriate language!";
   }

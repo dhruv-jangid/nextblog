@@ -12,14 +12,14 @@ import { checkProfanity } from "@/utils/checkProfanity";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { APIError } from "better-auth/api";
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 export const changeProfileImg = async (image: File) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
-    return { success: false, message: "User not authenticated" };
+    permanentRedirect("/signin");
   }
 
   const { id } = session.user;
@@ -62,7 +62,7 @@ export const removeProfileImg = async () => {
     headers: await headers(),
   });
   if (!session) {
-    return { success: false, message: "User not authenticated" };
+    permanentRedirect("/signin");
   }
 
   const { id } = session.user;
@@ -99,7 +99,7 @@ export const changeSlug = async (slug: string) => {
     headers: await headers(),
   });
   if (!session) {
-    return { success: false, message: "User not authenticated" };
+    permanentRedirect("/signin");
   }
 
   const { id } = session.user;
@@ -147,7 +147,7 @@ export const changeName = async (name: string) => {
     headers: await headers(),
   });
   if (!session) {
-    return { success: false, message: "User not authenticated" };
+    permanentRedirect("/signin");
   }
 
   const { id } = session.user;
@@ -228,7 +228,7 @@ export const removeUser = async (password: string) => {
     headers: await headers(),
   });
   if (!session) {
-    redirect("/signin");
+    permanentRedirect("/signin");
   }
 
   try {

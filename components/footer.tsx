@@ -15,7 +15,7 @@ export const Footer = () => {
 
   return (
     <footer className="p-10 lg:pb-36 lg:p-14 bg-neutral-900 rounded-t-4xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-12 gap-y-8 lg:gap-0 tracking-tight">
-      <div className="flex flex-col gap-4 w-fit">
+      <div className="flex flex-col gap-3 lg:gap-4 w-fit">
         <div className="text-2xl font-bold text-rose-300">About Me</div>
         <div className="flex flex-col gap-2.5">
           <div
@@ -49,7 +49,7 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-4 w-fit">
+      <div className="flex flex-col gap-3 lg:gap-4 w-fit">
         <div className="text-2xl font-bold text-rose-300">Quick Links</div>
         <div className="flex flex-col gap-2.5">
           <Link
@@ -72,7 +72,7 @@ export const Footer = () => {
           </Link>
         </div>
       </div>
-      <div className="flex flex-col gap-4 w-fit">
+      <div className="flex flex-col gap-3 lg:gap-4 w-fit">
         <div className="text-2xl font-bold text-rose-300">Categories</div>
         <div className="flex flex-col gap-2.5">
           {categories.slice(0, 4).map((category, index) => (
@@ -86,7 +86,7 @@ export const Footer = () => {
           ))}
         </div>
       </div>
-      <div className="flex flex-col gap-4 md:col-span-3 lg:col-span-1">
+      <div className="flex flex-col gap-3 lg:gap-4 md:col-span-3 lg:col-span-1">
         <h1 className="text-2xl font-bold text-rose-300">Newsletter</h1>
         <div className="relative flex flex-col gap-1">
           <input

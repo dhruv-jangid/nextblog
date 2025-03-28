@@ -16,7 +16,7 @@ export const createBlog = async (
     headers: await headers(),
   });
   if (!session) {
-    return "User not authenticated. Please login again!";
+    permanentRedirect("/signin");
   }
 
   const { id } = session.user;
@@ -26,7 +26,7 @@ export const createBlog = async (
   const blogCover = formData.get("image") as File;
 
   if (checkProfanity(title) || checkProfanity(content)) {
-    return "Inappropriate language used!";
+    return "Inappropriate language!";
   }
 
   const existingBlog = await prisma.blog.findUnique({
@@ -38,7 +38,7 @@ export const createBlog = async (
     },
   });
   if (existingBlog) {
-    return "Title already taken, please choose a different title!";
+    return "Title already taken!";
   }
 
   const imageUpload = await uploadImage(blogCover);
@@ -79,13 +79,13 @@ export const editBlog = async (
     headers: await headers(),
   });
   if (!session) {
-    return "User not authenticated. Please login again!";
+    permanentRedirect("/signin");
   }
 
   const { id } = session.user;
 
   if (checkProfanity(title) || checkProfanity(content)) {
-    return "Inappropriate language used!";
+    return "Inappropriate language!";
   }
 
   const blog = await prisma.blog.findUnique({
@@ -113,7 +113,7 @@ export const editBlog = async (
       },
     });
     if (existingBlog) {
-      return "Title already taken, please choose a different title!";
+      return "Title already taken!";
     }
 
     let imageUpload;
@@ -228,7 +228,7 @@ export const likeBlog = async (blogSlug: string) => {
         },
       });
 
-      return "Blog unliked";
+      return;
     }
 
     await tx.like.create({
@@ -238,7 +238,7 @@ export const likeBlog = async (blogSlug: string) => {
       },
     });
 
-    return "Blog liked";
+    return;
   });
 
   return;
@@ -255,7 +255,7 @@ export const addComment = async (comment: string, blogSlug: string) => {
   const { id } = session.user;
 
   if (checkProfanity(comment)) {
-    return "Inappropriate language used!";
+    return "Inappropriate comment!";
   }
 
   if (!comment.trim()) return "Comment content cannot be empty";

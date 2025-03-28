@@ -31,6 +31,7 @@ export const Comment = ({
   const [isPending, setIsPending] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [comment, setComment] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-6 tracking-tight text-balance">
@@ -48,17 +49,21 @@ export const Comment = ({
         <p className="absolute bottom-15 right-6 text-xs text-neutral-400">
           {comment.length}/100
         </p>
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2.5 sm:gap-4">
+          {error && (
+            <p className="flex text-red-500 bg-red-500/10 rounded-4xl justify-center items-center px-4 w-1/2 sm:w-fit text-nowrap leading-tight">
+              {error}
+            </p>
+          )}
           <Button
             onClick={async () => {
+              setError(null);
               setIsPending(true);
               const addedComment = await addComment(comment, blogSlug);
-              if (
-                addedComment &&
-                typeof addedComment === "object" &&
-                "id" in addedComment
-              ) {
-                comments.unshift(addedComment as (typeof comments)[number]);
+              if (typeof addedComment !== "object") {
+                setError(addedComment);
+              } else {
+                comments.unshift(addedComment);
               }
               setComment("");
               setIsPending(false);
@@ -116,7 +121,7 @@ export const Comment = ({
               {commentToDelete === comment.id && (
                 <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
                   <div className="bg-neutral-900 p-6 rounded-4xl max-w-sm w-full mx-4">
-                    <div className="mb-6 text-red-700">
+                    <div className="mb-6 text-red-500">
                       Are you sure you want to delete this comment:
                       <p className="text-neutral-100">{comment.content}</p>
                     </div>
