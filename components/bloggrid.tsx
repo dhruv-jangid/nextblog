@@ -78,6 +78,7 @@ export const BlogGrid = async ({
                     blogSlug={slug}
                     likes={likes.length}
                     isLiked={isLiked}
+                    isLoggedIn={session ? true : false}
                   />
                 </div>
               </div>

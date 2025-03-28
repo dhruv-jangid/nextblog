@@ -5,7 +5,6 @@ import Account from "@/public/images/account.png";
 import { Button } from "@/components/button";
 import Link from "next/link";
 import { addComment, deleteComment } from "@/actions/handleBlog";
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -29,7 +28,6 @@ export const Comment = ({
   isAuthor: boolean;
   userSlug: string;
 }) => {
-  const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [comment, setComment] = useState("");
@@ -53,11 +51,17 @@ export const Comment = ({
         <div className="flex justify-end">
           <Button
             onClick={async () => {
-              setComment("");
               setIsPending(true);
-              await addComment(comment, blogSlug);
+              const addedComment = await addComment(comment, blogSlug);
+              if (
+                addedComment &&
+                typeof addedComment === "object" &&
+                "id" in addedComment
+              ) {
+                comments.unshift(addedComment as (typeof comments)[number]);
+              }
+              setComment("");
               setIsPending(false);
-              router.refresh();
             }}
             disabled={isPending || !comment.trim()}
           >
@@ -126,11 +130,14 @@ export const Comment = ({
                       <div>
                         <Button
                           onClick={async () => {
-                            setIsPending(true);
-                            await deleteComment(comment.id);
-                            router.refresh();
-                            setIsPending(false);
+                            const index = comments.findIndex(
+                              (c) => c.id === comment.id
+                            );
+                            if (index !== -1) {
+                              comments.splice(index, 1);
+                            }
                             setCommentToDelete(null);
+                            await deleteComment(comment.id);
                           }}
                           roseVariant
                         >

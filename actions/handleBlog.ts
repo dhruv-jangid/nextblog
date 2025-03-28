@@ -268,15 +268,27 @@ export const addComment = async (comment: string, blogSlug: string) => {
     return "Blog not found";
   }
 
-  await prisma.comment.create({
+  const addedComment = await prisma.comment.create({
     data: {
       content: comment,
       blog: { connect: { id: blog.id } },
       author: { connect: { id } },
     },
+    select: {
+      id: true,
+      content: true,
+      createdAt: true,
+      author: {
+        select: {
+          name: true,
+          image: true,
+          slug: true,
+        },
+      },
+    },
   });
 
-  return;
+  return addedComment;
 };
 
 export const deleteComment = async (commentId: string) => {
