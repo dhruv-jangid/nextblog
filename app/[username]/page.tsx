@@ -87,8 +87,8 @@ export default async function Profile({
                 session.user.slug === user.slug && (
                   <Link href={`/admin/dashboard`} className="hidden md:block">
                     <Button>
-                      <span className="flex items-center gap-1">
-                        Dashboard <SquareArrowOutUpRight />
+                      <span className="flex items-center gap-1.5">
+                        Dashboard <SquareArrowOutUpRight size={18} />
                       </span>
                     </Button>
                   </Link>

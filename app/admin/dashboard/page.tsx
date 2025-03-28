@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
 import { BlogGrid } from "@/components/bloggrid";
 import { Author } from "@/components/author";
-import { Trash2 } from "lucide-react";
+import { User } from "@prisma/client";
+import { DeleteUserBtn } from "./deleteuser";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -34,6 +35,7 @@ export default async function AdminDashboard() {
         swr: 60,
         tags: ["blogs"],
       },
+      take: 9,
     }),
     prisma.user.findMany({
       select: {
@@ -46,57 +48,48 @@ export default async function AdminDashboard() {
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
+      cacheStrategy: {
+        tags: ["blogs"],
+      },
+      take: 9,
     }),
   ]);
 
   return (
     <div className="flex flex-col gap-10 px-4 lg:px-16 py-4 lg:py-12 tracking-tight">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold text-rose-300 text-end">
+        Admin Dashboard
+      </h1>
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-semibold">Recent Blogs</h2>
-        <BlogGrid blogs={blogs} />
+        <h2 className="text-2xl font-semibold text-end">Recent Users</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {users.map((user: Omit<User, "emailVerified" | "updatedAt">) => (
+            <div
+              key={user.slug}
+              className="bg-neutral-900 rounded-4xl p-5 flex flex-col gap-4"
+            >
+              <div className="flex justify-between">
+                <Author
+                  date={user.createdAt}
+                  image={user.image}
+                  name={user.name}
+                  slug={user.slug}
+                />
+                <DeleteUserBtn id={user.id} name={user.name} />
+              </div>
+              <div className="flex flex-col text-neutral-300 leading-tight ml-1.5">
+                <span>{user.email}</span>
+                <span>{user.role}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-semibold">Users</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {users.map(
-            (user: {
-              slug: string;
-              image: string | null;
-              createdAt: Date;
-              name: string;
-              role: string;
-              email: string;
-            }) => (
-              <div
-                key={user.slug}
-                className="bg-[#1F1F1F] rounded-2xl p-4 flex flex-col gap-4"
-              >
-                <div className="flex justify-between items-center">
-                  <Author
-                    date={user.createdAt}
-                    image={user.image}
-                    name={user.name}
-                    slug={user.slug}
-                  />
-                  <button className="h-fit bg-red-700 cursor-pointer p-2 rounded-xl hover:bg-red-700/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <Trash2 />
-                  </button>
-                </div>
-                <div className="flex justify-between">
-                  <p className="bg-white/90 text-black rounded-xl py-1 px-3 w-fit">
-                    {user.role}
-                  </p>
-                  <h1 className="bg-white/90 text-black rounded-xl py-1 px-3 w-fit">
-                    {user.email}
-                  </h1>
-                </div>
-              </div>
-            )
-          )}
-        </div>
+        <h2 className="text-2xl font-semibold text-end">Recent Blogs</h2>
+        <BlogGrid blogs={blogs} />
       </div>
     </div>
   );

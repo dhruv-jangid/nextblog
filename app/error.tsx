@@ -24,6 +24,7 @@ export default function ErrorBoundary({
         onClick={() => {
           router.replace("/");
         }}
+        roseVariant
       >
         Return to Home
       </Button>

@@ -246,3 +246,13 @@ export const removeUser = async (password: string) => {
     return "Failed to delete account. Please try again after sometime!";
   }
 };
+
+export const deleteUserByAdmin = async (id: string) => {
+  await prisma.user.delete({
+    where: {
+      id,
+    },
+  });
+
+  return revalidatePath("/admin/dashboard");
+};
