@@ -3,17 +3,22 @@
 import Google from "@/public/images/google.png";
 import Github from "@/public/images/github.png";
 import Greeting from "@/public/images/greeting.jpg";
-import { Eye, EyeClosed } from "lucide-react";
+import { Eye, EyeClosed, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/button";
-import { credentialSignIn, socialAuth } from "@/actions/handleAuth";
+import {
+  credentialSignIn,
+  forgetPassword,
+  socialAuth,
+} from "@/actions/handleAuth";
 
 export default function Signin() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   return (
     <div className="grid xl:grid-cols-2 h-[80vh]">
@@ -56,19 +61,16 @@ export default function Signin() {
             Github
           </Button>
         </div>
-
         <div className="flex items-center justify-evenly w-full">
           <hr className="w-1/3 border-neutral-800" />
           <h3 className="text-lg font-medium px-1.5 text-neutral-400">or</h3>
           <hr className="w-1/3 border-neutral-800" />
         </div>
-
         {error && (
           <div className="px-3.5 py-2 leading-tight text-pretty text-center text-red-500 bg-red-500/10 border border-red-500/50 rounded-4xl">
             {error}
           </div>
         )}
-
         <form
           className="flex flex-col items-center justify-center gap-2 w-full"
           onSubmit={async (e) => {
@@ -93,6 +95,7 @@ export default function Signin() {
               autoComplete="email"
               required
               disabled={pending}
+              autoFocus
             />
             <input
               type={showPassword ? "text" : "password"}
@@ -107,10 +110,18 @@ export default function Signin() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-16 -translate-y-1/4 text-neutral-500 hover:text-rose-300 transition-colors duration-300 cursor-pointer"
+              className="absolute right-4 top-16 -translate-y-1/6 text-neutral-500 hover:text-rose-300 transition-colors duration-300 cursor-pointer"
               disabled={pending}
             >
               {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm self-end mr-2.5 mb-3 -mt-3 underline underline-offset-4 text-neutral-400 cursor-pointer hover:text-rose-300 transition-colors duration-300"
+            >
+              Forget password?
             </button>
           </div>
 
@@ -122,7 +133,6 @@ export default function Signin() {
             )}
           </Button>
         </form>
-
         <div className="flex justify-center gap-1 w-full text-neutral-400">
           Don&apos;t have an account?{" "}
           <Link
@@ -147,6 +157,56 @@ export default function Signin() {
           className="object-cover"
         />
       </div>
+      {showForgotPassword && (
+        <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center z-50">
+          <div className="bg-neutral-950 p-6 rounded-4xl w-11/12 max-w-md border border-neutral-800">
+            <div className="flex justify-between items-center text-lg mb-3.5 mx-1">
+              Reset Password
+              <X
+                size={20}
+                onClick={() => setShowForgotPassword(false)}
+                cursor="pointer"
+              />
+            </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+
+                setPending(true);
+                setError(null);
+                const email = e.currentTarget.email.value;
+                if (!email) {
+                  return;
+                }
+
+                const result = await forgetPassword(email);
+                setError(result);
+                setShowForgotPassword(false);
+                setPending(false);
+              }}
+              className="flex flex-col gap-2"
+            >
+              <input
+                type="email"
+                className="w-full py-2 px-3.5 leading-tight border border-neutral-800 rounded-4xl focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                id="email"
+                name="email"
+                placeholder="Email"
+                autoComplete="email"
+                required
+                autoFocus
+              />
+              <Button disabled={pending}>
+                {pending ? (
+                  <div className="inline-block h-5 w-5 mt-0.5 animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                ) : (
+                  "Send"
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -103,6 +103,49 @@ export const credentialSignUp = async (
   }
 };
 
+export const forgetPassword = async (email: string) => {
+  try {
+    await auth.api.forgetPassword({
+      body: { email, redirectTo: "/resetpassword" },
+    });
+
+    return "If an account exists with this email, you will receive an password reset link!";
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.body?.code === "VALIDATION_ERROR") return "Invalid email";
+      return error.message;
+    }
+
+    return "Something went wrong!";
+  }
+};
+
+export const resetPassword = async (newPassword: string, token: string) => {
+  let done = false;
+
+  try {
+    const { status } = await auth.api.resetPassword({
+      body: { newPassword, token },
+    });
+
+    if (status) {
+      done = true;
+    }
+  } catch (error) {
+    if (error instanceof APIError) {
+      return error.message;
+    }
+
+    return "Something went wrong!";
+  }
+
+  if (done) {
+    return permanentRedirect("/signin");
+  }
+
+  return "Something went wrong!";
+};
+
 export const signOutCurrent = async () => {
   await auth.api.signOut({ headers: await headers() });
 
