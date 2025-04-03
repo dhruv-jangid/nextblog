@@ -16,7 +16,7 @@ export const Author = ({
   return (
     <div className="flex gap-3 items-center tracking-tight">
       <Link
-        href={`${slug}`}
+        href={`/${slug}`}
         className="relative w-11 h-11 lg:w-12 lg:h-12 rounded-full hover:animate-pulse overflow-hidden"
       >
         <Image
