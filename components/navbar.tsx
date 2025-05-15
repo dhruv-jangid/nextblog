@@ -68,7 +68,9 @@ export const Navbar = ({ session }: { session: Session | null }) => {
 
       <div className="flex items-center gap-2.5 cursor-default hover:animate-pulse">
         <Image src={Logo} alt="MetaPress Logo" width={26} priority />
-        <h1 className="font-semibold text-xl text-rose-300">MetaPress</h1>
+        <Link href="/" className="font-semibold text-xl text-rose-300">
+          MetaPress
+        </Link>
       </div>
 
       <div className="hidden lg:flex gap-3 xl:gap-6 items-center text-lg">
