@@ -1,70 +1,79 @@
+import "server-only";
 import Link from "next/link";
-import { Button } from "@/components/button";
+import type { Metadata } from "next";
+import { titleFont } from "@/lib/static/fonts";
+import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: "MetaPress | About",
+  description: "About MetaPress",
+};
 
 export default function About() {
   return (
-    <div className="min-h-[80vh] flex flex-col items-center p-4 lg:p-12 text-balance">
-      <div className="max-w-4xl w-full space-y-10">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl lg:text-4xl font-bold text-rose-300">
-            About MetaPress
-          </h1>
-          <p className="text-neutral-400 text-xl tracking-tight">
-            The Pulse of Creativity - Where Ideas Come to Life
-          </p>
-        </div>
+    <div className="min-h-[92dvh] flex flex-col items-center text-balance">
+      <div
+        className={`${titleFont.className} w-full text-center text-lg border-b py-12`}
+      >
+        <h1 className="text-3xl lg:text-4xl font-semibold">MetaPress</h1>
+        <p>The Pulse of Creativity</p>
+      </div>
 
-        <div className="bg-neutral-900 py-7 px-8 rounded-4xl space-y-3">
-          <h2 className="text-2xl font-semibold text-rose-300">Our Mission</h2>
-          <p className="text-neutral-300 text-lg leading-relaxed tracking-tight">
-            MetaPress is a platform dedicated to empowering writers, thinkers,
-            and creators to share their stories with the world. We believe in
-            the power of words to inspire, educate, and connect people across
-            boundaries.
-          </p>
-        </div>
+      <div className="py-16 px-16 lg:px-64 border-b w-full">
+        <h2 className={`${titleFont.className} text-2xl font-medium mb-2.5`}>
+          Our Mission
+        </h2>
+        <p className="text-lg leading-snug">
+          MetaPress is a platform dedicated to empowering writers, thinkers, and
+          creators to share their stories with the world. We believe in the
+          power of words to inspire, educate, and connect people across
+          boundaries.
+        </p>
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-10">
-          <div className="bg-neutral-900 py-7 px-8 rounded-4xl space-y-3">
-            <h3 className="text-xl font-semibold text-rose-300">For Writers</h3>
-            <ul className="text-neutral-300 text-lg tracking-tight space-y-1">
-              <li>• Easy-to-use blog creation tools</li>
-              <li>• Rich text editing capabilities</li>
-              <li>• Image upload and management</li>
-              <li>• Category organization</li>
-            </ul>
-          </div>
-
-          <div className="bg-neutral-900 py-7 px-8 rounded-4xl space-y-3">
-            <h3 className="text-xl font-semibold text-rose-300">For Readers</h3>
-            <ul className="text-neutral-300 text-lg tracking-tight space-y-1">
-              <li>• Diverse content categories</li>
-              <li>• Interactive like system</li>
-              <li>• Clean, distraction-free reading</li>
-              <li>• Easy content discovery</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="bg-neutral-900 py-7 px-8 rounded-4xl space-y-3">
-          <h2 className="text-2xl font-semibold text-rose-300">
-            Join Our Community
+      <div className="flex justify-between self-start gap-4 md:gap-16 xl:w-4/5 py-16 px-16 lg:px-64">
+        <div>
+          <h2 className={`${titleFont.className} text-2xl font-medium mb-2.5`}>
+            For Writers
           </h2>
-          <p className="text-neutral-300 leading-relaxed text-lg tracking-tight">
-            Whether you&apos;re a writer looking to share your voice or a reader
-            seeking inspiration, MetaPress is your home. Join our growing
-            community of creators and engage with content that matters to you.
-          </p>
+          <ul>
+            <li>• Easy-to-use blog creation tools</li>
+            <li>• Rich text editing capabilities</li>
+            <li>• Image upload and management</li>
+            <li>• Category organization</li>
+          </ul>
         </div>
+        <div>
+          <h2 className={`${titleFont.className} text-2xl font-medium mb-2.5`}>
+            For Readers
+          </h2>
+          <ul>
+            <li>• Diverse content categories</li>
+            <li>• Interactive like system</li>
+            <li>• Clean, distraction-free reading</li>
+            <li>• Easy content discovery</li>
+          </ul>
+        </div>
+      </div>
 
-        <div className="text-center flex flex-col items-center gap-2.5 mb-8">
-          <p className="text-neutral-400 text-lg tracking-tight">
-            Have questions or want to learn more about MetaPress?
-          </p>
-          <Link href="/contact" className="text-lg">
-            <Button>Contact Us</Button>
-          </Link>
-        </div>
+      <div className="py-16 px-16 lg:px-64 border-b border-t w-full">
+        <h2 className={`${titleFont.className} text-2xl font-medium mb-2.5`}>
+          Join Our Community
+        </h2>
+        <p>
+          Whether you&apos;re a writer looking to share your voice or a reader
+          seeking inspiration, MetaPress is your home. Join our growing
+          community of creators and engage with content that matters to you.
+        </p>
+      </div>
+
+      <div className="py-16 px-16 lg:px-64 w-full">
+        <h2 className={`${titleFont.className} text-xl font-medium mb-3.5`}>
+          Have questions or want to learn more about MetaPress?
+        </h2>
+        <Link href="/contact">
+          <Button>Contact Us</Button>
+        </Link>
       </div>
     </div>
   );

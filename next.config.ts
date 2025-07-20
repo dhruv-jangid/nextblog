@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+if (!cloudName) {
+  throw new Error("Cloudinary cloud name env required");
+}
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
@@ -15,7 +20,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        pathname: `/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/**`,
+        pathname: `/${cloudName}/**`,
       },
       {
         protocol: "https",

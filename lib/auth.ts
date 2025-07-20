@@ -1,71 +1,66 @@
-import { betterAuth, BetterAuthOptions } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
-import { sendEmail } from "@/utils/sendEmail";
-import argon2 from "argon2";
+import "server-only";
+import {
+  resetPasswordText,
+  verificationEmailText,
+  changeEmailVerificationText,
+  deleteAccountVerificationText,
+} from "@/lib/email/emailTexts";
+import { db } from "@/db/index";
+import * as schema from "@/db/schema";
 import { nextCookies } from "better-auth/next-js";
-import { removeImages } from "@/actions/handleUser";
-import { APIError } from "better-auth/api";
-import { generateSlug } from "@/utils/generateSlug";
-import { slugValidator } from "@/utils/zod";
+import { sendEmail } from "@/lib/email/sendEmail";
+import { admin, username } from "better-auth/plugins";
+import { generateUsername } from "@/actions/handleUser";
+import { betterAuth, BetterAuthOptions } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 export const auth = betterAuth({
-  database: prismaAdapter(new PrismaClient(), {
-    provider: "postgresql",
-  }),
-  plugins: [nextCookies()],
-  appName: "Metapress",
-  advanced: { cookiePrefix: "metapress" },
+  database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),
+  plugins: [
+    nextCookies(),
+    username(),
+    admin({
+      bannedUserMessage: "You have been banned from MetaPress",
+      defaultBanExpiresIn: 60 * 60 * 24 * 7,
+    }),
+  ],
+  appName: "MetaPress",
+  account: { encryptOAuthTokens: true },
+  advanced: { cookiePrefix: "metapress", database: { generateId: false } },
   user: {
-    deleteUser: {
+    changeEmail: {
       enabled: true,
-      sendDeleteAccountVerification: async ({ user, url }) => {
-        const createdAt = new Date(user.createdAt);
-        const now = new Date();
-        const diffInHours =
-          (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
-
-        if (diffInHours < 24) {
-          throw new APIError("BAD_REQUEST", {
-            message: "Account must be at least 24 hours old before deletion",
-          });
-        }
+      sendChangeEmailVerification: async ({
+        user: { name, email },
+        url,
+        newEmail,
+      }) => {
         await sendEmail({
-          to: user.email,
-          subject: "Account Deletion",
-          text: `Click the link to delete your MetaPress account ${url}`,
+          subject: "Confirm your new email address",
+          to: email,
+          text: changeEmailVerificationText({ name, newEmail, url }),
         });
       },
-      beforeDelete: async ({ id, email, createdAt }) => {
-        const twentyFourHours = 24 * 60 * 60 * 1000;
-        const timeSinceCreation = Date.now() - createdAt.getTime();
-
-        if (timeSinceCreation < twentyFourHours) {
-          throw new APIError("BAD_REQUEST", {
-            message: "Account must be at least 24 hours old before deletion",
-          });
-        }
-        if (email.includes("ADMIN")) {
-          throw new APIError("BAD_REQUEST", {
-            message: "Admin accounts can't be deleted",
-          });
-        }
-        await removeImages(id);
-      },
     },
-    additionalFields: {
-      role: {
-        type: "string",
-        required: true,
-        defaultValue: "USER",
-      },
-      slug: {
-        type: "string",
-        required: true,
-        unique: true,
-        validator: {
-          input: slugValidator,
-        },
+    deleteUser: {
+      enabled: true,
+      deleteTokenExpiresIn: 60 * 60,
+      sendDeleteAccountVerification: async ({
+        user: { name, email, createdAt },
+        url,
+      }) => {
+        const diffInHours =
+          (new Date().getTime() - new Date(createdAt).getTime()) /
+          (1000 * 60 * 60);
+        if (diffInHours < 24) {
+          throw new Error("Try again later");
+        }
+
+        await sendEmail({
+          to: email,
+          subject: "Delete your MetaPress account",
+          text: deleteAccountVerificationText({ name, url }),
+        });
       },
     },
   },
@@ -73,55 +68,48 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: false,
     requireEmailVerification: true,
-    password: {
-      hash: async (password) => {
-        return await argon2.hash(password);
-      },
-      verify: async ({ hash, password }) => {
-        return await argon2.verify(hash, password);
-      },
-    },
-    sendResetPassword: async ({ user, url }) => {
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user: { name, email }, url }) => {
       await sendEmail({
-        to: user.email,
-        subject: "Reset your password",
-        text: `Click the link to reset your password: ${url}`,
+        to: email,
+        subject: "Reset your MetaPress password",
+        text: resetPasswordText({ name, url }),
       });
     },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
+    sendVerificationEmail: async ({ user: { name, email }, url }) => {
       await sendEmail({
-        to: user.email,
-        subject: "Verify your email address",
-        text: `Click the link to verify your email: ${url}`,
+        to: email,
+        subject: "Verify your MetaPress email",
+        text: verificationEmailText({ name, url }),
       });
     },
   },
   socialProviders: {
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-      mapProfileToUser: (profile) => {
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      mapProfileToUser: async ({ login: name }) => {
         return {
-          role: "USER",
-          slug: generateSlug(profile.login, profile.id),
+          username: await generateUsername({ name }),
         };
       },
     },
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      mapProfileToUser: (profile) => {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      mapProfileToUser: async ({ name }) => {
         return {
-          role: "USER",
-          slug: generateSlug(profile.name, profile.sub),
+          username: await generateUsername({ name }),
         };
       },
     },
   },
+  verification: { disableCleanup: true },
+  onAPIError: { errorURL: "/signin" },
 } satisfies BetterAuthOptions);
 
 export type Session = typeof auth.$Infer.Session;

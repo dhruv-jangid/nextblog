@@ -1,41 +1,49 @@
-import { Button } from "@/components/button";
-import { Author } from "@/components/author";
 import Link from "next/link";
 import Image from "next/image";
-import type { Blog, Like, User } from "@prisma/client";
+import { Author } from "@/components/author";
+import { titleFont } from "@/lib/static/fonts";
+import { Button } from "@/components/ui/button";
+import type { BlogType } from "@/lib/static/types";
 
-export const Carousel = ({
-  blog,
-}: {
-  blog: Omit<Blog, "id" | "content" | "authorId" | "updatedAt"> & {
-    likes: Pick<Like, "userId" | "blogId">[];
-    author: Pick<User, "id" | "name" | "slug" | "image">;
-  };
-}) => {
+export const Carousel = ({ blog }: { blog: BlogType }) => {
   return (
-    <div className="relative rounded-4xl overflow-hidden h-[40vh] md:h-[70vh] max-h-[48rem] w-full mb-10">
-      <Image
-        src={blog.image}
-        alt={blog.title}
-        fill
-        priority
-        className="object-cover"
-      />
-      <div className="absolute left-8 md:left-14 bottom-8 md:bottom-14 text-base flex flex-col gap-2 sm:gap-4 w-2/3 md:w-1/2">
-        <Link href={`/blogs/${blog.category}`} className="text-sm xl:text-base">
-          <Button roseVariant>{blog.category}</Button>
-        </Link>
-        <Link
-          href={`/${blog.author.slug}/${blog.slug}`}
-          className="text-xl antialiased md:text-3xl xl:text-4xl font-bold line-clamp-2 text-balance hover:animate-pulse sm:line-clamp-3"
-        >
-          {blog.title}
-        </Link>
-        <Author
-          date={blog.createdAt}
-          image={blog.author.image}
-          name={blog.author.name}
-          slug={blog.author.slug}
+    <div className="relative lg:static flex justify-between h-[92dvh] w-full border-b">
+      <div className="lg:flex-[3_3_0%] flex flex-col w-full self-end gap-3 p-6 bg-accent shadow-xl lg:shadow-none lg:p-0 lg:ml-8 lg:mb-8">
+        <div className="flex items-center gap-4">
+          <time>
+            {new Intl.DateTimeFormat("en-GB", {
+              month: "long",
+              day: "2-digit",
+              year: "numeric",
+            }).format(new Date(blog.createdAt))}
+          </time>
+          <Link href={`/blogs/${blog.category}`}>
+            <Button variant="outline" className="tracking-tight">
+              {blog.category}
+            </Button>
+          </Link>
+        </div>
+        <div className="flex flex-col gap-4 lg:gap-6 lg:w-2/3 text-balance">
+          <Link
+            href={`/${blog.user.username}/${blog.slug}`}
+            className={`${titleFont.className} text-4xl lg:text-6xl text-balance underline-hover hover:animate-pulse line-clamp-3 leading-tight lg:leading-16`}
+          >
+            {blog.title}
+          </Link>
+          <Author
+            image={blog.user.image}
+            name={blog.user.name}
+            username={blog.user.username}
+          />
+        </div>
+      </div>
+      <div className="-z-10 lg:flex lg:relative flex-[2_2_0%] border-l">
+        <Image
+          src={blog.image}
+          alt={blog.title}
+          fill
+          priority
+          className="object-cover w-fit"
         />
       </div>
     </div>

@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
     }
     return NextResponse.next();
   }
-  if (pathname === "/") {
+  if (["/", "/blogs", "/about"].includes(pathname)) {
     return NextResponse.next();
   }
   if (!isLoggedIn) {

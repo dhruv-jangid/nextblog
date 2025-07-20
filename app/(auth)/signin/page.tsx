@@ -1,212 +1,32 @@
-"use client";
-
-import Google from "@/public/images/google.png";
-import Github from "@/public/images/github.png";
-import Greeting from "@/public/images/greeting.jpg";
-import { Eye, EyeClosed, X } from "lucide-react";
-import { useState } from "react";
+import "server-only";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/button";
-import {
-  credentialSignIn,
-  forgetPassword,
-  socialAuth,
-} from "@/actions/handleAuth";
+import type { Metadata } from "next";
+import { SigninClient } from "./client";
+import { titleFont } from "@/lib/static/fonts";
+import Greeting from "@/public/images/circles.jpg";
+
+export const metadata: Metadata = {
+  title: "MetaPress | Signin",
+  description: "Signin to MetaPress",
+};
 
 export default function Signin() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-
   return (
-    <div className="grid xl:grid-cols-2 h-[80vh]">
-      <div className="flex flex-col items-center justify-center gap-3 w-2/3 lg:w-1/2 place-self-center">
-        <div className="flex items-center justify-center gap-4 w-full">
-          <Button
-            disabled={pending}
-            onClick={async () => {
-              setError(null);
-              setPending(true);
-              const error = await socialAuth("google");
-              if (error) {
-                setPending(false);
-                setError(error);
-              }
-            }}
-          >
-            <Image src={Google} alt="Google's icon" width={16} height={16} />
-            Google
-          </Button>
-          <Button
-            onClick={async () => {
-              setError(null);
-              setPending(true);
-              const error = await socialAuth("github");
-              if (error) {
-                setPending(false);
-                setError(error);
-              }
-            }}
-            disabled={pending}
-          >
-            <Image
-              src={Github}
-              alt="Github's icon"
-              width={18}
-              height={18}
-              className="invert"
-            />
-            Github
-          </Button>
-        </div>
-        <div className="flex items-center justify-evenly w-full">
-          <hr className="w-1/3 border-neutral-800" />
-          <h3 className="text-lg font-medium px-1.5 text-neutral-400">or</h3>
-          <hr className="w-1/3 border-neutral-800" />
-        </div>
-        {error && (
-          <div className="px-3.5 py-2 leading-tight text-pretty text-center text-red-500 bg-red-500/10 border border-red-500/50 rounded-4xl">
-            {error}
+    <div className="relative text-nowrap">
+      <Image
+        src={Greeting}
+        alt="Background Image"
+        fill
+        className="dark:invert"
+      />
+      <div className="flex flex-col items-center justify-center w-full min-h-[92dvh] backdrop-blur-2xl dark:backdrop-blur-3xl">
+        <div className="w-4/5 md:w-1/2 xl:w-1/4 mx-auto">
+          <div className={`${titleFont.className} text-3xl mb-6 text-center`}>
+            Greetings
           </div>
-        )}
-        <form
-          className="flex flex-col items-center justify-center gap-2 w-full"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setError(null);
-            setPending(true);
-
-            const { email, password } = e.currentTarget;
-
-            const error = await credentialSignIn(email.value, password.value);
-            setPending(false);
-            setError(error);
-          }}
-        >
-          <div className="relative flex flex-col gap-3 w-full">
-            <input
-              type="email"
-              className="w-full py-2 px-3.5 leading-tight border border-neutral-800 rounded-4xl focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-              id="email"
-              name="email"
-              placeholder="Email"
-              autoComplete="email"
-              required
-              disabled={pending}
-              autoFocus
-            />
-            <input
-              type={showPassword ? "text" : "password"}
-              className="w-full py-2 px-3.5 leading-tight border border-neutral-800 rounded-4xl focus:outline-hidden mb-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-              id="password"
-              name="password"
-              placeholder="Password"
-              autoComplete="new-password"
-              required
-              disabled={pending}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-16 -translate-y-1/6 text-neutral-500 hover:text-rose-300 transition-colors duration-300 cursor-pointer"
-              disabled={pending}
-            >
-              {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowForgotPassword(true)}
-              className="text-sm self-end mr-2.5 mb-3 -mt-3 underline underline-offset-4 text-neutral-400 cursor-pointer hover:text-rose-300 transition-colors duration-300"
-            >
-              Forget password?
-            </button>
-          </div>
-
-          <Button disabled={pending}>
-            {pending ? (
-              <div className="inline-block h-5 w-5 mt-0.5 animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-            ) : (
-              "Sign in"
-            )}
-          </Button>
-        </form>
-        <div className="flex justify-center gap-1 w-full text-neutral-400">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-neutral-300 underline font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            tabIndex={pending ? -1 : 0}
-            replace
-          >
-            Signup
-          </Link>
+          <SigninClient />
         </div>
       </div>
-      <div className="rounded-full rounded-tr-none overflow-hidden hidden xl:block relative">
-        <Image
-          src={Greeting}
-          alt="The adventure begins"
-          fill
-          quality={100}
-          priority={true}
-          placeholder="blur"
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
-        />
-      </div>
-      {showForgotPassword && (
-        <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center z-50">
-          <div className="bg-neutral-950 p-6 rounded-4xl w-11/12 max-w-md border border-neutral-800">
-            <div className="flex justify-between items-center text-lg mb-3.5 mx-1">
-              Reset Password
-              <X
-                size={20}
-                onClick={() => setShowForgotPassword(false)}
-                cursor="pointer"
-              />
-            </div>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-
-                setPending(true);
-                setError(null);
-                const email = e.currentTarget.email.value;
-                if (!email) {
-                  return;
-                }
-
-                const result = await forgetPassword(email);
-                setError(result);
-                setShowForgotPassword(false);
-                setPending(false);
-              }}
-              className="flex flex-col gap-2"
-            >
-              <input
-                type="email"
-                className="w-full py-2 px-3.5 leading-tight border border-neutral-800 rounded-4xl focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-                id="email"
-                name="email"
-                placeholder="Email"
-                autoComplete="email"
-                required
-                autoFocus
-              />
-              <Button disabled={pending}>
-                {pending ? (
-                  <div className="inline-block h-5 w-5 mt-0.5 animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                ) : (
-                  "Send"
-                )}
-              </Button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

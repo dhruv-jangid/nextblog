@@ -1,148 +1,194 @@
-import { Button } from "@/components/button";
-import { prisma } from "@/lib/db";
+import "server-only";
+import { db } from "@/db";
 import Link from "next/link";
-import { BlogGrid } from "@/components/bloggrid";
 import { auth } from "@/lib/auth";
-import { SquareArrowOutUpRight } from "lucide-react";
-import ProfileImg from "@/components/profileimg";
+import ProfileImg from "./client";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { eq, desc, sql } from "drizzle-orm";
+import { titleFont } from "@/lib/static/fonts";
+import { Button } from "@/components/ui/button";
+import { BlogGrid } from "@/components/bloggrid";
+import { users, blogs, likes } from "@/db/schema";
+import type { BlogType } from "@/lib/static/types";
+import { SquareArrowOutUpRight } from "lucide-react";
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> => {
+  const { username } = await params;
+
+  return {
+    title: `MetaPress | ${username}`,
+    description: `View the profile of ${username}.`,
+  };
+};
 
 export default async function Profile({
   params,
 }: {
   params: Promise<{ username: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
   const { username } = await params;
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const [userRow] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
+      role: users.role,
+      totalLikes: sql<number>`count(distinct ${likes})`,
+    })
+    .from(users)
+    .leftJoin(blogs, eq(blogs.userId, users.id))
+    .leftJoin(likes, eq(likes.blogId, blogs.id))
+    .where(eq(users.username, username))
+    .groupBy(users.id);
 
-  const user = await prisma.user.findUnique({
-    where: { slug: username },
-    select: {
-      name: true,
-      role: true,
-      slug: true,
-      image: true,
-      blogs: {
-        select: {
-          title: true,
-          slug: true,
-          image: true,
-          category: true,
-          createdAt: true,
-          likes: { select: { blogId: true, userId: true } },
-          author: {
-            select: { name: true, slug: true, id: true, image: true },
-          },
-          _count: {
-            select: {
-              likes: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        take: 10,
-      },
-    },
-    cacheStrategy: {
-      ttl: 60,
-      swr: 60,
-      tags: ["blogs"],
-    },
-  });
-
-  if (!user) {
+  if (!userRow) {
     notFound();
   }
 
+  const blogsRaw = await db
+    .select({
+      id: blogs.id,
+      title: blogs.title,
+      slug: blogs.slug,
+      image: blogs.image,
+      category: blogs.category,
+      createdAt: blogs.createdAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        image: users.image,
+      },
+      likes: {
+        userId: likes.userId,
+        blogId: likes.blogId,
+      },
+    })
+    .from(blogs)
+    .innerJoin(users, eq(users.id, blogs.userId))
+    .leftJoin(likes, eq(likes.blogId, blogs.id))
+    .where(eq(blogs.userId, userRow.id))
+    .orderBy(desc(blogs.createdAt));
+
+  const grouped: Record<string, BlogType> = {};
+  for (const row of blogsRaw) {
+    const key = row.slug;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        id: row.id,
+        title: row.title,
+        slug: row.slug,
+        image: row.image,
+        category: row.category,
+        createdAt: row.createdAt,
+        user: {
+          id: row.user.id,
+          name: row.user.name,
+          username: row.user.username,
+          image: row.user.image,
+        },
+        likes: [],
+      };
+    }
+
+    if (row.likes?.userId && row.likes?.blogId) {
+      grouped[key].likes.push({
+        userId: row.likes.userId,
+        blogId: row.likes.blogId,
+      });
+    }
+  }
+  const actualBlogs = Object.values(grouped);
+
+  const { username: sUsername, role } = session!.user;
+  const isSelf = sUsername === userRow.username;
+  const isSelfAdmin = role === "admin" && isSelf;
+
   return (
-    <div className="flex flex-col gap-6 p-4 lg:p-12">
+    <div className="flex flex-col items-center">
       <div className="flex flex-col gap-16 justify-center lg:flex-row items-center lg:text-base">
-        <div className="flex lg:justify-center gap-8 xl:gap-16">
-          <div className="relative h-30 w-30 lg:h-36 lg:w-36">
+        <div className="flex lg:justify-center gap-8 xl:gap-16 w-full py-22 pb-18">
+          <div className="h-30 w-30 lg:h-36 lg:w-36">
             <ProfileImg
-              imageUrl={user.image}
-              isAuthor={user.slug === session?.user.slug}
+              imageUrl={userRow.image}
+              isUser={userRow.username === sUsername}
             />
-            {session?.user.slug === user.slug && (
-              <Link
-                href="settings?tab=profile"
-                className="text-sm xl:text-base w-max md:hidden absolute left-1/2 -translate-x-1/2 -bottom-2 backdrop-blur-2xl text-[#EEEEEE] font-medium py-1.5 px-3 rounded-xl"
-              >
-                Edit Profile
-              </Link>
-            )}
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex gap-4 items-center">
-              <h1 className="text-3xl font-medium">{user.slug}</h1>
-              {session?.user.slug === user.slug && (
-                <Link href="settings?tab=profile" className="hidden md:block">
+              <h1 className={`${titleFont.className} text-3xl`}>
+                {userRow.username}
+              </h1>
+              {isSelf && (
+                <Link href="settings/profile" className="hidden md:block">
                   <Button>Edit Profile</Button>
                 </Link>
               )}
-              {session?.user.role === "ADMIN" &&
-                session.user.slug === user.slug && (
-                  <Link href={`/admin/dashboard`} className="hidden md:block">
-                    <Button>
-                      <span className="flex items-center gap-1.5">
-                        Dashboard <SquareArrowOutUpRight size={18} />
-                      </span>
-                    </Button>
-                  </Link>
-                )}
-            </div>
-
-            <div className="flex items-center gap-6 text-lg">
-              <div className="flex items-center gap-2">
-                <h1 className="font-semibold text-rose-300">
-                  {user.blogs.length}
-                </h1>
-                <div>Blogs</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-semibold text-rose-300">
-                  {user.blogs.reduce(
-                    (sum: number, blog: { _count: { likes: number } }) =>
-                      sum + blog._count.likes,
-                    0
-                  )}
-                </h1>
-                <div>Likes</div>
-              </div>
-            </div>
-
-            <div className="flex gap-2 items-center text-lg font-medium text-rose-300">
-              {user.name}
-              {user.role === "ADMIN" && (
-                <span className="text-red-800 text-lg">({user.role})</span>
-              )}
-            </div>
-            {session?.user.role === "ADMIN" &&
-              session.user.slug === user.slug && (
-                <Link href={`/admin/dashboard`} className="md:hidden">
+              {isSelfAdmin && (
+                <Link href={`/admin/dashboard`} className="hidden md:block">
                   <Button>
-                    <span className="flex items-center gap-1">
-                      Dashboard <SquareArrowOutUpRight />
+                    <span className="flex items-center gap-1.5">
+                      Dashboard <SquareArrowOutUpRight size={18} />
                     </span>
                   </Button>
                 </Link>
               )}
+            </div>
+
+            <div className="flex items-center gap-6 text-lg">
+              <div className="flex items-center gap-2">
+                {actualBlogs.length}
+                <span className="opacity-70">Blogs</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {userRow.totalLikes}
+                <span className="opacity-70">Likes</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 items-center text-lg opacity-85">
+              {userRow.name}
+              {userRow.role === "admin" && (
+                <span className="text-lg text-red-500">
+                  ({userRow.role.toUpperCase()})
+                </span>
+              )}
+            </div>
+            <div className="flex gap-1.5">
+              {isSelf && (
+                <Link href="settings?tab=profile" className="md:hidden">
+                  <Button>Edit Profile</Button>
+                </Link>
+              )}
+              {isSelfAdmin && (
+                <Link href={`/admin/dashboard`} className="md:hidden">
+                  <Button>
+                    Dashboard <SquareArrowOutUpRight />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center my-6">
-        <hr className="col-span-2 w-full md:w-3/4 border-neutral-700" />
-      </div>
-
-      {user.blogs.length > 0 ? (
-        <BlogGrid blogs={user.blogs} />
+      {actualBlogs.length > 0 ? (
+        <BlogGrid blogs={actualBlogs} />
       ) : (
-        <div className="flex justify-center items-center min-h-[60vh] text-4xl rounded-4xl w-3/4 mx-auto">
-          Currently, this user has no published blogs!
+        <div
+          className={`${titleFont.className} flex justify-center items-center min-h-[59vh] text-4xl w-full border-t`}
+        >
+          This user has no published blogs!
         </div>
       )}
     </div>

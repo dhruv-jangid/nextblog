@@ -1,153 +1,174 @@
 "use server";
 
-import { permanentRedirect, redirect } from "next/navigation";
+import "server-only";
+import {
+  emailValidator,
+  getFirstZodError,
+  passwordValidator,
+  credentialsValidator,
+} from "@/lib/schemas/shared";
+import { ZodError } from "zod";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { APIError } from "better-auth/api";
-import { checkProfanity } from "@/utils/checkProfanity";
-import { ZodError } from "zod";
-import { passwordValidator } from "@/utils/zod";
 
-export const socialAuth = async (provider: "google" | "github") => {
+export const socialAuth = async ({
+  provider,
+}: {
+  provider: "google" | "github";
+}): Promise<void> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) {
-    permanentRedirect("/");
+    throw new Error("Already signed in");
   }
 
-  const result = await auth.api.signInSocial({
-    body: {
-      provider,
-      disableRedirect: true,
-      errorCallbackURL: "/signin",
-    },
-  });
-
-  if (result.url) {
-    redirect(result.url);
-  }
-
-  return "Something went wrong!";
-};
-
-export const credentialSignIn = async (email: string, password: string) => {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (session) {
-    permanentRedirect("/");
-  }
-
-  let done = false;
-
+  let redirectUrl: string | undefined;
   try {
-    const result = await auth.api.signInEmail({ body: { email, password } });
-
-    if (result) {
-      done = true;
-    }
-  } catch (error) {
-    if (error instanceof APIError) {
-      return error.message;
-    }
-
-    return "Something went wrong!";
-  }
-
-  if (done) {
-    permanentRedirect("/");
-  }
-
-  return "Something went wrong!";
-};
-
-export const credentialSignUp = async (
-  slug: string,
-  email: string,
-  password: string
-) => {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (session) {
-    permanentRedirect("/");
-  }
-
-  if (checkProfanity(slug)) {
-    return "Inappropriate language!";
-  }
-
-  const checkPassword = passwordValidator.safeParse(password);
-  if (!checkPassword.success) {
-    return checkPassword.error.format()._errors[0];
-  }
-
-  try {
-    await auth.api.signUpEmail({
-      body: { name: slug, email, password, slug },
+    const { url } = await auth.api.signInSocial({
+      body: {
+        provider,
+        disableRedirect: true,
+        errorCallbackURL: "/signin",
+      },
     });
-
-    return "Verification email sent to your gmail inbox!";
+    redirectUrl = url;
   } catch (error) {
-    if (error instanceof APIError) {
-      switch (error.body?.code) {
-        case "FAILED_TO_CREATE_USER":
-          return "Username not available";
-        case "USER_ALREADY_EXISTS":
-          return "Email already registered";
-        default:
-          return error.message;
-      }
+    if (error instanceof APIError || error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
     }
+  }
 
+  if (redirectUrl) {
+    redirect(redirectUrl);
+  }
+
+  throw new Error("Something went wrong");
+};
+
+export const credentialSignIn = async (body: {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) {
+    throw new Error("Already signed in");
+  }
+
+  try {
+    emailValidator.parse(body.email);
+
+    await auth.api.signInEmail({ body });
+  } catch (error) {
     if (error instanceof ZodError) {
-      return error.errors[0].message;
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof APIError || error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
     }
+  }
 
-    return "Something went wrong!";
+  redirect("/");
+};
+
+export const credentialSignUp = async (credentials: {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) {
+    throw new Error("Already signed in");
+  }
+
+  try {
+    const body = credentialsValidator.parse(credentials);
+
+    await auth.api.signUpEmail({ body });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof APIError) {
+      switch (error.body?.code) {
+        case "USERNAME_IS_ALREADY_TAKEN_PLEASE_TRY_ANOTHER":
+          throw new Error("Username is already taken");
+        case "USER_ALREADY_EXISTS":
+          throw new Error("Email already registered");
+        default:
+          throw new Error(error.message);
+      }
+    } else if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
   }
 };
 
-export const forgetPassword = async (email: string) => {
+export const forgetPassword = async ({
+  email,
+}: {
+  email: string;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) {
+    throw new Error("Already signed in");
+  }
+
   try {
+    emailValidator.parse(email);
+
     await auth.api.forgetPassword({
       body: { email, redirectTo: "/resetpassword" },
+      headers: await headers(),
     });
-
-    return "If an account exists with this email, you will receive an password reset link!";
   } catch (error) {
-    if (error instanceof APIError) {
-      if (error.body?.code === "VALIDATION_ERROR") return "Invalid email";
-      return error.message;
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof APIError || error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
     }
-
-    return "Something went wrong!";
   }
 };
 
-export const resetPassword = async (newPassword: string, token: string) => {
-  let done = false;
-
+export const resetPassword = async (body: {
+  newPassword: string;
+  token: string;
+}): Promise<void> => {
   try {
-    const { status } = await auth.api.resetPassword({
-      body: { newPassword, token },
-    });
+    passwordValidator.parse(body.newPassword);
 
-    if (status) {
-      done = true;
-    }
+    await auth.api.resetPassword({ body });
   } catch (error) {
-    if (error instanceof APIError) {
-      return error.message;
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof APIError || error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
     }
-
-    return "Something went wrong!";
   }
 
-  if (done) {
-    return permanentRedirect("/signin");
-  }
-
-  return "Something went wrong!";
+  redirect("/signin");
 };
 
-export const signOutCurrent = async () => {
-  await auth.api.signOut({ headers: await headers() });
+export const signOutCurrent = async (): Promise<void> => {
+  try {
+    await auth.api.signOut({ headers: await headers() });
+  } catch (error) {
+    if (error instanceof APIError || error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
+  }
 
-  permanentRedirect("/signin");
+  redirect("/signin");
 };

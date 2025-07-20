@@ -1,15 +1,17 @@
 "use client";
 
-import { Button } from "@/components/button";
-import { useState } from "react";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import Logo from "@/app/favicon.ico";
-import { signOutCurrent } from "@/actions/handleAuth";
-import { Menu, X, ChevronDown } from "lucide-react";
-import Account from "@/public/images/account.png";
-import { Session } from "@/lib/auth";
 import Link from "next/link";
+import Image from "next/image";
+import Logo from "@/app/favicon.ico";
+import type { Session } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { titleFont } from "@/lib/static/fonts";
+import { Button } from "@/components/ui/button";
+import Account from "@/public/images/account.png";
+import { useTheme } from "@/context/themeProvider";
+import { LaptopMinimal, Moon, Sun, Menu, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -19,139 +21,155 @@ const NAV_LINKS = [
   { href: "/createblog", label: "Create" },
 ];
 
-export const Navbar = ({ session }: { session: Session | null }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+export const Navbar = ({ user }: { user: Session["user"] | null }) => {
   const pathname = usePathname();
+  const { setTheme, theme } = useTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
 
   return (
-    <nav className="flex justify-between items-center px-8 md:px-12 py-6 sticky top-0 z-50 backdrop-blur-3xl rounded-b-4xl tracking-tight">
-      <div className="relative lg:hidden">
+    <nav className="flex justify-between items-center px-8 h-[8dvh] max-h-[8dvh] sticky top-0 z-50 border-b backdrop-blur-3xl">
+      <Link
+        href="/"
+        className={`${titleFont.className} flex items-center gap-2.5 -z-10 cursor-pointer hover:animate-pulse`}
+      >
+        <Image
+          src={Logo}
+          alt="MetaPress Logo"
+          className="dark:invert"
+          width={26}
+          priority
+        />
+        <h1 className="text-xl font-medium mt-0.5">MetaPress</h1>
+      </Link>
+
+      <div className="lg:hidden relative">
         {isMenuOpen ? (
-          <X
-            size={36}
-            strokeWidth={1}
-            className="border border-b-transparent border-neutral-800 rounded-xl rounded-bl-none p-1.5"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          />
+          <>
+            <X
+              onClick={() => setIsMenuOpen(false)}
+              className="z-50 cursor-pointer"
+            />
+            <div className="fixed top-0 right-0 h-dvh w-64 bg-accent flex flex-col gap-8 px-8 py-6 transition-transform duration-300">
+              <div className="flex justify-end">
+                <X
+                  onClick={() => setIsMenuOpen(false)}
+                  className="cursor-pointer"
+                />
+              </div>
+              {NAV_LINKS.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`${
+                    pathname === href ? "font-semibold" : "underline-hover"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {label}
+                </Link>
+              ))}
+              <div className="mt-auto flex flex-col gap-4">
+                {user ? (
+                  <Link
+                    href={user.username!}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Avatar>
+                      <AvatarImage src={user.image ? user.image : undefined} />
+                      <AvatarFallback>{user.name}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+                ) : (
+                  <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                    <Button>Get Started</Button>
+                  </Link>
+                )}
+                <div className="flex gap-2">
+                  {theme === "system" ? (
+                    <LaptopMinimal
+                      size={16}
+                      cursor="pointer"
+                      onClick={() => setTheme("light")}
+                    />
+                  ) : theme === "light" ? (
+                    <Sun
+                      size={16}
+                      cursor="pointer"
+                      onClick={() => setTheme("dark")}
+                    />
+                  ) : (
+                    <Moon
+                      size={16}
+                      cursor="pointer"
+                      onClick={() => setTheme("system")}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="fixed h-dvh inset-0 bg-black/80 -z-10" />
+          </>
         ) : (
           <Menu
-            size={36}
-            strokeWidth={1}
-            className="border border-neutral-800 rounded-xl p-1.5"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => setIsMenuOpen(true)}
+            className="cursor-pointer"
           />
         )}
-        <div
-          className={`absolute top-9 left-0 ${
-            isMenuOpen ? "block" : "hidden"
-          } flex flex-col items-center rounded-3xl leading-tight gap-4 py-2.5 px-1 bg-neutral-950 border rounded-tl-none border-neutral-800`}
-        >
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => {
-                setIsMenuOpen(false);
-              }}
-              className={`rounded-4xl py-1.5 px-3.5 ${
-                pathname === href
-                  ? "bg-rose-500/10 text-rose-300"
-                  : "hover:bg-rose-500/10"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
       </div>
 
-      <div className="flex items-center gap-2.5 cursor-default hover:animate-pulse">
-        <Image src={Logo} alt="MetaPress Logo" width={26} priority />
-        <Link href="/" className="font-semibold text-xl text-rose-300">
-          MetaPress
-        </Link>
-      </div>
-
-      <div className="hidden lg:flex gap-3 xl:gap-6 items-center text-lg">
+      <div className="hidden lg:flex gap-8 items-center font-medium">
         {NAV_LINKS.map(({ href, label }) => (
           <Link
             key={href}
             href={href}
-            className={`rounded-4xl py-1 px-3.5 transition-all duration-300 ${
-              pathname === href
-                ? "bg-rose-500/10 text-rose-300"
-                : "hover:bg-rose-500/10 cursor-pointer"
+            className={`${
+              pathname === href ? "font-semibold" : "underline-hover"
             }`}
           >
             {label}
           </Link>
         ))}
+        {user ? (
+          <Link href={user.username!}>
+            <Avatar>
+              <AvatarImage src={user.image ? user.image : Account.src} />
+              <AvatarFallback>{user.name}</AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <Link href="/signup">
+            <Button>Get Started</Button>
+          </Link>
+        )}
+        {theme === "system" ? (
+          <LaptopMinimal
+            size={16}
+            className="-mx-2.5"
+            cursor="pointer"
+            onClick={() => setTheme("light")}
+          />
+        ) : theme === "light" ? (
+          <Sun
+            size={16}
+            className="-mx-2.5"
+            cursor="pointer"
+            onClick={() => setTheme("dark")}
+          />
+        ) : (
+          <Moon
+            size={16}
+            className="-mx-2.5"
+            cursor="pointer"
+            onClick={() => setTheme("system")}
+          />
+        )}
       </div>
-
-      {session?.user ? (
-        <div className="relative">
-          <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className={`flex items-center gap-1 border border-neutral-800 hover:bg-rose-500/10 transition-all duration-300 ${
-              isProfileOpen && "rounded-br-none border-b-transparent"
-            } rounded-full p-1 pl-1.5 cursor-pointer`}
-          >
-            <ChevronDown
-              size={18}
-              strokeWidth={1}
-              className={`transition-transform duration-200 ${
-                isProfileOpen && "rotate-180"
-              }`}
-            />
-            <Image
-              src={session.user.image || Account}
-              width={36}
-              height={36}
-              alt="Profile Picture"
-              className="rounded-full w-8 h-8 md:w-9 md:h-9"
-            />
-          </button>
-          <div
-            className={`flex flex-col items-center justify-between gap-1.5 absolute right-0 p-2 bg-neutral-950 leading-tight border border-neutral-800 rounded-tr-none rounded-3xl transition-all duration-300 transform ${
-              isProfileOpen
-                ? "opacity-100 scale-100 visible"
-                : "opacity-0 scale-95 invisible"
-            }`}
-          >
-            <Link href={`/${session?.user.slug}`}>
-              <Button
-                onClick={() => {
-                  setIsProfileOpen(false);
-                }}
-              >
-                Profile
-              </Button>
-            </Link>
-            <Link href="/settings">
-              <Button
-                onClick={() => {
-                  setIsProfileOpen(false);
-                }}
-              >
-                Setting
-              </Button>
-            </Link>
-            <Button
-              onClick={() => {
-                setIsProfileOpen(false);
-                signOutCurrent();
-              }}
-            >
-              Logout
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <Link href="/signin">
-          <Button roseVariant>Signin</Button>
-        </Link>
-      )}
     </nav>
   );
 };

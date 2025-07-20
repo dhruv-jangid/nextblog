@@ -1,311 +1,289 @@
 "use server";
 
+import "server-only";
+import { db } from "@/db";
+import { ZodError } from "zod";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { deleteImage, uploadImage, getPublicIdFromUrl } from "@/lib/cloudinary";
-import { permanentRedirect, redirect, RedirectType } from "next/navigation";
-import { checkProfanity } from "@/utils/checkProfanity";
+import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import type { JSONContent } from "@tiptap/react";
+import { deleteImages } from "@/actions/handleCloudinary";
+import { blogs, likes, comments, blogImages } from "@/db/schema";
+import { blogValidator, editBlogValidator } from "@/lib/schemas/server";
+import { commentValidator, getFirstZodError } from "@/lib/schemas/shared";
+import { permanentRedirect, redirect, RedirectType } from "next/navigation";
 
-export const createBlog = async (
-  prevState: any,
-  formData: FormData
-): Promise<string | void> => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const createBlog = async ({
+  title,
+  content,
+  category,
+  image,
+  images,
+}: {
+  title: string;
+  content: JSONContent;
+  category: string;
+  image: string;
+  images: { url: string; publicId: string }[];
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    permanentRedirect("/signin");
+    throw new Error("Unauthorized");
   }
 
-  const { id } = session.user;
-  const title = formData.get("title") as string;
-  const content = formData.get("content") as string;
-  const category = formData.get("category") as string;
-  const blogCover = formData.get("image") as File;
+  const { id: userId, username } = session.user;
+  let slug: string | undefined;
+  try {
+    const newBlog = blogValidator.parse({
+      title: title,
+      content: content,
+      category: category,
+      image: image,
+      images: images,
+    });
+    slug = newBlog.slug;
 
-  if (checkProfanity(title) || checkProfanity(content)) {
-    return "Inappropriate language!";
+    await db.transaction(async (tx) => {
+      const [{ id: blogId }] = await tx
+        .insert(blogs)
+        .values({ ...newBlog, userId })
+        .returning();
+
+      await tx.insert(blogImages).values(
+        images.map(({ url, publicId }, index) => ({
+          blogId,
+          url,
+          publicId,
+          order: index,
+        }))
+      );
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
   }
 
-  const existingBlog = await prisma.blog.findUnique({
-    where: {
-      slug: title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w\-]+/g, ""),
-    },
-  });
-  if (existingBlog) {
-    return "Title already taken!";
-  }
-
-  const imageUpload = await uploadImage(blogCover);
-
-  if (!imageUpload.success) {
-    return imageUpload.result;
-  }
-
-  const newBlog = await prisma.blog.create({
-    data: {
-      title,
-      slug: title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w\-]+/g, ""),
-      image: imageUpload.result,
-      content: content
-        .replace(/<p><br><\/p>/g, "")
-        .replace(/\s+/g, " ")
-        .trim(),
-      category,
-      author: { connect: { id } },
-    },
-    include: { author: { select: { id: true, slug: true } } },
-  });
-
-  redirect(`/${newBlog.author.slug}/${newBlog.slug}`);
+  redirect(`/${username}/${slug}`, RedirectType.replace);
 };
 
-export const editBlog = async (
-  slug: string,
-  title: string,
-  content: string,
-  category: string,
-  newImage: File | null
-) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const editBlog = async ({
+  blogId,
+  blogSlug,
+  title,
+  content,
+  category,
+  image,
+  images,
+  imagesToDelete,
+}: {
+  blogId: string;
+  blogSlug: string;
+  title: string;
+  content: JSONContent;
+  category: string;
+  image: string;
+  images: { url: string; publicId: string }[];
+  imagesToDelete: string[];
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    permanentRedirect("/signin");
+    throw new Error("Unauthorized");
   }
+  const { id, role, username } = session.user;
+  let newBlogSlug: string | undefined;
 
-  const { id } = session.user;
-
-  if (checkProfanity(title) || checkProfanity(content)) {
-    return "Inappropriate language!";
-  }
-
-  const blog = await prisma.blog.findUnique({
-    where: { slug },
-    select: {
-      authorId: true,
-      author: { select: { slug: true } },
-      image: true,
-    },
-  });
-  if (!blog) {
-    return "Blog not found";
-  }
-
-  if (blog.authorId === id || session.user.role === "ADMIN") {
-    const newSlug = title
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "");
-
-    const existingBlog = await prisma.blog.findFirst({
-      where: {
-        slug: newSlug,
-        NOT: { slug },
-      },
+  try {
+    const { slug } = editBlogValidator.parse({
+      title: title,
+      content: content,
+      category: category,
+      image: image,
+      images: images,
     });
-    if (existingBlog) {
-      return "Title already taken!";
-    }
+    newBlogSlug = slug;
 
-    let imageUpload;
-    if (newImage && newImage.size > 0) {
-      imageUpload = await uploadImage(newImage);
-      if (!imageUpload.success) {
-        return imageUpload.result;
-      }
-      const publicId = getPublicIdFromUrl(blog.image);
-      if (publicId) {
-        const result = await deleteImage(publicId);
-        if (!result.success) {
-          return result.message;
-        }
-      }
-    }
+    await db.transaction(async (tx) => {
+      await tx
+        .update(blogs)
+        .set({
+          title,
+          slug,
+          content,
+          category,
+          image,
+        })
+        .where(
+          role === "admin"
+            ? eq(blogs.id, blogId)
+            : and(eq(blogs.id, blogId), eq(blogs.userId, id))
+        );
 
-    await prisma.blog.update({
-      where: { slug },
-      data: {
-        title,
-        slug: newSlug,
-        content,
-        category,
-        ...(imageUpload?.success && { image: imageUpload?.result }),
-      },
+      if (images.length > 0) {
+        await tx.insert(blogImages).values(
+          images.map(({ url, publicId }, index) => ({
+            blogId,
+            url,
+            publicId,
+            order: index,
+          }))
+        );
+      }
+
+      if (imagesToDelete.length > 0) {
+        await tx.delete(blogImages).where(eq(blogImages.blogId, blogId));
+      }
     });
 
-    if (newSlug !== slug) {
-      redirect(`/${blog.author.slug}/${newSlug}`, RedirectType.replace);
+    if (imagesToDelete.length > 0) {
+      await deleteImages(imagesToDelete);
     }
-
-    return revalidatePath(`/${blog.author.slug}/${newSlug}`);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
   }
 
-  return "Unauthorized to edit this blog";
+  if (newBlogSlug !== blogSlug) {
+    permanentRedirect(`/${username}/${newBlogSlug}`, RedirectType.replace);
+  } else {
+    redirect(`/${username}/${blogSlug}`, RedirectType.replace);
+  }
 };
 
-export const deleteBlog = async (blogSlug: string) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const deleteBlog = async ({
+  blogId,
+}: {
+  blogId: string;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    permanentRedirect("/signin");
+    throw new Error("Unauthorized");
   }
 
-  const { id } = session.user;
+  const { id, role } = session.user;
+  try {
+    const imagesToDelete = await db
+      .select({ publicId: blogImages.publicId })
+      .from(blogImages)
+      .where(eq(blogImages.blogId, blogId));
+    const images = imagesToDelete.map((image) => image.publicId);
+    await deleteImages(images);
 
-  const blog = await prisma.blog.findUnique({
-    where: { slug: blogSlug },
-    select: { image: true, authorId: true },
-  });
-  if (!blog) {
-    return "Blog not found";
+    await db
+      .delete(blogs)
+      .where(
+        role === "admin"
+          ? eq(blogs.id, blogId)
+          : and(eq(blogs.id, blogId), eq(blogs.userId, id))
+      );
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
   }
 
-  if (blog.authorId === id || session.user.role === "ADMIN") {
-    await prisma.$transaction(async (tx: any) => {
-      if (blog.image) {
-        const publicId = getPublicIdFromUrl(blog.image);
-        if (publicId) {
-          await deleteImage(publicId);
-        }
-      }
-
-      await tx.blog.delete({
-        where: { slug: blogSlug },
-      });
-    });
-
-    redirect("/", RedirectType.replace);
-  }
-
-  return "Unauthorized to delete this blog";
+  redirect("/", RedirectType.replace);
 };
 
-export const likeBlog = async (blogSlug: string) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const likeBlog = async ({
+  blogId,
+}: {
+  blogId: string;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    permanentRedirect("/signin");
+    throw new Error("Unauthorized");
   }
 
   const { id } = session.user;
+  try {
+    const deleted = await db
+      .delete(likes)
+      .where(and(eq(likes.userId, id), eq(likes.blogId, blogId)))
+      .returning();
 
-  await prisma.$transaction(async (tx: any) => {
-    const blog = await tx.blog.findUnique({
-      where: { slug: blogSlug },
-      select: { id: true },
-    });
-    if (!blog) {
-      throw new Error("Blog not found");
-    }
-
-    const existingLike = await tx.like.findUnique({
-      where: {
-        userId_blogId: {
-          userId: id,
-          blogId: blog.id,
-        },
-      },
-    });
-
-    if (existingLike) {
-      await tx.like.delete({
-        where: {
-          userId_blogId: {
-            userId: id,
-            blogId: blog.id,
-          },
-        },
-      });
-
-      return;
-    }
-
-    await tx.like.create({
-      data: {
+    if (deleted.length === 0) {
+      await db.insert(likes).values({
         userId: id,
-        blogId: blog.id,
-      },
+        blogId,
+      });
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
+  }
+};
+
+export const addComment = async ({
+  blogId,
+  comment,
+}: {
+  blogId: string;
+  comment: string;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const { id: userId } = session.user;
+  try {
+    const content = commentValidator.parse(comment);
+
+    await db.insert(comments).values({
+      content,
+      userId,
+      blogId,
     });
-
-    return;
-  });
-
-  return;
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
+  }
 };
 
-export const addComment = async (comment: string, blogSlug: string) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const deleteComment = async ({
+  commentId,
+}: {
+  commentId: string;
+}): Promise<void> => {
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    permanentRedirect("/signin");
+    throw new Error("Unauthorized");
   }
 
-  const { id } = session.user;
-
-  if (checkProfanity(comment)) {
-    return "Inappropriate comment!";
+  const { id, role } = session.user;
+  try {
+    await db
+      .delete(comments)
+      .where(
+        role === "admin"
+          ? eq(comments.id, commentId)
+          : and(eq(comments.id, commentId), eq(comments.userId, id))
+      );
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
   }
-
-  if (!comment.trim()) return "Comment content cannot be empty";
-
-  const blog = await prisma.blog.findUnique({
-    where: { slug: blogSlug },
-    select: { id: true, author: { select: { slug: true } } },
-  });
-  if (!blog) {
-    return "Blog not found";
-  }
-
-  const addedComment = await prisma.comment.create({
-    data: {
-      content: comment,
-      blog: { connect: { id: blog.id } },
-      author: { connect: { id } },
-    },
-    select: {
-      id: true,
-      content: true,
-      createdAt: true,
-      author: {
-        select: {
-          name: true,
-          image: true,
-          slug: true,
-        },
-      },
-    },
-  });
-
-  return addedComment;
-};
-
-export const deleteComment = async (commentId: string) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    permanentRedirect("/signin");
-  }
-
-  if (!commentId) return "Comment is required!";
-
-  await prisma.comment.delete({
-    where: {
-      id: commentId,
-    },
-  });
-
-  return;
 };

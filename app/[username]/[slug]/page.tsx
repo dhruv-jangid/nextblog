@@ -1,80 +1,123 @@
-import { prisma } from "@/lib/db";
-import BlogPage from "@/components/blogpage";
+import "server-only";
+import { db } from "@/db";
+import BlogPage from "./client";
 import { auth } from "@/lib/auth";
-import { notFound, permanentRedirect } from "next/navigation";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { eq, and, desc } from "drizzle-orm";
+import type { JSONContent } from "@tiptap/react";
+import type { BlogType } from "@/lib/static/types";
+import { blogs, users, likes as dbLikes, comments } from "@/db/schema";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string; slug: string }>;
+}): Promise<Metadata> {
+  const { username, slug } = await params;
+
+  return {
+    title: `MetaPress | ${username} | ${slug}`,
+  };
+}
 
 export default async function Blog({
   params,
 }: {
   params: Promise<{ username: string; slug: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
   const { username, slug } = await params;
-
-  const blog = await prisma.blog.findUnique({
-    select: {
-      title: true,
-      slug: true,
-      image: true,
-      createdAt: true,
-      content: true,
-      category: true,
+  const blogRows = await db
+    .select({
+      id: blogs.id,
+      title: blogs.title,
+      slug: blogs.slug,
+      content: blogs.content,
+      image: blogs.image,
+      category: blogs.category,
+      createdAt: blogs.createdAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        image: users.image,
+      },
       likes: {
-        select: {
-          userId: true,
-        },
+        userId: dbLikes.userId,
+        blogId: dbLikes.blogId,
       },
-      comments: {
-        orderBy: {
-          createdAt: "desc",
-        },
-        select: {
-          id: true,
-          author: { select: { name: true, image: true, slug: true } },
-          content: true,
-          createdAt: true,
-        },
-      },
-      author: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          image: true,
-        },
-      },
-    },
-    where: { slug, author: { slug: username } },
-    cacheStrategy: {
-      ttl: 60,
-      swr: 60,
-      tags: ["blogs"],
-    },
-  });
+    })
+    .from(blogs)
+    .innerJoin(users, eq(users.id, blogs.userId))
+    .leftJoin(dbLikes, eq(dbLikes.blogId, blogs.id))
+    .where(and(eq(blogs.slug, slug), eq(users.username, username)));
 
-  if (!blog) {
+  if (blogRows.length < 1) {
     notFound();
   }
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    permanentRedirect("/signin");
+  const grouped: Record<string, BlogType & { content: JSONContent }> = {};
+  for (const row of blogRows) {
+    const key = row.slug;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        id: row.id,
+        title: row.title,
+        slug: row.slug,
+        image: row.image,
+        content: row.content,
+        category: row.category,
+        createdAt: row.createdAt,
+        user: {
+          id: row.user.id,
+          name: row.user.name,
+          username: row.user.username,
+          image: row.user.image,
+        },
+        likes: [],
+      };
+    }
+
+    if (row.likes?.userId && row.likes?.blogId) {
+      grouped[key].likes.push({
+        userId: row.likes.userId,
+        blogId: row.likes.blogId,
+      });
+    }
   }
-  const { id, role } = session.user;
-  const isAuthor = role === "ADMIN" || id === blog.author.id;
-  const isLiked = blog.likes.some(
-    (like: { userId: string }) => like.userId === id
-  );
-  const userSlug = session.user.slug;
+  const blogRow = Object.values(grouped)[0];
+
+  const actualComments = await db
+    .select({
+      id: comments.id,
+      content: comments.content,
+      createdAt: comments.createdAt,
+      user: {
+        name: users.name,
+        image: users.image,
+        username: users.username,
+      },
+    })
+    .from(comments)
+    .innerJoin(users, eq(users.id, comments.userId))
+    .where(eq(comments.blogId, blogRow.id))
+    .orderBy(desc(comments.createdAt));
+
+  const { likes, user } = blogRow;
+  const { id, role } = session!.user;
+  const isUser = role === "admin" || id === user.id;
+  const isLiked = likes.some((like) => like.userId === id);
 
   return (
     <BlogPage
-      blog={blog}
-      isAuthor={isAuthor}
+      blog={{ ...blogRow, user, likes, comments: actualComments }}
+      isUser={isUser}
       isLiked={isLiked}
-      userSlug={userSlug}
+      username={user.username}
     />
   );
 }

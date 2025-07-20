@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
+import "server-only";
 import "@/app/globals.css";
+import { auth } from "@/lib/auth";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import localFont from "next/font/local";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-
-const degular = localFont({
-  src: "../public/fonts/DegularVariable.ttf",
-});
+import { cn } from "@/lib/static/shadcnUtils";
+import { mainFont } from "@/lib/static/fonts";
+import { AlertProvider } from "@/context/alertProvider";
+import { ToastProvider } from "@/context/toastProvider";
+import { ThemeProvider } from "@/context/themeProvider";
 
 export const metadata: Metadata = {
   title: "MetaPress",
@@ -20,16 +21,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await auth.api.getSession({ headers: await headers() });
 
   return (
-    <html lang="en" className={degular.className}>
-      <body className="bg-neutral-950 text-neutral-100 antialiased w-11/12 lg:w-4/5 xl:w-2/3 mx-auto selection:bg-neutral-700">
-        <Navbar session={session} />
-        {children}
-        <Footer />
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(mainFont.className, "antialiased")}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ToastProvider>
+            <AlertProvider>
+              <Navbar user={session ? session.user : null} />
+              {children}
+              <Footer />
+            </AlertProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,15 +1,16 @@
 "use client";
 
-import { Button } from "@/components/button";
 import Image from "next/image";
 import Logo from "@/app/favicon.ico";
 import { useRouter } from "next/navigation";
+import { titleFont } from "@/lib/static/fonts";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="h-[80dvh] flex flex-col items-center justify-center text-center">
+    <div className="h-[92dvh] flex flex-col items-center justify-center text-center">
       <Image
         src={Logo}
         width={120}
@@ -17,17 +18,15 @@ export default function NotFound() {
         priority
         quality={100}
         alt="logo"
-        className="mb-4"
+        className="mb-4 dark:invert"
       />
-      <h2 className="text-4xl font-bold mb-2 text-rose-300">Page Not Found</h2>
-      <p className="text-lg text-neutral-400 mb-6">
-        Sorry, we couldn&apos;t find the page you&apos;re looking for.
+      <h2 className={`${titleFont.className} text-4xl font-medium mb-2`}>
+        Page Not Found
+      </h2>
+      <p className="text-lg opacity-50 mb-6">
+        Sorry, couldn&apos;t find the page you&apos;re looking for.
       </p>
-      <Button
-        onClick={() => {
-          router.replace("/");
-        }}
-      >
+      <Button size="lg" onClick={() => router.replace("/")}>
         Return Home
       </Button>
     </div>

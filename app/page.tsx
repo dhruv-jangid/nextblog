@@ -1,44 +1,83 @@
+import "server-only";
+import { db } from "@/db";
+import { eq, desc } from "drizzle-orm";
+import { titleFont } from "@/lib/static/fonts";
 import { Carousel } from "@/components/carousel";
 import { BlogGrid } from "@/components/bloggrid";
-import { prisma } from "@/lib/db";
+import { blogs, likes, users } from "@/db/schema";
+import type { BlogType } from "@/lib/static/types";
 
 export default async function Home() {
-  const blogs = await prisma.blog.findMany({
-    select: {
-      title: true,
-      slug: true,
-      image: true,
-      category: true,
-      createdAt: true,
-      likes: { select: { blogId: true, userId: true } },
-      author: {
-        select: { name: true, slug: true, id: true, image: true },
+  const rows = await db
+    .select({
+      id: blogs.id,
+      title: blogs.title,
+      slug: blogs.slug,
+      content: blogs.content,
+      category: blogs.category,
+      image: blogs.image,
+      createdAt: blogs.createdAt,
+      like: {
+        userId: likes.userId,
+        blogId: likes.blogId,
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 7,
-    cacheStrategy: {
-      ttl: 60,
-      swr: 60,
-      tags: ["blogs"],
-    },
-  });
-  const [firstBlog, ...remainingBlogs] = blogs;
+      user: {
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        image: users.image,
+      },
+    })
+    .from(blogs)
+    .innerJoin(users, eq(users.id, blogs.userId))
+    .leftJoin(likes, eq(likes.blogId, blogs.id))
+    .orderBy(desc(blogs.createdAt));
+
+  const grouped: Record<string, BlogType> = {};
+  for (const row of rows) {
+    const key = row.slug;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        id: row.id,
+        title: row.title,
+        slug: row.slug,
+        image: row.image,
+        category: row.category,
+        createdAt: row.createdAt,
+        user: {
+          id: row.user.id,
+          name: row.user.name,
+          username: row.user.username,
+          image: row.user.image,
+        },
+        likes: [],
+      };
+    }
+
+    if (row.like?.userId && row.like?.blogId) {
+      grouped[key].likes.push({
+        userId: row.like.userId,
+        blogId: row.like.blogId,
+      });
+    }
+  }
+
+  const actualBlogs = Object.values(grouped).slice(0, 7);
+  const [firstBlog, ...remainingBlogs] = actualBlogs;
 
   return (
     <>
-      {blogs.length > 0 ? (
+      {actualBlogs.length > 0 ? (
         <>
           <Carousel blog={firstBlog} />
-          <div className="px-4 md:px-8">
-            <BlogGrid blogs={remainingBlogs} />
-          </div>
+          <BlogGrid blogs={remainingBlogs} />
         </>
       ) : (
-        <div className="flex justify-center items-center min-h-[80vh] text-4xl text-rose-300 rounded-4xl w-3/4 mx-auto">
-          Sorry, no blogs available at this time!
+        <div
+          className={`${titleFont.className} flex justify-center items-center min-h-[92vh] text-4xl mx-auto`}
+        >
+          There are currently no blogs to display!
         </div>
       )}
     </>
