@@ -115,7 +115,7 @@ export const Comment = ({
               <p className="mt-4">{comment.content}</p>
             </div>
           </div>
-          {(isUser || (username && comment.user.username === username)) && (
+          {(isUser || comment.user.username === username) && (
             <Trash2
               size={18}
               onClick={() =>

@@ -136,7 +136,7 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
           </Link>
         ))}
         {user ? (
-          <Link href={user.username!}>
+          <Link href={`/${user.username!}`}>
             <Avatar>
               <AvatarImage src={user.image ? user.image : Account.src} />
               <AvatarFallback>{user.name}</AvatarFallback>

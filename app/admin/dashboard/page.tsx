@@ -1,7 +1,10 @@
 import "server-only";
 import { db } from "@/db";
+import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { DeleteUserBtn } from "./client";
+import { notFound } from "next/navigation";
 import { desc, eq, sql } from "drizzle-orm";
 import { Author } from "@/components/author";
 import { titleFont } from "@/lib/static/fonts";
@@ -14,6 +17,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDashboard() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session || session.user.role !== "admin") {
+    notFound();
+  }
+
   const rows = await db
     .select({
       id: blogs.id,

@@ -108,7 +108,7 @@ export default async function Blog({
     .orderBy(desc(comments.createdAt));
 
   const { likes, user } = blogRow;
-  const { id, role } = session!.user;
+  const { id, username: sessionUsername, role } = session!.user;
   const isUser = role === "admin" || id === user.id;
   const isLiked = likes.some((like) => like.userId === id);
 
@@ -117,7 +117,7 @@ export default async function Blog({
       blog={{ ...blogRow, user, likes, comments: actualComments }}
       isUser={isUser}
       isLiked={isLiked}
-      username={user.username}
+      username={sessionUsername!}
     />
   );
 }
