@@ -4,7 +4,7 @@ import { Author } from "@/components/author";
 import { Button } from "@/components/ui/button";
 import type { BlogType } from "@/lib/static/types";
 
-export const BlogGrid = async ({ blogs }: { blogs: BlogType[] }) => {
+export const BlogGrid = ({ blogs }: { blogs: BlogType[] }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 outline outline-accent-foreground">
       {blogs.map(({ id, title, image, category, slug, user }) => {

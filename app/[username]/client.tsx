@@ -1,31 +1,194 @@
 "use client";
 
 import {
+  uploadImage,
+  checkNudity,
+  getPublicIdFromImageUrl,
+} from "@/lib/imageUtils";
+import {
   Dialog,
   DialogTitle,
   DialogHeader,
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 import Image from "next/image";
-import { ZodError } from "zod/v4";
-import { ImageUp } from "lucide-react";
+import { ZodError } from "zod";
+import { useRouter } from "next/navigation";
+import { titleFont } from "@/lib/static/fonts";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { BlogGrid } from "@/components/bloggrid";
 import Account from "@/public/images/account.png";
 import { useToast } from "@/context/toastProvider";
+import { updateUserCache } from "@/actions/handleCache";
 import { getFirstZodError } from "@/lib/schemas/shared";
+import { BlogType, UserType } from "@/lib/static/types";
+import { deleteImage } from "@/actions/handleCloudinary";
 import { imageValidatorClient } from "@/lib/schemas/client";
-import { getCloudinarySignature } from "@/actions/handleCloudinary";
-import { changeProfileImage, removeProfileImage } from "@/actions/handleUser";
+import { ImageUp, SquareArrowOutUpRight } from "lucide-react";
 
-export default function UsernameClient({
+export const ProfileClient = ({
+  userRow,
+  actualBlogs,
+  isSelf,
+  isSelfAdmin,
+}: {
+  userRow: UserType;
+  actualBlogs: BlogType[];
+  isSelf: boolean;
+  isSelfAdmin: boolean;
+}) => {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex flex-col gap-16 justify-center lg:flex-row items-center lg:text-base">
+        <div className="flex lg:justify-center gap-8 xl:gap-16 w-full py-22 pb-18">
+          <div className="h-30 w-30 lg:h-36 lg:w-36">
+            <ProfileImg imageUrl={userRow.image} isUser={isSelf} />
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-4 items-center">
+              <h1 className={`${titleFont.className} text-3xl`}>
+                {userRow.username}
+              </h1>
+              {isSelf && (
+                <Link href="settings/profile" className="hidden md:block">
+                  <Button>Edit Profile</Button>
+                </Link>
+              )}
+              {isSelfAdmin && (
+                <Link href={`/admin/dashboard`} className="hidden md:block">
+                  <Button>
+                    <span className="flex items-center gap-1.5">
+                      Dashboard <SquareArrowOutUpRight size={18} />
+                    </span>
+                  </Button>
+                </Link>
+              )}
+            </div>
+
+            <div className="flex items-center gap-6 text-lg">
+              <div className="flex items-center gap-2">
+                {actualBlogs.length}
+                <span className="opacity-70">Blogs</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {userRow.totalLikes}
+                <span className="opacity-70">Likes</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 items-center text-lg opacity-85">
+              {userRow.name}
+              {userRow.role === "admin" && (
+                <span className="text-lg text-red-500">
+                  ({userRow.role.toUpperCase()})
+                </span>
+              )}
+            </div>
+            <div className="flex gap-1.5">
+              {isSelf && (
+                <Link href="settings?tab=profile" className="md:hidden">
+                  <Button>Edit Profile</Button>
+                </Link>
+              )}
+              {isSelfAdmin && (
+                <Link href={`/admin/dashboard`} className="md:hidden">
+                  <Button>
+                    Dashboard <SquareArrowOutUpRight />
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {actualBlogs.length > 0 ? (
+        <BlogGrid blogs={actualBlogs} />
+      ) : (
+        <div
+          className={`${titleFont.className} flex justify-center items-center min-h-[59vh] text-4xl w-full border-t`}
+        >
+          This user has no published blogs!
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const ProfileImg = ({
   imageUrl,
   isUser,
 }: {
   imageUrl: string | null;
   isUser: boolean;
-}) {
+}) => {
+  const router = useRouter();
   const { toast, success, error: errorToast } = useToast();
+
+  const updateImage = async (
+    e: React.ChangeEvent<HTMLInputElement> | false
+  ) => {
+    const fileInput = document.getElementById(
+      "fileInput"
+    ) as HTMLInputElement | null;
+
+    try {
+      if (!e) {
+        toast({ title: "Removing..." });
+        const { error } = await authClient.updateUser({ image: null });
+        if (error) {
+          throw new Error(error.message);
+        }
+      } else {
+        const image = e.target.files?.[0];
+        if (image) {
+          imageValidatorClient.parse(image);
+
+          toast({ title: "Checking..." });
+          await checkNudity({ image });
+
+          toast({ title: "Uploading..." });
+          const { url } = await uploadImage({
+            image,
+            isUser: true,
+          });
+
+          const { error } = await authClient.updateUser({ image: url });
+          if (error) {
+            throw new Error(error.message);
+          }
+        }
+      }
+
+      await updateUserCache();
+
+      if (imageUrl && imageUrl.includes("cloudinary")) {
+        const publicId = getPublicIdFromImageUrl({
+          url: imageUrl,
+          isUser: true,
+        });
+        await deleteImage({ publicId });
+      }
+
+      router.refresh();
+      success({ title: "Profile updated" });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        errorToast({ title: getFirstZodError(error) });
+      } else if (error instanceof Error) {
+        errorToast({ title: error.message });
+      } else {
+        errorToast({ title: "Something went wrong" });
+      }
+    } finally {
+      if (fileInput) {
+        fileInput.value = "";
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -56,52 +219,7 @@ export default function UsernameClient({
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={async (e) => {
-                    const image = e.target.files?.[0];
-                    if (image) {
-                      toast({ title: "Uploading..." });
-                      try {
-                        imageValidatorClient.parse(image);
-
-                        const {
-                          cloudName,
-                          apiKey,
-                          timestamp,
-                          signature,
-                          asset_folder,
-                          transformation,
-                        } = await getCloudinarySignature({ isUser: true });
-
-                        const formData = new FormData();
-                        formData.append("file", image);
-                        formData.append("api_key", apiKey);
-                        formData.append("timestamp", timestamp);
-                        formData.append("signature", signature);
-                        formData.append("asset_folder", asset_folder);
-                        formData.append("transformation", transformation);
-
-                        const result = await fetch(
-                          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                          {
-                            method: "POST",
-                            body: formData,
-                          }
-                        );
-                        const { secure_url } = await result.json();
-
-                        await changeProfileImage({ newImage: secure_url });
-                        success({ title: "Profile updated" });
-                      } catch (error) {
-                        if (error instanceof ZodError) {
-                          errorToast({ title: getFirstZodError(error) });
-                        } else if (error instanceof Error) {
-                          errorToast({ title: error.message });
-                        } else {
-                          errorToast({ title: "Something went wrong" });
-                        }
-                      }
-                    }
-                  }}
+                  onChange={(e) => updateImage(e)}
                 />
                 <Button
                   onClick={() => document.getElementById("fileInput")?.click()}
@@ -110,23 +228,7 @@ export default function UsernameClient({
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={async () => {
-                    if (imageUrl) {
-                      toast({ title: "Removing..." });
-                      try {
-                        await removeProfileImage();
-                        toast({ title: "Profile updated" });
-                      } catch (error) {
-                        if (error instanceof Error) {
-                          errorToast({ title: error.message });
-                        } else {
-                          errorToast({ title: "Something went wrong" });
-                        }
-                      }
-                    } else {
-                      errorToast({ title: "No current profile image" });
-                    }
-                  }}
+                  onClick={() => updateImage(false)}
                   disabled={!imageUrl}
                 >
                   Remove Current Image
@@ -138,4 +240,4 @@ export default function UsernameClient({
       </div>
     </div>
   );
-}
+};

@@ -1,5 +1,5 @@
 import "server-only";
-import z from "zod/v3";
+import { z } from "zod/v3";
 
 export const usernameValidator = z
   .string()

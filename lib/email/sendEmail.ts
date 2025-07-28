@@ -1,6 +1,6 @@
 import "server-only";
 import { ZodError } from "zod";
-import nodemailer from "nodemailer";
+import { createTransport } from "nodemailer";
 import { emailValidator, getFirstZodError } from "@/lib/schemas/shared";
 
 const user = process.env.EMAIL_USER;
@@ -9,7 +9,7 @@ if (!user || !pass) {
   throw new Error("Mailer ENVs required");
 }
 
-const transporter = nodemailer.createTransport({
+const transporter = createTransport({
   service: "gmail",
   auth: { user, pass },
 });

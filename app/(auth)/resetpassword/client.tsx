@@ -4,14 +4,14 @@ import { ZodError } from "zod";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeClosed } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/toastProvider";
-import { resetPassword } from "@/actions/handleAuth";
-import { notFound, useSearchParams } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { getFirstZodError, passwordValidator } from "@/lib/schemas/shared";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const ResetPasswordClient = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const { success, error: errorToast } = useToast();
@@ -23,8 +23,33 @@ export const ResetPasswordClient = () => {
     notFound();
   }
 
+  const resetPassword = async () => {
+    setLoading(true);
+    try {
+      passwordValidator.parse(newPassword);
+
+      const { error } = await authClient.resetPassword({ newPassword, token });
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      success({ title: "Password changed" });
+      router.replace("/signin");
+    } catch (error) {
+      if (error instanceof ZodError) {
+        errorToast({ title: getFirstZodError(error) });
+      } else if (error instanceof Error) {
+        errorToast({ title: error.message });
+      } else {
+        errorToast({ title: "Something went wrong" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <>
+    <div className="flex flex-col h-[92dvh] justify-center items-end gap-1 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 mx-auto">
       <Input
         type={showPassword ? "text" : "password"}
         id="password"
@@ -54,29 +79,14 @@ export const ResetPasswordClient = () => {
       </div>
       <Button
         className="mt-1"
-        onClick={async () => {
-          setLoading(true);
-          try {
-            passwordValidator.parse(newPassword);
-
-            await resetPassword({ newPassword, token });
-          } catch (error) {
-            if (error instanceof ZodError) {
-              errorToast({ title: getFirstZodError(error) });
-            } else if (isRedirectError(error)) {
-              success({ title: "Password changed" });
-            } else if (error instanceof Error) {
-              errorToast({ title: error.message });
-            } else {
-              errorToast({ title: "Something went wrong" });
-            }
-          } finally {
-            setLoading(false);
-          }
-        }}
+        disabled={loading || !newPassword.trim()}
+        onClick={resetPassword}
       >
         Change password
       </Button>
-    </>
+      <p className="self-center opacity-50 text-center mt-12 text-sm tracking-wide">
+        *Link is valid only for 1 hour*
+      </p>
+    </div>
   );
 };

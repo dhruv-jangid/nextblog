@@ -14,22 +14,55 @@ import { RichTextEditor } from "@/components/editor";
 import { Copy, PencilLine, Trash2 } from "lucide-react";
 import { useAlertDialog } from "@/context/alertProvider";
 import type { BlogType, CommentType } from "@/lib/static/types";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
 
-export default function BlogClient({
+export const BlogClient = ({
   blog,
   isUser,
   isLiked,
   username,
+  totalLikes,
 }: {
   blog: BlogType & { content: JSONContent; comments: CommentType[] };
   isUser: boolean;
   isLiked: boolean;
   username: string;
-}) {
-  const { toast, success, error: errorToast } = useToast();
-  const { show } = useAlertDialog();
+  totalLikes: number;
+}) => {
   const router = useRouter();
+  const { show } = useAlertDialog();
+  const { toast, success, error: errorToast } = useToast();
+
+  const handleDeleteBlog = async () => {
+    toast({ title: "Deleting..." });
+    try {
+      await deleteBlog({ blogId: blog.id, blogSlug: blog.slug });
+
+      router.replace("/");
+      success({ title: "Blog deleted" });
+    } catch (error) {
+      if (error instanceof Error) {
+        errorToast({ title: error.message });
+      } else {
+        errorToast({ title: "Something went wrong" });
+      }
+    }
+  };
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/${blog.user.username}/${blog.slug}`
+      );
+
+      success({ title: "Link copied to clipboard" });
+    } catch (error) {
+      if (error instanceof Error) {
+        errorToast({ title: error.message });
+      } else {
+        errorToast({ title: "Something went wrong" });
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8 lg:gap-12 my-14 lg:my-24 w-11/12 lg:w-5/12 mx-auto">
@@ -52,20 +85,7 @@ export default function BlogClient({
               show({
                 title: "Delete this blog?",
                 actionLabel: "Delete",
-                onConfirm: async () => {
-                  toast({ title: "Deleting this blog..." });
-                  try {
-                    await deleteBlog({ blogId: blog.id });
-                  } catch (error) {
-                    if (isRedirectError(error)) {
-                      success({ title: "Blog deleted" });
-                    } else if (error instanceof Error) {
-                      toast({ title: error.message });
-                    } else {
-                      toast({ title: "Something went wrong" });
-                    }
-                  }
-                },
+                onConfirm: handleDeleteBlog,
               })
             }
           >
@@ -99,20 +119,7 @@ export default function BlogClient({
                 show({
                   title: "Delete this blog?",
                   actionLabel: "Delete",
-                  onConfirm: async () => {
-                    toast({ title: "Deleting..." });
-                    try {
-                      await deleteBlog({ blogId: blog.id });
-                    } catch (error) {
-                      if (isRedirectError(error)) {
-                        success({ title: "Blog deleted" });
-                      } else if (error instanceof Error) {
-                        toast({ title: error.message });
-                      } else {
-                        toast({ title: "Something went wrong" });
-                      }
-                    }
-                  },
+                  onConfirm: handleDeleteBlog,
                 })
               }
             >
@@ -153,22 +160,7 @@ export default function BlogClient({
         <div className="flex justify-between">
           <h3>Share this Blog</h3>
           <div>
-            <Button
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(
-                    `${window.location.origin}/${blog.user.username}/${blog.slug}`
-                  );
-                  success({ title: "Link copied to clipboard" });
-                } catch (error) {
-                  if (error instanceof Error) {
-                    errorToast({ title: error.message });
-                  } else {
-                    errorToast({ title: "Something went wrong" });
-                  }
-                }
-              }}
-            >
+            <Button onClick={copyLink}>
               <Copy /> Copy Link
             </Button>
           </div>
@@ -176,7 +168,7 @@ export default function BlogClient({
       </div>
 
       <div className="flex items-start justify-between gap-8">
-        <Like blogId={blog.id} likes={blog.likes.length} isLiked={isLiked} />
+        <Like blogId={blog.id} likes={totalLikes} isLiked={isLiked} />
         <div className="w-full">
           <Comment
             isUser={isUser}
@@ -188,4 +180,4 @@ export default function BlogClient({
       </div>
     </div>
   );
-}
+};

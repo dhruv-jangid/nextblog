@@ -1,7 +1,10 @@
 import { z, ZodError } from "zod";
+import {
+  checkProfanity,
+  blogCategories,
+  restrictedUsernames,
+} from "@/lib/utils";
 import { JSONContent } from "@tiptap/react";
-import { checkProfanity } from "@/lib/checkProfanity";
-import { blogCategories, restrictedUsernames } from "@/lib/utils";
 
 export const nameValidator = z
   .string()

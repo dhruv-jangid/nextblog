@@ -64,15 +64,7 @@ export default async function AdminDashboard() {
           username: row.user.username,
           image: row.user.image,
         },
-        likes: [],
       };
-    }
-
-    if (row.likes?.userId && row.likes?.blogId) {
-      grouped[key].likes.push({
-        userId: row.likes.userId,
-        blogId: row.likes.blogId,
-      });
     }
   }
   const actualBlogs = Object.values(grouped);

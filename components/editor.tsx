@@ -35,11 +35,13 @@ import { useEditor, JSONContent, EditorContent } from "@tiptap/react";
 export const RichTextEditor = ({
   content,
   onChange,
+  onCharactersChange,
   placeholder = "Start writing your blog...",
   readOnly = true,
 }: {
   content?: JSONContent;
   onChange?: (json: JSONContent) => void;
+  onCharactersChange?: (characters: number) => void;
   placeholder?: string;
   readOnly?: boolean;
 }) => {
@@ -76,6 +78,7 @@ export const RichTextEditor = ({
           editor.view.dispatch(tr);
         } else {
           onChange?.(editor.getJSON());
+          onCharactersChange?.(editor.storage.characterCount.characters());
         }
       }
     },

@@ -1,3 +1,5 @@
+import { users } from "@/db/schema";
+
 export type BlogType = {
   id: string;
   title: string;
@@ -5,10 +7,6 @@ export type BlogType = {
   category: string;
   image: string;
   createdAt: string;
-  likes: {
-    userId: string;
-    blogId: string;
-  }[];
   user: {
     id: string;
     name: string;
@@ -27,3 +25,8 @@ export type CommentType = {
     username: string;
   };
 };
+
+export type UserType = Pick<
+  typeof users.$inferSelect,
+  "id" | "name" | "image" | "username" | "role"
+> & { totalLikes: number };

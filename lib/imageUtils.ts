@@ -1,4 +1,103 @@
+import * as nsfwjs from "nsfwjs";
+import { ZodError } from "zod/v4";
+import * as tf from "@tensorflow/tfjs";
 import { JSONContent } from "@tiptap/core";
+import { getFirstZodError } from "@/lib/schemas/shared";
+import { imageValidatorClient } from "@/lib/schemas/client";
+import { getCloudinarySignature } from "@/actions/handleCloudinary";
+
+let nsfwModel: nsfwjs.NSFWJS | null = null;
+if (process.env.NODE_ENV === "production") {
+  tf.enableProdMode();
+}
+
+export const uploadImage = async ({
+  image,
+  isUser,
+}: {
+  image: File;
+  isUser: boolean;
+}): Promise<{ url: string; publicId: string }> => {
+  try {
+    imageValidatorClient.parse(image);
+
+    const {
+      cloudName,
+      apiKey,
+      timestamp,
+      signature,
+      asset_folder,
+      transformation,
+    } = await getCloudinarySignature({ isUser });
+
+    const formData = new FormData();
+    formData.append("file", image);
+    formData.append("api_key", apiKey);
+    formData.append("timestamp", timestamp);
+    formData.append("signature", signature);
+    formData.append("asset_folder", asset_folder);
+    formData.append("transformation", transformation);
+
+    const result = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const { error, secure_url, public_id } = await result.json();
+    if (error) {
+      throw new Error("Invalid Image");
+    }
+
+    return { url: secure_url, publicId: public_id };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(getFirstZodError(error));
+    } else if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
+  }
+};
+export const checkNudity = async ({
+  image,
+}: {
+  image: File;
+}): Promise<void> => {
+  try {
+    if (!nsfwModel) {
+      nsfwModel = await nsfwjs.load("/models/mobilenet_v2/model.json");
+    }
+
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(image);
+
+    await new Promise((resolve) => {
+      img.onload = () => resolve(true);
+    });
+
+    const predictions = await nsfwModel.classify(img);
+
+    const rawScore =
+      predictions.find((p) => p.className === "Porn")?.probability ?? 0;
+    const sexyScore =
+      predictions.find((p) => p.className === "Sexy")?.probability ?? 0;
+
+    if (rawScore >= 0.6 || sexyScore >= 0.6) {
+      throw new Error("Inappropriate image");
+    }
+
+    URL.revokeObjectURL(img.src);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Something went wrong");
+    }
+  }
+};
 
 export const getPublicIdFromImageUrl = ({
   url,

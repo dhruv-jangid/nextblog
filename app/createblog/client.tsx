@@ -1,20 +1,25 @@
 "use client";
 
+import {
+  uploadImage,
+  checkNudity,
+  replaceImageSrcs,
+  extractImagesFromContent,
+} from "@/lib/imageUtils";
 import pLimit from "p-limit";
 import { useState } from "react";
 import { ZodError } from "zod/v4";
-import { titleFont } from "@/lib/static/fonts";
 import { blogCategories } from "@/lib/utils";
+import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import type { JSONContent } from "@tiptap/react";
 import { createBlog } from "@/actions/handleBlog";
 import { useToast } from "@/context/toastProvider";
 import { RichTextEditor } from "@/components/editor";
 import { getFirstZodError } from "@/lib/schemas/shared";
+import { deleteImages } from "@/actions/handleCloudinary";
 import { blogValidatorClient } from "@/lib/schemas/client";
-import { getCloudinarySignature } from "@/actions/handleCloudinary";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { extractImagesFromContent, replaceImageSrcs } from "@/lib/imageUtils";
 
 export const CreateBlogClient = () => {
   const [blog, setBlog] = useState<{
@@ -27,10 +32,111 @@ export const CreateBlogClient = () => {
     category: "",
   });
   const [loading, setLoading] = useState(false);
+  const [characters, setCharacters] = useState(0);
   const { toast, success, error: errorToast } = useToast();
 
+  const handleCreateBlog = async () => {
+    setLoading(true);
+    try {
+      const { images, base64Urls } = extractImagesFromContent({
+        content: blog.content,
+      });
+
+      toast({ title: "Checking..." });
+      blogValidatorClient.parse({
+        title: blog.title,
+        content: blog.content,
+        category: blog.category,
+        images: images,
+      });
+
+      const { exists } = await (
+        await fetch(`/api/checkTitle?title=${encodeURIComponent(blog.title)}`)
+      ).json();
+      if (exists) {
+        throw new Error("Title already exists");
+      }
+
+      for (const image of images) {
+        await checkNudity({ image });
+      }
+
+      toast({ title: "Uploading..." });
+      const errorImages: string[] = [];
+      const limit = pLimit(3);
+      const imagesToUpload = images.map((image, index) =>
+        limit(async () => {
+          const { url, publicId } = await uploadImage({
+            image,
+            isUser: false,
+          });
+          errorImages.push(publicId);
+
+          return {
+            url,
+            publicId,
+            originalBase64: base64Urls[index],
+          };
+        })
+      );
+      const results = await Promise.allSettled(imagesToUpload);
+
+      const failed = results.find((r) => r.status === "rejected");
+      if (failed) {
+        if (errorImages.length > 0) {
+          await deleteImages(errorImages);
+        }
+        throw new Error("Invalid Image(s)");
+      }
+
+      const uploadedImages = results.map(
+        (r) =>
+          (
+            r as PromiseFulfilledResult<{
+              url: string;
+              publicId: string;
+              originalBase64: string;
+            }>
+          ).value
+      );
+
+      const allImages = uploadedImages.map(({ url, publicId }) => ({
+        url,
+        publicId,
+      }));
+
+      const replacements = Object.fromEntries(
+        uploadedImages.map(({ originalBase64, url }) => [originalBase64, url])
+      );
+      const updatedContent = replaceImageSrcs({
+        content: blog.content,
+        replacements,
+      });
+
+      await createBlog({
+        title: blog.title,
+        content: updatedContent,
+        category: blog.category,
+        image: allImages[0].url,
+        images: allImages,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        errorToast({ title: getFirstZodError(error) });
+      } else if (isRedirectError(error)) {
+        success({ title: "Published" });
+      } else if (error instanceof Error) {
+        errorToast({ title: error.message });
+      } else {
+        errorToast({ title: "Something went wrong" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <>
+    <div className="flex flex-col tracking-tight mx-auto lg:w-5/12 lg:border-l lg:border-r">
       <select
         id="category"
         onChange={(e) => setBlog({ ...blog, category: e.currentTarget.value })}
@@ -61,117 +167,20 @@ export const CreateBlogClient = () => {
         content={blog.content}
         readOnly={false}
         onChange={(content) => setBlog({ ...blog, content })}
+        onCharactersChange={(characters) => setCharacters(characters)}
       />
+
+      <span className="place-self-end mr-6 mb-4 text-muted-foreground">
+        {characters}
+      </span>
 
       <Button
         className="rounded-none py-5 text-base"
-        disabled={loading}
-        onClick={async () => {
-          setLoading(true);
-          try {
-            const { images, base64Urls } = extractImagesFromContent({
-              content: blog.content,
-            });
-
-            blogValidatorClient.parse({
-              title: blog.title,
-              content: blog.content,
-              category: blog.category,
-              images: images,
-            });
-
-            const { exists } = await (
-              await fetch(
-                `/api/checkTitle?title=${encodeURIComponent(blog.title)}`
-              )
-            ).json();
-            if (exists) {
-              throw new Error("Title already exists");
-            }
-
-            toast({ title: "Uploading..." });
-            const limit = pLimit(3);
-            const imagesToUpload: Promise<{
-              url: string;
-              publicId: string;
-              originalBase64: string;
-            }>[] = images.map((image, index) =>
-              limit(async () => {
-                const {
-                  cloudName,
-                  apiKey,
-                  timestamp,
-                  asset_folder,
-                  transformation,
-                  signature,
-                } = await getCloudinarySignature({ isUser: false });
-
-                const formData = new FormData();
-                formData.append("file", image);
-                formData.append("api_key", apiKey);
-                formData.append("timestamp", timestamp);
-                formData.append("asset_folder", asset_folder);
-                formData.append("transformation", transformation);
-                formData.append("signature", signature);
-
-                const result = await fetch(
-                  `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                  {
-                    method: "POST",
-                    body: formData,
-                  }
-                );
-                const { secure_url, public_id } = await result.json();
-
-                return {
-                  url: secure_url,
-                  publicId: public_id,
-                  originalBase64: base64Urls[index],
-                };
-              })
-            );
-            const uploadedImages = await Promise.all(imagesToUpload);
-
-            const allImages = uploadedImages.map(({ url, publicId }) => ({
-              url,
-              publicId,
-            }));
-
-            const replacements = Object.fromEntries(
-              uploadedImages.map(({ originalBase64, url }) => [
-                originalBase64,
-                url,
-              ])
-            );
-            const updatedContent = replaceImageSrcs({
-              content: blog.content,
-              replacements,
-            });
-
-            await createBlog({
-              title: blog.title,
-              content: updatedContent,
-              category: blog.category,
-              image: allImages[0].url,
-              images: allImages,
-            });
-          } catch (error) {
-            if (error instanceof ZodError) {
-              errorToast({ title: getFirstZodError(error) });
-            } else if (isRedirectError(error)) {
-              success({ title: "Published" });
-            } else if (error instanceof Error) {
-              errorToast({ title: error.message });
-            } else {
-              errorToast({ title: "Something went wrong" });
-            }
-          } finally {
-            setLoading(false);
-          }
-        }}
+        disabled={loading || characters < 1000}
+        onClick={handleCreateBlog}
       >
         {loading ? "Publishing..." : "Publish"}
       </Button>
-    </>
+    </div>
   );
 };

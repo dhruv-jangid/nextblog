@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { auth } from "@/lib/auth";
 import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
+import { getRedisClient } from "@/lib/redis";
 import type { JSONContent } from "@tiptap/react";
 import { deleteImages } from "@/actions/handleCloudinary";
 import { blogs, likes, comments, blogImages } from "@/db/schema";
@@ -43,21 +44,27 @@ export const createBlog = async ({
     });
     slug = newBlog.slug;
 
+    let blogId: string | undefined;
     await db.transaction(async (tx) => {
-      const [{ id: blogId }] = await tx
+      const [{ id }] = await tx
         .insert(blogs)
         .values({ ...newBlog, userId })
         .returning();
+      blogId = id;
 
       await tx.insert(blogImages).values(
         images.map(({ url, publicId }, index) => ({
-          blogId,
+          blogId: id,
           url,
           publicId,
           order: index,
         }))
       );
     });
+
+    const redis = await getRedisClient();
+    await redis.set(`blog:${blogId}:likes`, "0");
+    await redis.del(`user:${username}`);
   } catch (error) {
     if (error instanceof ZodError) {
       throw new Error(getFirstZodError(error));
@@ -94,9 +101,9 @@ export const editBlog = async ({
   if (!session) {
     throw new Error("Unauthorized");
   }
-  const { id, role, username } = session.user;
-  let newBlogSlug: string | undefined;
 
+  const { id, username, role } = session.user;
+  let newSlug = blogSlug;
   try {
     const { slug } = editBlogValidator.parse({
       title: title,
@@ -105,7 +112,7 @@ export const editBlog = async ({
       image: image,
       images: images,
     });
-    newBlogSlug = slug;
+    newSlug = slug;
 
     await db.transaction(async (tx) => {
       await tx
@@ -152,8 +159,12 @@ export const editBlog = async ({
     }
   }
 
-  if (newBlogSlug !== blogSlug) {
-    permanentRedirect(`/${username}/${newBlogSlug}`, RedirectType.replace);
+  const redis = await getRedisClient();
+  await redis.del("homepage:blogs");
+  await redis.del(`blog:${username}:${blogSlug}`);
+  if (newSlug !== blogSlug) {
+    await redis.del(`user:${username}`);
+    permanentRedirect(`/${username}/${newSlug}`, RedirectType.replace);
   } else {
     redirect(`/${username}/${blogSlug}`, RedirectType.replace);
   }
@@ -161,30 +172,42 @@ export const editBlog = async ({
 
 export const deleteBlog = async ({
   blogId,
+  blogSlug,
 }: {
   blogId: string;
+  blogSlug: string;
 }): Promise<void> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     throw new Error("Unauthorized");
   }
 
-  const { id, role } = session.user;
+  const { id, username, role } = session.user;
+  let images: string[] = [];
   try {
-    const imagesToDelete = await db
-      .select({ publicId: blogImages.publicId })
-      .from(blogImages)
-      .where(eq(blogImages.blogId, blogId));
-    const images = imagesToDelete.map((image) => image.publicId);
+    await db.transaction(async (tx) => {
+      const imagesToDelete = await tx
+        .select({ publicId: blogImages.publicId })
+        .from(blogImages)
+        .where(eq(blogImages.blogId, blogId));
+      images = imagesToDelete.map((image) => image.publicId);
+
+      await tx
+        .delete(blogs)
+        .where(
+          role === "admin"
+            ? eq(blogs.id, blogId)
+            : and(eq(blogs.id, blogId), eq(blogs.userId, id))
+        );
+    });
+
     await deleteImages(images);
 
-    await db
-      .delete(blogs)
-      .where(
-        role === "admin"
-          ? eq(blogs.id, blogId)
-          : and(eq(blogs.id, blogId), eq(blogs.userId, id))
-      );
+    const redis = await getRedisClient();
+    await redis.del(`blog:${username}:${blogSlug}`);
+    await redis.del(`comments:${blogId}`);
+    await redis.del(`user:${username}`);
+    await redis.del("homepage:blogs");
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(error.message);
@@ -192,8 +215,6 @@ export const deleteBlog = async ({
       throw new Error("Something went wrong");
     }
   }
-
-  redirect("/", RedirectType.replace);
 };
 
 export const likeBlog = async ({
@@ -213,11 +234,18 @@ export const likeBlog = async ({
       .where(and(eq(likes.userId, id), eq(likes.blogId, blogId)))
       .returning();
 
+    const key = `blog:${blogId}:likes`;
+    const redis = await getRedisClient();
+
     if (deleted.length === 0) {
       await db.insert(likes).values({
         userId: id,
         blogId,
       });
+
+      await redis.incr(key);
+    } else {
+      await redis.decr(key);
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -249,6 +277,9 @@ export const addComment = async ({
       userId,
       blogId,
     });
+
+    const redis = await getRedisClient();
+    await redis.del(`comments:${blogId}`);
   } catch (error) {
     if (error instanceof ZodError) {
       throw new Error(getFirstZodError(error));
@@ -262,8 +293,10 @@ export const addComment = async ({
 
 export const deleteComment = async ({
   commentId,
+  blogId,
 }: {
   commentId: string;
+  blogId: string;
 }): Promise<void> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
@@ -279,6 +312,9 @@ export const deleteComment = async ({
           ? eq(comments.id, commentId)
           : and(eq(comments.id, commentId), eq(comments.userId, id))
       );
+
+    const redis = await getRedisClient();
+    await redis.del(`comments:${blogId}`);
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(error.message);

@@ -4,7 +4,7 @@ import {
   contentValidator,
   categoryValidator,
 } from "@/lib/schemas/shared";
-import z from "zod";
+import { z } from "zod";
 import { slugifyTitle } from "@/lib/utils";
 
 export const imageValidator = z

@@ -55,7 +55,7 @@ export default function ErrorBoundary({
         </Button>
       </div>
       <div className="mt-48 text-sm opacity-30 underline underline-offset-4 break-words">
-        {error?.message}
+        {error.message ?? "Something went wrong"}
       </div>
     </div>
   );

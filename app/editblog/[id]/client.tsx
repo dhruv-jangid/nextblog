@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  uploadImage,
+  checkNudity,
   replaceImageSrcs,
   extractImagesFromContent,
   extractImageUrlsFromContent,
@@ -8,16 +10,16 @@ import {
 import pLimit from "p-limit";
 import { useState } from "react";
 import { ZodError } from "zod/v4";
-import { titleFont } from "@/lib/static/fonts";
 import { blogCategories } from "@/lib/utils";
-import { editBlog } from "@/actions/handleBlog";
+import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
+import { editBlog } from "@/actions/handleBlog";
 import type { JSONContent } from "@tiptap/react";
 import { useToast } from "@/context/toastProvider";
 import { RichTextEditor } from "@/components/editor";
 import { getFirstZodError } from "@/lib/schemas/shared";
+import { deleteImages } from "@/actions/handleCloudinary";
 import { editBlogValidatorClient } from "@/lib/schemas/client";
-import { getCloudinarySignature } from "@/actions/handleCloudinary";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const EditBlogClient = ({
@@ -45,10 +47,155 @@ export const EditBlogClient = ({
     category: oldCategory,
   });
   const [loading, setLoading] = useState(false);
+  const [characters, setCharacters] = useState(0);
   const { toast, success, error: errorToast } = useToast();
 
+  const handleEditBlog = async () => {
+    setLoading(true);
+    try {
+      const { images: newImages, base64Urls: newBase64Urls } =
+        extractImagesFromContent({
+          content: blog.content,
+        });
+
+      const existingImageUrls = extractImageUrlsFromContent({
+        content: blog.content,
+      });
+
+      const imagesToKeep = oldImages.filter((img) =>
+        existingImageUrls.includes(img.url)
+      );
+
+      const imagesToDelete = oldImages
+        .filter((img) => !existingImageUrls.includes(img.url))
+        .map((img) => img.publicId);
+
+      toast({ title: "Checking..." });
+      editBlogValidatorClient.parse({
+        title: blog.title,
+        content: blog.content,
+        category: blog.category,
+        newImages: newImages,
+        imagesToKeep: imagesToKeep,
+      });
+
+      if (oldTitle !== blog.title) {
+        const { exists } = await (
+          await fetch(`/api/checkTitle?title=${encodeURIComponent(blog.title)}`)
+        ).json();
+        if (exists) {
+          throw new Error("Title already exists");
+        }
+      }
+
+      for (const image of newImages) {
+        await checkNudity({ image });
+      }
+
+      toast({ title: "Uploading..." });
+      let uploadedImages: {
+        url: string;
+        publicId: string;
+        originalBase64: string;
+      }[] = [];
+      const errorImages: string[] = [];
+      if (newImages.length > 0) {
+        const limit = pLimit(3);
+        const imagesToUpload: Promise<{
+          url: string;
+          publicId: string;
+          originalBase64: string;
+        }>[] = newImages.map((image, index) =>
+          limit(async () => {
+            const { url, publicId } = await uploadImage({
+              image,
+              isUser: false,
+            });
+            errorImages.push(publicId);
+
+            return {
+              url,
+              publicId,
+              originalBase64: newBase64Urls[index],
+            };
+          })
+        );
+        const results = await Promise.allSettled(imagesToUpload);
+
+        const failed = results.find((r) => r.status === "rejected");
+        if (failed) {
+          if (errorImages.length > 0) {
+            await deleteImages(errorImages);
+          }
+          throw new Error("Invalid Image(s)");
+        }
+
+        uploadedImages = results.map(
+          (r) =>
+            (
+              r as PromiseFulfilledResult<{
+                url: string;
+                publicId: string;
+                originalBase64: string;
+              }>
+            ).value
+        );
+      }
+
+      const finalImages = [
+        ...imagesToKeep,
+        ...uploadedImages.map(({ url, publicId }) => ({ url, publicId })),
+      ];
+
+      const existingReplacements = Object.fromEntries(
+        imagesToKeep.map((img) => [img.url, img.url])
+      );
+
+      const uploadReplacements =
+        uploadedImages.length > 0
+          ? Object.fromEntries(
+              uploadedImages.map(({ originalBase64, url }) => [
+                originalBase64,
+                url,
+              ])
+            )
+          : {};
+
+      const finalContent = replaceImageSrcs({
+        content: blog.content,
+        replacements: {
+          ...existingReplacements,
+          ...uploadReplacements,
+        },
+      });
+
+      await editBlog({
+        blogId,
+        blogSlug,
+        title: blog.title,
+        content: finalContent,
+        category: blog.category,
+        image: finalImages[0].url,
+        images: finalImages,
+        imagesToDelete,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        errorToast({ title: getFirstZodError(error) });
+      } else if (isRedirectError(error)) {
+        success({ title: "Updated" });
+      } else if (error instanceof Error) {
+        errorToast({ title: error.message });
+      } else {
+        errorToast({ title: "Something went wrong" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <>
+    <div className="flex flex-col tracking-tight mx-auto lg:w-5/12 lg:border-l lg:border-r">
       <select
         id="category"
         onChange={(e) => setBlog({ ...blog, category: e.currentTarget.value })}
@@ -80,160 +227,26 @@ export const EditBlogClient = ({
         content={blog.content}
         readOnly={false}
         onChange={(content) => setBlog({ ...blog, content })}
+        onCharactersChange={(characters) => setCharacters(characters)}
       />
+
+      <span className="place-self-end mr-6 mb-4 text-muted-foreground">
+        {characters}
+      </span>
 
       <Button
         className="rounded-none py-5 text-base"
         disabled={
           loading ||
+          characters < 1000 ||
           (oldContent === blog.content &&
             oldTitle === blog.title &&
             oldCategory === blog.category)
         }
-        onClick={async () => {
-          setLoading(true);
-          try {
-            const { images: newImages, base64Urls: newBase64Urls } =
-              extractImagesFromContent({
-                content: blog.content,
-              });
-
-            const existingImageUrls = extractImageUrlsFromContent({
-              content: blog.content,
-            });
-
-            const imagesToKeep = oldImages.filter((img) =>
-              existingImageUrls.includes(img.url)
-            );
-
-            const imagesToDelete = oldImages
-              .filter((img) => !existingImageUrls.includes(img.url))
-              .map((img) => img.publicId);
-
-            editBlogValidatorClient.parse({
-              title: blog.title,
-              content: blog.content,
-              category: blog.category,
-              newImages: newImages,
-              imagesToKeep: imagesToKeep,
-            });
-
-            if (oldTitle !== blog.title) {
-              const { exists } = await (
-                await fetch(
-                  `/api/checkTitle?title=${encodeURIComponent(blog.title)}`
-                )
-              ).json();
-              if (exists) {
-                throw new Error("Title already exists");
-              }
-            }
-
-            let uploadedImages: {
-              url: string;
-              publicId: string;
-              originalBase64: string;
-            }[] = [];
-
-            toast({ title: "Uploading..." });
-            if (newImages.length > 0) {
-              const limit = pLimit(3);
-              const imagesToUpload: Promise<{
-                url: string;
-                publicId: string;
-                originalBase64: string;
-              }>[] = newImages.map((image, index) =>
-                limit(async () => {
-                  const {
-                    cloudName,
-                    apiKey,
-                    timestamp,
-                    asset_folder,
-                    transformation,
-                    signature,
-                  } = await getCloudinarySignature({ isUser: false });
-
-                  const formData = new FormData();
-                  formData.append("file", image);
-                  formData.append("api_key", apiKey);
-                  formData.append("timestamp", timestamp);
-                  formData.append("asset_folder", asset_folder);
-                  formData.append("transformation", transformation);
-                  formData.append("signature", signature);
-
-                  const result = await fetch(
-                    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                    {
-                      method: "POST",
-                      body: formData,
-                    }
-                  );
-
-                  const { secure_url, public_id } = await result.json();
-                  return {
-                    url: secure_url,
-                    publicId: public_id,
-                    originalBase64: newBase64Urls[index],
-                  };
-                })
-              );
-              uploadedImages = await Promise.all(imagesToUpload);
-            }
-
-            const finalImages = [
-              ...imagesToKeep,
-              ...uploadedImages.map(({ url, publicId }) => ({ url, publicId })),
-            ];
-
-            const existingReplacements = Object.fromEntries(
-              imagesToKeep.map((img) => [img.url, img.url])
-            );
-
-            const uploadReplacements =
-              uploadedImages.length > 0
-                ? Object.fromEntries(
-                    uploadedImages.map(({ originalBase64, url }) => [
-                      originalBase64,
-                      url,
-                    ])
-                  )
-                : {};
-
-            const finalContent = replaceImageSrcs({
-              content: blog.content,
-              replacements: {
-                ...existingReplacements,
-                ...uploadReplacements,
-              },
-            });
-
-            await editBlog({
-              blogId,
-              blogSlug,
-              title: blog.title,
-              content: finalContent,
-              category: blog.category,
-              image: finalImages[0].url,
-              images: finalImages,
-              imagesToDelete,
-            });
-          } catch (error) {
-            if (error instanceof ZodError) {
-              errorToast({ title: getFirstZodError(error) });
-            } else if (isRedirectError(error)) {
-              success({ title: "Updated" });
-            } else if (error instanceof Error) {
-              errorToast({ title: error.message });
-            } else {
-              errorToast({ title: "Something went wrong" });
-            }
-          } finally {
-            setLoading(false);
-          }
-        }}
+        onClick={handleEditBlog}
       >
         {loading ? "Updating..." : "Update"}
       </Button>
-    </>
+    </div>
   );
 };

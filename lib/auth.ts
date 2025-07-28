@@ -7,12 +7,16 @@ import {
 } from "@/lib/email/emailTexts";
 import { db } from "@/db/index";
 import * as schema from "@/db/schema";
-import { nextCookies } from "better-auth/next-js";
+import { APIError } from "better-auth/api";
+import { getRedisClient } from "@/lib/redis";
 import { sendEmail } from "@/lib/email/sendEmail";
+import { nextCookies } from "better-auth/next-js";
 import { admin, username } from "better-auth/plugins";
 import { generateUsername } from "@/actions/handleUser";
 import { betterAuth, BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+
+const redis = await getRedisClient();
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),
@@ -53,7 +57,7 @@ export const auth = betterAuth({
           (new Date().getTime() - new Date(createdAt).getTime()) /
           (1000 * 60 * 60);
         if (diffInHours < 24) {
-          throw new Error("Try again later");
+          throw new APIError("TOO_EARLY", { message: "Try again later" });
         }
 
         await sendEmail({
@@ -108,7 +112,33 @@ export const auth = betterAuth({
       },
     },
   },
-  verification: { disableCleanup: true },
+  session: { cookieCache: { enabled: true } },
+  secondaryStorage: {
+    get: async (key) => {
+      const value = await redis.get(key);
+      return value ? value : null;
+    },
+    set: async (key, value, ttl) => {
+      if (ttl) {
+        await redis.set(key, value, { EX: ttl });
+      } else {
+        await redis.set(key, value);
+      }
+    },
+    delete: async (key) => {
+      await redis.del(key);
+    },
+  },
+  rateLimit: {
+    customRules: {
+      "/sign-up/email": { window: 10, max: 3 },
+      "/sign-in/email": { window: 10, max: 3 },
+      "/forget-password": { window: 60, max: 1 },
+      "/reset-password": { window: 10, max: 3 },
+      "/reset-password/*": { window: 10, max: 3 },
+      "/update-user": { window: 60 * 60, max: 3 },
+    },
+  },
   onAPIError: { errorURL: "/signin" },
 } satisfies BetterAuthOptions);
 

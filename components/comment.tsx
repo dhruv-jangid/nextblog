@@ -125,7 +125,7 @@ export const Comment = ({
                   actionLabel: "Delete",
                   onConfirm: async () => {
                     try {
-                      await deleteComment({ commentId: comment.id });
+                      await deleteComment({ commentId: comment.id, blogId });
                       router.refresh();
                       success({ title: "Comment deleted" });
                     } catch (error) {

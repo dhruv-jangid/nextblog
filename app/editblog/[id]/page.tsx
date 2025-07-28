@@ -44,15 +44,13 @@ export default async function EditBlog({
   }
 
   return (
-    <div className="flex flex-col tracking-tight mx-auto lg:w-5/12 lg:border-l lg:border-r">
-      <EditBlogClient
-        blogId={blog.id}
-        blogSlug={blog.slug}
-        oldTitle={blog.title}
-        oldContent={blog.content}
-        oldCategory={blog.category}
-        oldImages={blog.images}
-      />
-    </div>
+    <EditBlogClient
+      blogId={blog.id}
+      blogSlug={blog.slug}
+      oldTitle={blog.title}
+      oldContent={blog.content}
+      oldCategory={blog.category}
+      oldImages={blog.images}
+    />
   );
 }

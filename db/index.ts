@@ -3,7 +3,7 @@ import { Pool as NeonPool } from "@neondatabase/serverless";
 import { drizzle as pgDrizzle } from "drizzle-orm/node-postgres";
 import { drizzle as neonDrizzle } from "drizzle-orm/neon-serverless";
 
-const url = process.env.DATABASE_URL!;
+const url = process.env.DATABASE_URL;
 const isProd = process.env.NODE_ENV === "production";
 
 export const db = isProd

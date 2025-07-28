@@ -1,8 +1,7 @@
 "use client";
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
-
 import { cn } from "@/lib/static/shadcnUtils";
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 function Avatar({
   className,
