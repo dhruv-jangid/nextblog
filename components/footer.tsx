@@ -51,7 +51,7 @@ export const Footer = () => {
             <div
               className="underline-hover"
               onClick={() => {
-                window.open("https://github.com/toxic-lmao");
+                window.open("https://github.com/dhruv-jangid");
               }}
             >
               Github

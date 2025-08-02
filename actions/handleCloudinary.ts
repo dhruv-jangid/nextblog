@@ -34,8 +34,8 @@ export const getCloudinarySignature = async ({
   try {
     const timestamp = String(Math.floor(Date.now() / 1000));
     const transformation = `${
-      !isUser ? "ar_16:9,c_auto,g_auto" : "ar_1:1,c_auto,g_faces"
-    },f_webp,q_auto:low`;
+      !isUser ? "g_auto" : "ar_1:1,g_faces"
+    },f_webp,q_auto:low,c_auto`;
     const asset_folder = `metapress/${!isUser ? "blogs" : "users"}`;
 
     const signature = cloudinary.utils.api_sign_request(
