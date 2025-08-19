@@ -54,14 +54,14 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const toast: ToastContextType = {
-    toast: (payload) => showToast("normal", payload),
-    success: (payload) => showToast("success", payload),
-    error: (payload) => showToast("error", payload),
-  };
-
   return (
-    <ToastContext.Provider value={toast}>
+    <ToastContext.Provider
+      value={{
+        toast: (payload) => showToast("normal", payload),
+        success: (payload) => showToast("success", payload),
+        error: (payload) => showToast("error", payload),
+      }}
+    >
       <Toaster
         position="top-center"
         toastOptions={{ style: { borderRadius: "1rem" } }}

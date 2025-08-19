@@ -2,8 +2,8 @@
 
 import { ZodError } from "zod";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Eye, EyeClosed } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/toastProvider";

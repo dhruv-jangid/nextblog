@@ -1,11 +1,29 @@
 import { Pool as PgPool } from "pg";
-import { Pool as NeonPool } from "@neondatabase/serverless";
+import { neon } from "@neondatabase/serverless";
+import { drizzle as neonDrizzle } from "drizzle-orm/neon-http";
 import { drizzle as pgDrizzle } from "drizzle-orm/node-postgres";
-import { drizzle as neonDrizzle } from "drizzle-orm/neon-serverless";
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_URL!;
 const isProd = process.env.NODE_ENV === "production";
 
-export const db = isProd
-  ? neonDrizzle(new NeonPool({ connectionString: url }))
-  : pgDrizzle(new PgPool({ connectionString: url }));
+const globalForDb = globalThis as unknown as {
+  pgPool: PgPool | undefined;
+  db: any | undefined;
+};
+
+export const db =
+  globalForDb.db ??
+  (() => {
+    let database;
+    if (isProd) {
+      const client = neon(url);
+      database = neonDrizzle(client);
+    } else {
+      if (!globalForDb.pgPool) {
+        globalForDb.pgPool = new PgPool({ connectionString: url });
+      }
+      database = pgDrizzle(globalForDb.pgPool);
+    }
+    globalForDb.db = database;
+    return database;
+  })();

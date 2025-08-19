@@ -1,4 +1,4 @@
-# NextBlog (MetaPress)
+# MetaPress
 
 A modern, full-featured blogging platform built with Next.js App Router, Drizzle ORM, PostgreSQL, Redis, and a beautiful UI. Supports rich text editing, authentication, image uploads, and more.
 
@@ -8,17 +8,17 @@ A modern, full-featured blogging platform built with Next.js App Router, Drizzle
 
 ## Tech Stack
 
-- **Framework:** Next.js (App Router, React Server Components) with Typescript
+- **Framework:** Next.js 15 (App Router, React Server Components) with TypeScript
 - **Database:** PostgreSQL (local via Docker, NeonDB in production)
 - **ORM:** Drizzle ORM
 - **Cache:** Redis (local via Docker, Upstash in production)
 - **Authentication:** BetterAuth (GitHub, Google, and credentials)
 - **Image Storage:** Cloudinary
-- **ML:** NFSWjs (NFSW Detection)
-- **Text Editor:** TipTap (Rich Text Editor)
-- **Styling:** Tailwind CSS, Shadcn UI
+- **ML:** NFSWjs (NSFW Detection), TensorFlow.js
+- **Text Editor:** TipTap (Rich Text Editor with extensions)
+- **Styling:** Tailwind CSS 4, Shadcn UI, Radix UI
 - **Email:** Nodemailer (Gmail SMTP)
-- **Other:** Zod (validation), Docker Compose (local dev)
+- **Other:** Zod (validation), Docker Compose (local dev), MCP SDK
 
 ---
 
@@ -28,13 +28,14 @@ A modern, full-featured blogging platform built with Next.js App Router, Drizzle
 - **Blog Management**: Create, edit, delete blogs with rich text, images, categories, and SEO-friendly slugs
 - **Comments**: Commenting system per blog
 - **Likes**: Like/unlike blogs
-- **Image Uploads**: Cloudinary integration, nudity check, multiple images per blog
+- **Image Uploads**: Cloudinary integration, NSFW detection, multiple images per blog
 - **Categories**: Organize blogs by category
 - **User Profiles**: Public profile pages, avatars, total likes
 - **Contact & Newsletter**: Contact form, newsletter subscription
 - **Performance**: Redis caching for blogs, users, categories
 - **Admin Panel**: Manage users, moderate content
-- **Modern UI**: Responsive, accessible, beautiful design
+- **Modern UI**: Responsive, accessible, beautiful design with dark/light theme support
+- **Content Moderation**: NSFW detection, profanity filtering
 
 ---
 
@@ -71,35 +72,29 @@ npm install
 
 ### 2. Environment Variables
 
-```
-Redis (for caching)
-- REDIS_URL=
+Create a `.env.local` file with the following variables:
 
-Database (Use local DB url in dev and Neon DB url in prod)
-- DATABASE_URL=
+```env
+# Redis (for caching)
+REDIS_URL=
 
-Cloudinary (for media storage and image processing)
-- CLOUDINARY_CLOUD_NAME=
-- CLOUDINARY_API_KEY=
-- CLOUDINARY_API_SECRET=
-- CLOUDINARY_URL=
+# Database (Use local DB url in dev and Neon DB url in prod)
+DATABASE_URL=
 
-TinyMCE (for rich text editing)
-- NEXT_PUBLIC_TINYMCE_API_KEY=
+# Cloudinary (for media storage and image processing)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-OAuth Providers (Google & GitHub Authentication)
-- GOOGLE_CLIENT_ID=
-- GOOGLE_CLIENT_SECRET=
-- GITHUB_CLIENT_ID=
-- GITHUB_CLIENT_SECRET=
+# OAuth Providers (Google & GitHub Authentication)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
 
-BetterAuth (Authentication & Security)
-- BETTER_AUTH_SECRET=
-- BETTER_AUTH_URL=
-
-Email (Authentication & Security)
-- EMAIL_USER=
-- EMAIL_PASS=
+# Email (Authentication & Security)
+EMAIL_USER=
+EMAIL_PASS=
 ```
 
 ### 3. Start Docker (Postgres & Redis)
@@ -119,6 +114,16 @@ npx drizzle-kit push:pg
 ```bash
 npm run dev
 ```
+
+---
+
+## Available Scripts
+
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run clean` - Clean install (remove node_modules and reinstall)
 
 ---
 

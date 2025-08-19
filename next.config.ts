@@ -7,9 +7,7 @@ if (!cloudName) {
 
 const nextConfig: NextConfig = {
   experimental: {
-    serverActions: {
-      bodySizeLimit: "5mb",
-    },
+    serverActions: { bodySizeLimit: "5mb" },
     staleTimes: {
       static: 30,
       dynamic: 180,
@@ -34,4 +32,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

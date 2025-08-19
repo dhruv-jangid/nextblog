@@ -7,8 +7,8 @@ import {
   extractImagesFromContent,
 } from "@/lib/imageUtils";
 import pLimit from "p-limit";
+import { ZodError } from "zod";
 import { useState } from "react";
-import { ZodError } from "zod/v4";
 import { blogCategories } from "@/lib/utils";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";

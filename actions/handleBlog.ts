@@ -45,7 +45,7 @@ export const createBlog = async ({
     slug = newBlog.slug;
 
     let blogId: string | undefined;
-    await db.transaction(async (tx) => {
+    await db.transaction(async (tx: any) => {
       const [{ id }] = await tx
         .insert(blogs)
         .values({ ...newBlog, userId })
@@ -114,7 +114,7 @@ export const editBlog = async ({
     });
     newSlug = slug;
 
-    await db.transaction(async (tx) => {
+    await db.transaction(async (tx: any) => {
       await tx
         .update(blogs)
         .set({
@@ -185,12 +185,14 @@ export const deleteBlog = async ({
   const { id, username, role } = session.user;
   let images: string[] = [];
   try {
-    await db.transaction(async (tx) => {
+    await db.transaction(async (tx: any) => {
       const imagesToDelete = await tx
         .select({ publicId: blogImages.publicId })
         .from(blogImages)
         .where(eq(blogImages.blogId, blogId));
-      images = imagesToDelete.map((image) => image.publicId);
+      images = imagesToDelete.map(
+        (image: { publicId: string }) => image.publicId
+      );
 
       await tx
         .delete(blogs)

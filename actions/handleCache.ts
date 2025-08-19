@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getRedisClient } from "@/lib/redis";

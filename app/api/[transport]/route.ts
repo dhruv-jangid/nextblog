@@ -24,7 +24,7 @@ const handler = createMcpHandler(
       },
     },
   },
-  { basePath: "/api", verboseLogs: true }
+  { basePath: "/api" }
 );
 
 export { handler as GET, handler as POST, handler as DELETE };

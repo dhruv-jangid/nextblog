@@ -129,7 +129,7 @@ export default async function Blog({
       .select({ count: sql<number>`count(*)`.mapWith(Number) })
       .from(likes)
       .where(eq(likes.blogId, blogRow.id))
-      .then((res) => res[0]?.count ?? 0);
+      .then((res: Array<{ count: number }>) => res[0]?.count ?? 0);
 
     await redis.set(likesCacheKey, totalLikes);
   }
@@ -143,7 +143,7 @@ export default async function Blog({
     .select()
     .from(likes)
     .where(and(eq(likes.userId, id), eq(likes.blogId, blogRow.id)))
-    .then((res) => res.length > 0);
+    .then((res: { length: number }) => res.length > 0);
 
   return (
     <BlogClient

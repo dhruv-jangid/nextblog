@@ -140,6 +140,7 @@ export const auth = betterAuth({
     },
   },
   onAPIError: { errorURL: "/signin" },
+  telemetry: { enabled: false },
 } satisfies BetterAuthOptions);
 
 export type Session = typeof auth.$Infer.Session;

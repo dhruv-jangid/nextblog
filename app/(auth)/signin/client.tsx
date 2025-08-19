@@ -10,17 +10,17 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import { ZodError } from "zod";
 import Image from "next/image";
 import { useState } from "react";
-import { ZodError } from "zod/v4";
 import { Input } from "@/components/ui/input";
 import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import Google from "@/public/images/google.png";
 import Github from "@/public/images/github.png";
 import { Button } from "@/components/ui/button";
-import Greeting from "@/public/images/circles.jpg";
 import { useToast } from "@/context/toastProvider";
+import Greeting from "@/public/images/circles.jpg";
 import { ArrowUpRight, Eye, EyeClosed } from "lucide-react";
 import { emailValidator, getFirstZodError } from "@/lib/schemas/shared";
 

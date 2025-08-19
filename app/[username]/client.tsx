@@ -13,8 +13,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import Image from "next/image";
 import { ZodError } from "zod";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
@@ -23,8 +23,8 @@ import { BlogGrid } from "@/components/bloggrid";
 import Account from "@/public/images/account.png";
 import { useToast } from "@/context/toastProvider";
 import { updateUserCache } from "@/actions/handleCache";
-import { getFirstZodError } from "@/lib/schemas/shared";
 import { BlogType, UserType } from "@/lib/static/types";
+import { getFirstZodError } from "@/lib/schemas/shared";
 import { deleteImage } from "@/actions/handleCloudinary";
 import { imageValidatorClient } from "@/lib/schemas/client";
 import { ImageUp, SquareArrowOutUpRight } from "lucide-react";

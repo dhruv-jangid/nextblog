@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { mainFont, titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
+import { mainFont, titleFont } from "@/lib/static/fonts";
 
 export default function GlobalError({
   error,
