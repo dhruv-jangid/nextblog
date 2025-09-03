@@ -1,10 +1,10 @@
 import "server-only";
 import { db } from "@/db";
+import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { eq, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { blogs, users } from "@/db/schema";
-import { getRedisClient } from "@/lib/redis";
 import { titleFont } from "@/lib/static/fonts";
 import { BlogGrid } from "@/components/bloggrid";
 import type { BlogType } from "@/lib/static/types";
@@ -29,7 +29,6 @@ export default async function CategoryBlogs({
 }) {
   const { category } = await params;
 
-  const redis = await getRedisClient();
   const cacheKey = `category:${category}`;
   const cached = await redis.get(cacheKey);
 

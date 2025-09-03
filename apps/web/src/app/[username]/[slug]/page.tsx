@@ -1,11 +1,11 @@
 import "server-only";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { BlogClient } from "./client";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { getRedisClient } from "@/lib/redis";
 import type { JSONContent } from "@tiptap/react";
 import { eq, and, desc, sql } from "drizzle-orm";
 import type { BlogType } from "@/lib/static/types";
@@ -30,7 +30,6 @@ export default async function Blog({
 }) {
   const { username, slug } = await params;
 
-  const redis = await getRedisClient();
   const blogCacheKey = `blog:${username}:${slug}`;
   const cached = await redis.get(blogCacheKey);
 

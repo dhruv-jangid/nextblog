@@ -6,17 +6,15 @@ import {
   deleteAccountVerificationText,
 } from "@/lib/email/emailTexts";
 import { db } from "@/db/index";
+import { redis } from "@/lib/redis";
 import * as schema from "@/db/schema";
 import { APIError } from "better-auth/api";
-import { getRedisClient } from "@/lib/redis";
 import { sendEmail } from "@/lib/email/sendEmail";
 import { nextCookies } from "better-auth/next-js";
 import { admin, username } from "better-auth/plugins";
 import { generateUsername } from "@/actions/handleUser";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-
-const redis = await getRedisClient();
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),

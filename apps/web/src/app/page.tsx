@@ -1,15 +1,14 @@
 import "server-only";
 import { db } from "@/db";
+import { redis } from "@/lib/redis";
 import { eq, desc } from "drizzle-orm";
 import { blogs, users } from "@/db/schema";
-import { getRedisClient } from "@/lib/redis";
 import { titleFont } from "@/lib/static/fonts";
 import { Carousel } from "@/components/carousel";
 import { BlogGrid } from "@/components/bloggrid";
 import type { BlogType } from "@/lib/static/types";
 
 export default async function Home() {
-  const redis = await getRedisClient();
   const cacheKey = "homepage:blogs";
   const cached = await redis.get(cacheKey);
 

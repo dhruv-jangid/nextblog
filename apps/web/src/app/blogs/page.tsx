@@ -1,9 +1,9 @@
 import "server-only";
 import { db } from "@/db";
+import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { eq, desc } from "drizzle-orm";
 import { blogs, users } from "@/db/schema";
-import { getRedisClient } from "@/lib/redis";
 import { titleFont } from "@/lib/static/fonts";
 import { BlogGrid } from "@/components/bloggrid";
 import type { JSONContent } from "@tiptap/react";
@@ -15,7 +15,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Blogs() {
-  const redis = await getRedisClient();
   const cacheKey = "blogs";
   const cached = await redis.get(cacheKey);
 

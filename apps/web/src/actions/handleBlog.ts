@@ -4,8 +4,8 @@ import "server-only";
 import { db } from "@/db";
 import { ZodError } from "zod";
 import { auth } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 import { headers } from "next/headers";
-import { getRedisClient } from "@/lib/redis";
 import { eq, and, inArray } from "drizzle-orm";
 import type { JSONContent } from "@tiptap/react";
 import { deleteImages } from "@/actions/handleCloudinary";
@@ -62,7 +62,6 @@ export const createBlog = async ({
       );
     });
 
-    const redis = await getRedisClient();
     await redis.set(`blog:${blogId}:likes`, "0");
     await redis.del(`user:${username}`);
   } catch (error) {
@@ -192,7 +191,6 @@ export const editBlog = async ({
     }
   }
 
-  const redis = await getRedisClient();
   await redis.del("homepage:blogs");
   await redis.del(`blog:${username}:${blogSlug}`);
 
@@ -239,7 +237,6 @@ export const deleteBlog = async ({
 
     await deleteImages(images);
 
-    const redis = await getRedisClient();
     await redis.del(`blog:${username}:${blogSlug}`);
     await redis.del(`comments:${blogId}`);
     await redis.del(`user:${username}`);
@@ -270,7 +267,6 @@ export const likeBlog = async ({
       .where(and(eq(likes.userId, id), eq(likes.blogId, blogId)))
       .returning();
 
-    const redis = await getRedisClient();
     const key = `blog:${blogId}:likes`;
 
     if (deleted.length === 0) {
@@ -314,7 +310,6 @@ export const addComment = async ({
       blogId,
     });
 
-    const redis = await getRedisClient();
     await redis.del(`comments:${blogId}`);
   } catch (error) {
     if (error instanceof ZodError) {
@@ -349,7 +344,6 @@ export const deleteComment = async ({
           : and(eq(comments.id, commentId), eq(comments.userId, id))
       );
 
-    const redis = await getRedisClient();
     await redis.del(`comments:${blogId}`);
   } catch (error) {
     if (error instanceof Error) {

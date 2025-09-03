@@ -1,12 +1,12 @@
 import "server-only";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { ProfileClient } from "./client";
 import { notFound } from "next/navigation";
-import { getRedisClient } from "@/lib/redis";
 import { users, blogs, likes } from "@/db/schema";
 import type { BlogType, UserType } from "@/lib/static/types";
 
@@ -31,7 +31,6 @@ export default async function Profile({
   const session = await auth.api.getSession({ headers: await headers() });
   const { username } = await params;
 
-  const redis = await getRedisClient();
   const cacheKey = `user:${username}`;
   const cached = await redis.get(cacheKey);
 

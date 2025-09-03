@@ -2,8 +2,8 @@
 
 import "server-only";
 import { auth } from "@/lib/auth";
+import { redis } from "@/lib/redis";
 import { headers } from "next/headers";
-import { getRedisClient } from "@/lib/redis";
 
 export const updateUserCache = async (): Promise<void> => {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -13,7 +13,6 @@ export const updateUserCache = async (): Promise<void> => {
 
   const { username } = session.user;
 
-  const redis = await getRedisClient();
   await redis.del(`user:${username}`);
   await redis.del(`blog:${username}:*`);
 };
