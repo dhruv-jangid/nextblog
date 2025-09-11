@@ -10,9 +10,9 @@ import {
 import pLimit from "p-limit";
 import { toast } from "sonner";
 import { ZodError } from "zod";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { blogCategories } from "@/lib/utils";
-import { cn } from "@/lib/static/shadcnUtils";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { editBlog } from "@/actions/handleBlog";
@@ -48,6 +48,9 @@ export const EditBlogClient = ({
 
   const handleEditBlog = async () => {
     setLoading(true);
+
+    let toastId1: string | number = "";
+    let toastId2: string | number = "";
     try {
       const { images: newImages, base64Urls: newBase64Urls } =
         extractImagesFromContent({
@@ -83,12 +86,12 @@ export const EditBlogClient = ({
         }
       }
 
-      toast.loading("Checking...");
+      toastId1 = toast.loading("Checking...");
       for (const image of newImages) {
         await checkNudity({ image });
       }
 
-      toast.loading("Updating...");
+      toastId2 = toast.loading("Updating...");
       let uploadedImages: {
         url: string;
         publicId: string;
@@ -186,6 +189,8 @@ export const EditBlogClient = ({
         toast.error("Something went wrong");
       }
     } finally {
+      toast.dismiss(toastId1);
+      toast.dismiss(toastId2);
       setLoading(false);
     }
   };

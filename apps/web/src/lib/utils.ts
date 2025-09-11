@@ -4,6 +4,8 @@ import {
   englishRecommendedTransformers,
 } from "obscenity";
 import slugify from "slugify";
+import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from "clsx";
 
 export const slugifyTitle = ({ title }: { title: string }): string =>
   slugify(title, {
@@ -31,6 +33,10 @@ export const checkProfanity = ({ text }: { text: string }): boolean => {
     text.toLowerCase().includes(word)
   );
 };
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export const blogCategories = [
   "Agriculture",

@@ -1,11 +1,11 @@
 import "server-only";
 import "@/globals.css";
+import { cn } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { cn } from "@/lib/static/shadcnUtils";
 import { mainFont } from "@/lib/static/fonts";
 import { Providers } from "@/components/providers";
 

@@ -9,9 +9,9 @@ import {
 import pLimit from "p-limit";
 import { toast } from "sonner";
 import { ZodError } from "zod";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { blogCategories } from "@/lib/utils";
-import { cn } from "@/lib/static/shadcnUtils";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/combobox";
@@ -39,6 +39,9 @@ export const CreateBlogClient = () => {
 
   const handleCreateBlog = async () => {
     setLoading(true);
+
+    let toastId1: string | number = "";
+    let toastId2: string | number = "";
     try {
       const { images, base64Urls } = extractImagesFromContent({
         content: blog.content,
@@ -58,12 +61,12 @@ export const CreateBlogClient = () => {
         throw new Error("Title already exists");
       }
 
-      toast.loading("Checking...");
+      toastId1 = toast.loading("Checking...");
       for (const image of images) {
         await checkNudity({ image });
       }
 
-      toast.loading("Uploading...");
+      toastId2 = toast.loading("Uploading...");
       const errorImages: string[] = [];
       const limit = pLimit(3);
       const imagesToUpload = images.map((image, index) =>
@@ -133,6 +136,8 @@ export const CreateBlogClient = () => {
         toast.error("Something went wrong");
       }
     } finally {
+      toast.dismiss(toastId1);
+      toast.dismiss(toastId2);
       setLoading(false);
     }
   };

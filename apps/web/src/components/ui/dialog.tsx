@@ -1,5 +1,5 @@
+import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
-import { cn } from "@/lib/static/shadcnUtils";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 function Dialog({

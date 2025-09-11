@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/static/shadcnUtils";
+import { cn } from "@/lib/utils";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import type { Route } from "next";
 import Logo from "@/app/favicon.ico";
 import { Button } from "./ui/button";
@@ -9,7 +10,6 @@ import { Menu, X } from "lucide-react";
 import type { Session } from "@/lib/auth";
 import { ThemeToggle } from "./themeToggle";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/static/shadcnUtils";
 import { usePathname } from "next/navigation";
 import { titleFont } from "@/lib/static/fonts";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";

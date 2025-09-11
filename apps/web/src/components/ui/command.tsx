@@ -7,8 +7,8 @@ import {
   DialogContent,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { SearchIcon } from "lucide-react";
-import { cn } from "@/lib/static/shadcnUtils";
 import { Command as CommandPrimitive } from "cmdk";
 
 function Command({

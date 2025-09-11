@@ -32,7 +32,7 @@ export const BlogClient = ({
   const { show } = useAlertDialog();
 
   const handleDeleteBlog = async () => {
-    toast.loading("Deleting...");
+    const toastId = toast.loading("Deleting...");
     try {
       await deleteBlog({ blogId: blog.id, blogSlug: blog.slug });
 
@@ -44,6 +44,8 @@ export const BlogClient = ({
       } else {
         toast.error("Something went wrong");
       }
+    } finally {
+      toast.dismiss(toastId);
     }
   };
 
