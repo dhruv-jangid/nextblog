@@ -1,32 +1,31 @@
 "use client";
 
+import { toast } from "sonner";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/providers/toastProvider";
 import { useAlertDialog } from "@/components/providers/alertProvider";
 
 export const DeleteUserBtn = ({ userId }: { userId: string }) => {
   const { show } = useAlertDialog();
   const [loading, setLoading] = useState(false);
-  const { toast, success, error: errorToast } = useToast();
 
   const deleteUser = async () => {
     setLoading(true);
     try {
-      toast({ title: "Deleting..." });
+      toast("Deleting...");
       const { error } = await authClient.admin.removeUser({ userId });
       if (error) {
         throw new Error(error.message);
       }
 
-      success({ title: `Deleted user with id: ${userId}` });
+      toast.success(`Deleted user with id: ${userId}`);
     } catch (error) {
       if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
 import { titleFont } from "@/lib/static/fonts";
@@ -26,7 +27,6 @@ import { deleteImage } from "@/actions/handleCloudinary";
 import { imageValidatorClient } from "@/lib/schemas/client";
 import type { BlogType, UserType } from "@/lib/static/types";
 import { ImageUp, SquareArrowOutUpRight } from "lucide-react";
-import { useToast } from "@/components/providers/toastProvider";
 
 export const ProfileClient = ({
   userRow,
@@ -125,7 +125,6 @@ export const ProfileImg = ({
   isUser: boolean;
 }) => {
   const router = useRouter();
-  const { toast, success, error: errorToast } = useToast();
 
   const updateImage = async (
     e: React.ChangeEvent<HTMLInputElement> | false
@@ -136,7 +135,7 @@ export const ProfileImg = ({
 
     try {
       if (!e) {
-        toast({ title: "Removing..." });
+        toast("Removing...");
         const { error } = await authClient.updateUser({ image: null });
         if (error) {
           throw new Error(error.message);
@@ -146,10 +145,10 @@ export const ProfileImg = ({
         if (image) {
           imageValidatorClient.parse(image);
 
-          toast({ title: "Checking..." });
+          toast.loading("Checking...");
           await checkNudity({ image });
 
-          toast({ title: "Uploading..." });
+          toast.loading("Uploading...");
           const { url } = await uploadImage({
             image,
             isUser: true,
@@ -173,14 +172,14 @@ export const ProfileImg = ({
       }
 
       router.refresh();
-      success({ title: "Profile updated" });
+      toast.success("Profile updated");
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       if (fileInput) {

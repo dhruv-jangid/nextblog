@@ -20,13 +20,13 @@ import {
   TrailingNode,
   CharacterCount,
 } from "@tiptap/extensions";
+import { toast } from "sonner";
 import StarterKit from "@tiptap/starter-kit";
 import Youtube from "@tiptap/extension-youtube";
 import { BubbleMenu } from "@tiptap/react/menus";
 import TipTapImage from "@tiptap/extension-image";
 import { BulletList } from "@tiptap/extension-list";
 import TextAlign from "@tiptap/extension-text-align";
-import { useToast } from "./providers/toastProvider";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import Emoji, { gitHubEmojis } from "@tiptap/extension-emoji";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
@@ -45,8 +45,6 @@ export const RichTextEditor = ({
   placeholder?: string;
   readOnly?: boolean;
 }) => {
-  const { error: errorToast } = useToast();
-
   const editor = useEditor({
     editable: !readOnly,
     immediatelyRender: false,
@@ -119,7 +117,7 @@ export const RichTextEditor = ({
   }
 
   editor.on("contentError", ({ error }) => {
-    errorToast({ title: error.message });
+    toast.error(error.message);
   });
 
   return (

@@ -7,6 +7,7 @@ import {
   extractImagesFromContent,
 } from "@/lib/imageUtils";
 import pLimit from "p-limit";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { blogCategories } from "@/lib/utils";
@@ -21,7 +22,6 @@ import { RichTextEditor } from "@/components/editor";
 import { getFirstZodError } from "@/lib/schemas/shared";
 import { deleteImages } from "@/actions/handleCloudinary";
 import { blogValidatorClient } from "@/lib/schemas/client";
-import { useToast } from "@/components/providers/toastProvider";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const CreateBlogClient = () => {
@@ -36,7 +36,6 @@ export const CreateBlogClient = () => {
   });
   const [loading, setLoading] = useState(false);
   const [characters, setCharacters] = useState(0);
-  const { toast, success, error: errorToast } = useToast();
 
   const handleCreateBlog = async () => {
     setLoading(true);
@@ -59,11 +58,12 @@ export const CreateBlogClient = () => {
         throw new Error("Title already exists");
       }
 
+      toast.loading("Checking...");
       for (const image of images) {
         await checkNudity({ image });
       }
 
-      toast({ title: "Uploading..." });
+      toast.loading("Uploading...");
       const errorImages: string[] = [];
       const limit = pLimit(3);
       const imagesToUpload = images.map((image, index) =>
@@ -124,13 +124,13 @@ export const CreateBlogClient = () => {
       });
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (isRedirectError(error)) {
-        success({ title: "Published" });
+        toast.success("Published");
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

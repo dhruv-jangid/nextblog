@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,6 @@ import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Eye, EyeClosed } from "lucide-react";
-import { useToast } from "@/components/providers/toastProvider";
 import { emailValidator, getFirstZodError } from "@/lib/schemas/shared";
 
 export const SigninClient = () => {
@@ -28,7 +28,6 @@ export const SigninClient = () => {
     rememberMe: boolean;
   }>({ email: "", password: "", rememberMe: true });
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
 
   const credentialSignIn = async () => {
@@ -44,14 +43,14 @@ export const SigninClient = () => {
         throw new Error(error.message);
       }
 
-      success({ title: "Signed in" });
+      toast.success("Signed in");
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -67,9 +66,9 @@ export const SigninClient = () => {
       }
     } catch (error) {
       if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -214,7 +213,6 @@ export const SigninClient = () => {
 const ForgetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState<string>("");
-  const { success, error: errorToast } = useToast();
 
   const forgetPassword = async () => {
     setLoading(true);
@@ -229,16 +227,14 @@ const ForgetPassword = () => {
         throw new Error(error.message);
       }
 
-      success({
-        title: "Check your email for password reset link",
-      });
+      toast.success("Check your email for password reset link");
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

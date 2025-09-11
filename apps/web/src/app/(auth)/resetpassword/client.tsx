@@ -1,12 +1,12 @@
 "use client";
 
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeClosed } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/providers/toastProvider";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { getFirstZodError, passwordValidator } from "@/lib/schemas/shared";
 
@@ -14,7 +14,6 @@ export const ResetPasswordClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,15 +32,15 @@ export const ResetPasswordClient = () => {
         throw new Error(error.message);
       }
 
-      success({ title: "Password changed" });
+      toast.success("Password changed");
       router.replace("/signin");
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

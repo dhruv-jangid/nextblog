@@ -8,6 +8,7 @@ import {
   extractImageUrlsFromContent,
 } from "@/lib/imageUtils";
 import pLimit from "p-limit";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { blogCategories } from "@/lib/utils";
@@ -23,7 +24,6 @@ import { RichTextEditor } from "@/components/editor";
 import { getFirstZodError } from "@/lib/schemas/shared";
 import { deleteImages } from "@/actions/handleCloudinary";
 import { editBlogValidatorClient } from "@/lib/schemas/client";
-import { useToast } from "@/components/providers/toastProvider";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const EditBlogClient = ({
@@ -45,7 +45,6 @@ export const EditBlogClient = ({
   });
   const [loading, setLoading] = useState(false);
   const [characters, setCharacters] = useState(0);
-  const { toast, success, error: errorToast } = useToast();
 
   const handleEditBlog = async () => {
     setLoading(true);
@@ -84,11 +83,12 @@ export const EditBlogClient = ({
         }
       }
 
+      toast.loading("Checking...");
       for (const image of newImages) {
         await checkNudity({ image });
       }
 
-      toast({ title: "Updating..." });
+      toast.loading("Updating...");
       let uploadedImages: {
         url: string;
         publicId: string;
@@ -177,13 +177,13 @@ export const EditBlogClient = ({
       });
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (isRedirectError(error)) {
-        success({ title: "Updated" });
+        toast.success("Updated");
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

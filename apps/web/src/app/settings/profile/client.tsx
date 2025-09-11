@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import type { Session } from "@/lib/auth";
@@ -22,7 +23,6 @@ import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { updateUserCache } from "@/actions/handleCache";
-import { useToast } from "@/components/providers/toastProvider";
 import { useAlertDialog } from "@/components/providers/alertProvider";
 
 export const Profile = ({ user }: { user: Session["user"] }) => {
@@ -33,7 +33,6 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
   const router = useRouter();
   const { show } = useAlertDialog();
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
 
   const handleUser = async (change: "username" | "name") => {
     setLoading(true);
@@ -59,7 +58,7 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
         await updateUserCache();
 
         router.refresh();
-        success({ title: "Username changed" });
+        toast.success("Username changed");
       } else {
         nameValidator.parse(data.username);
 
@@ -71,15 +70,15 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
         await updateUserCache();
 
         router.refresh();
-        success({ title: "Name changed" });
+        toast.success("Name changed");
       }
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -92,7 +91,7 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
 
       router.push("/signin");
     } catch {
-      errorToast({ title: "Something went wrong" });
+      toast.error("Something went wrong");
     }
   };
 

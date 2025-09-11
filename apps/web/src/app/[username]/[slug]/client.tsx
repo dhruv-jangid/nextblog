@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toast } from "sonner";
 import { Like } from "@/components/like";
 import { useRouter } from "next/navigation";
 import { Author } from "@/components/author";
@@ -11,7 +12,6 @@ import type { JSONContent } from "@tiptap/react";
 import { deleteBlog } from "@/actions/handleBlog";
 import { RichTextEditor } from "@/components/editor";
 import { Copy, PencilLine, Trash2 } from "lucide-react";
-import { useToast } from "@/components/providers/toastProvider";
 import type { BlogType, CommentType } from "@/lib/static/types";
 import { useAlertDialog } from "@/components/providers/alertProvider";
 
@@ -30,20 +30,19 @@ export const BlogClient = ({
 }) => {
   const router = useRouter();
   const { show } = useAlertDialog();
-  const { toast, success, error: errorToast } = useToast();
 
   const handleDeleteBlog = async () => {
-    toast({ title: "Deleting..." });
+    toast.loading("Deleting...");
     try {
       await deleteBlog({ blogId: blog.id, blogSlug: blog.slug });
 
       router.replace("/");
-      success({ title: "Blog deleted" });
+      toast.success("Blog deleted");
     } catch (error) {
       if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     }
   };
@@ -54,12 +53,12 @@ export const BlogClient = ({
         `${window.location.origin}/${blog.user.username}/${blog.slug}`
       );
 
-      success({ title: "Link copied to clipboard" });
+      toast.success("Link copied to clipboard");
     } catch (error) {
       if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     }
   };

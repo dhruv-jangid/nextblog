@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
+import { Textarea } from "./ui/textarea";
 import { useRouter } from "next/navigation";
-import { useToast } from "./providers/toastProvider";
 import type { CommentType } from "@/lib/static/types";
 import { useAlertDialog } from "./providers/alertProvider";
 import { addComment, deleteComment } from "@/actions/handleBlog";
 import { commentValidator, getFirstZodError } from "@/lib/schemas/shared";
-import { Textarea } from "./ui/textarea";
 
 export const Comment = ({
   blogId,
@@ -29,7 +29,6 @@ export const Comment = ({
   const { show } = useAlertDialog();
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
 
   return (
     <div className="flex flex-col gap-6 tracking-tight text-balance">
@@ -59,14 +58,14 @@ export const Comment = ({
                 setComment("");
                 await addComment({ comment, blogId });
                 router.refresh();
-                success({ title: "Comment added" });
+                toast.success("Comment added");
               } catch (error) {
                 if (error instanceof ZodError) {
-                  errorToast({ title: getFirstZodError(error) });
+                  toast.error(getFirstZodError(error));
                 } else if (error instanceof Error) {
-                  errorToast({ title: error.message });
+                  toast.error(error.message);
                 } else {
-                  errorToast({ title: "Something went wrong" });
+                  toast.error("Something went wrong");
                 }
               } finally {
                 setLoading(false);
@@ -130,12 +129,12 @@ export const Comment = ({
                     try {
                       await deleteComment({ commentId: comment.id, blogId });
                       router.refresh();
-                      success({ title: "Comment deleted" });
+                      toast.success("Comment deleted");
                     } catch (error) {
                       if (error instanceof Error) {
-                        errorToast({ title: error.message });
+                        toast.error(error.message);
                       } else {
-                        errorToast({ title: "Something went wrong" });
+                        toast.error("Something went wrong");
                       }
                     }
                   },

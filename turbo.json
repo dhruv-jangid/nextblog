@@ -2,18 +2,19 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
     "build": {
       "cache": false,
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
-    "lint": { "dependsOn": ["^lint"] },
+    "start": { "cache": false },
     "check-types": { "dependsOn": ["^check-types"] },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "lint": { "dependsOn": ["^lint"] }
   },
   "globalEnv": [
     "CLOUDINARY_CLOUD_NAME",

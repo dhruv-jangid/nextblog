@@ -9,18 +9,17 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { updateUserCache } from "@/actions/handleCache";
-import { useToast } from "@/components/providers/toastProvider";
 
 export const Account = () => {
   const [string, setString] = useState("");
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
 
   const handleDeleteUser = async () => {
     setLoading(true);
@@ -36,14 +35,12 @@ export const Account = () => {
 
       await updateUserCache();
 
-      success({
-        title: "Deletion confirmation email has been sent",
-      });
+      toast.success("Deletion confirmation email has been sent");
     } catch (error) {
       if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

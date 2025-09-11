@@ -1,9 +1,9 @@
 "use client";
 
+import { toast } from "sonner";
 import { Heart } from "lucide-react";
 import { useRef, useState } from "react";
 import { likeBlog } from "@/actions/handleBlog";
-import { useToast } from "./providers/toastProvider";
 
 export const Like = ({
   blogId,
@@ -14,7 +14,6 @@ export const Like = ({
   likes: number;
   isLiked: boolean;
 }) => {
-  const { error: errorToast } = useToast();
   const [tempLikes, setTempLikes] = useState(likes);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [tempIsLiked, setTempIsLiked] = useState(isLiked);
@@ -34,9 +33,9 @@ export const Like = ({
             setTempLikes(tempIsLiked ? tempLikes - 1 : tempLikes + 1);
           } catch (error) {
             if (error instanceof Error) {
-              errorToast({ title: error.message });
+              toast.error(error.message);
             } else {
-              errorToast({ title: "Something went wrong" });
+              toast.error("Something went wrong");
             }
           }
         }}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,6 @@ import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Eye, EyeClosed } from "lucide-react";
-import { useToast } from "@/components/providers/toastProvider";
 import { getFirstZodError, credentialsValidator } from "@/lib/schemas/shared";
 
 export const SignupClient = () => {
@@ -20,7 +20,6 @@ export const SignupClient = () => {
     password: string;
   }>({ name: "", username: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
 
   const credentialSignUp = async () => {
@@ -42,14 +41,14 @@ export const SignupClient = () => {
         }
       }
 
-      success({ title: "Check your email for verification" });
+      toast.success("Check your email for verification");
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -65,9 +64,9 @@ export const SignupClient = () => {
       }
     } catch (error) {
       if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);

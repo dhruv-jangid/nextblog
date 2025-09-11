@@ -1,15 +1,16 @@
 "use client";
 
-import { ThemeProvider } from "./providers/themeProvider";
-import { ToastProvider } from "./providers/toastProvider";
+import { Toaster } from "./ui/sonner";
+import { ThemeProvider } from "next-themes";
 import { AlertProvider } from "./providers/alertProvider";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <ToastProvider>
-        <AlertProvider>{children}</AlertProvider>
-      </ToastProvider>
+      <AlertProvider>
+        {children}
+        <Toaster />
+      </AlertProvider>
     </ThemeProvider>
   );
 };

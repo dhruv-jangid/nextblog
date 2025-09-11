@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { contactUser } from "@/actions/handleUser";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/providers/toastProvider";
 import { contactValidator, getFirstZodError } from "@/lib/schemas/shared";
 
 export const ContactClient = () => {
@@ -16,7 +16,6 @@ export const ContactClient = () => {
     message: string;
   }>({ subject: "", message: "" });
   const [loading, setLoading] = useState(false);
-  const { success, error: errorToast } = useToast();
 
   const handleContactUser = async () => {
     setLoading(true);
@@ -24,14 +23,14 @@ export const ContactClient = () => {
       contactValidator.parse(details);
 
       await contactUser(details);
-      success({ title: "We've received your inquiry" });
+      toast.success("We've received your inquiry");
     } catch (error) {
       if (error instanceof ZodError) {
-        errorToast({ title: getFirstZodError(error) });
+        toast.info(getFirstZodError(error));
       } else if (error instanceof Error) {
-        errorToast({ title: error.message });
+        toast.error(error.message);
       } else {
-        errorToast({ title: "Something went wrong" });
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);
