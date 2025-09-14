@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ZodError } from "zod";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { blogCategories } from "@/lib/utils";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
@@ -24,15 +25,16 @@ import { RichTextEditor } from "@/components/editor";
 import { getFirstZodError } from "@/lib/schemas/shared";
 import { deleteImages } from "@/actions/handleCloudinary";
 import { editBlogValidatorClient } from "@/lib/schemas/client";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const EditBlogClient = ({
   oldBlog,
+  username,
 }: {
-  oldBlog: BlogType & {
+  oldBlog: Omit<BlogType, "user" | "image"> & {
     content: JSONContent;
     images: Array<{ url: string; publicId: string }>;
   };
+  username: string;
 }) => {
   const [blog, setBlog] = useState<{
     title: string;
@@ -43,6 +45,7 @@ export const EditBlogClient = ({
     content: oldBlog.content,
     category: oldBlog.category,
   });
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [characters, setCharacters] = useState(0);
 
@@ -168,7 +171,7 @@ export const EditBlogClient = ({
         },
       });
 
-      await editBlog({
+      const slug = await editBlog({
         blogId: oldBlog.id,
         blogSlug: oldBlog.slug,
         title: blog.title,
@@ -178,11 +181,11 @@ export const EditBlogClient = ({
         images: finalImages,
         imagesToDelete,
       });
+      router.replace(`/${username}/${slug}`);
+      toast.success("Updated");
     } catch (error) {
       if (error instanceof ZodError) {
         toast.info(getFirstZodError(error));
-      } else if (isRedirectError(error)) {
-        toast.success("Updated");
       } else if (error instanceof Error) {
         toast.error(error.message);
       } else {

@@ -98,67 +98,51 @@ export default async function AdminDashboard() {
       <div className="flex flex-col gap-6 pb-12 px-16 border-b">
         <h2 className="text-2xl text-end">Recent Users</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {actualUsers.map(
-            (user: {
-              username: string;
-              image: string;
-              name: string;
-              role: "admin" | "user";
-              id: string;
-              email: string;
-              createdAt: string;
-              totalBlogs: number;
-              totalLikes: number;
-            }) => (
-              <div
-                key={user.username}
-                className="rounded-4xl p-7 flex flex-col gap-4 border"
-              >
-                <div className="flex justify-between">
-                  <Author
-                    image={user.image}
-                    name={user.name}
-                    username={user.username}
-                  />
-                  {!(user.role === "admin") && (
-                    <DeleteUserBtn userId={user.id} />
-                  )}
-                </div>
-                <div className="flex flex-col ml-1.5 gap-1">
-                  <span>
-                    <span className="tracking-tight">Display Name - </span>
-                    {user.name}
-                  </span>
-                  <span>
-                    <span className="tracking-tight">Email - </span>
-                    {user.email}
-                  </span>
-                  <span>
-                    <span className="tracking-tight">Blogs - </span>
-                    {user.totalBlogs}
-                  </span>
-                  <span>
-                    <span className="tracking-tight">Likes - </span>
-                    {user.totalLikes}
-                  </span>
-                  <span>
-                    <span className="tracking-tight">Created - </span>
-                    {new Intl.DateTimeFormat("en-GB", {
-                      month: "long",
-                      day: "2-digit",
-                      year: "numeric",
-                    }).format(new Date(user.createdAt))}
-                  </span>
-                  <span
-                    className={`${user.role === "admin" && "text-red-500"}`}
-                  >
-                    <span className="tracking-tight">Role - </span>
-                    {user.role.toUpperCase()}
-                  </span>
-                </div>
+          {actualUsers.map((user) => (
+            <div
+              key={user.username}
+              className="rounded-4xl p-7 flex flex-col gap-4 border"
+            >
+              <div className="flex justify-between">
+                <Author
+                  image={user.image}
+                  name={user.name}
+                  username={user.username}
+                />
+                {!(user.role === "admin") && <DeleteUserBtn userId={user.id} />}
               </div>
-            )
-          )}
+              <div className="flex flex-col ml-1.5 gap-1">
+                <span>
+                  <span className="tracking-tight">Display Name - </span>
+                  {user.name}
+                </span>
+                <span>
+                  <span className="tracking-tight">Email - </span>
+                  {user.email}
+                </span>
+                <span>
+                  <span className="tracking-tight">Blogs - </span>
+                  {user.totalBlogs}
+                </span>
+                <span>
+                  <span className="tracking-tight">Likes - </span>
+                  {user.totalLikes}
+                </span>
+                <span>
+                  <span className="tracking-tight">Created - </span>
+                  {new Intl.DateTimeFormat("en-GB", {
+                    month: "long",
+                    day: "2-digit",
+                    year: "numeric",
+                  }).format(new Date(user.createdAt))}
+                </span>
+                <span className={`${user.role === "admin" && "text-red-500"}`}>
+                  <span className="tracking-tight">Role - </span>
+                  {user.role.toUpperCase()}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

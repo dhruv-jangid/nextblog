@@ -1,6 +1,6 @@
 {
   "name": "metapress",
-  "version": "8.0.3",
+  "version": "8.1.0",
   "private": true,
   "author": "dhruvjangid",
   "description": "The Pulse of Creativity",
@@ -14,7 +14,7 @@
     "build": "turbo build -F web",
     "start": "turbo start -F web",
     "check-types": "turbo check-types",
-    "clean": "rm -rf apps/web/.next apps/web/node_modules bun.lock .turbo"
+    "clean": "rm -rf apps/web/.next apps/web/.turbo apps/web/node_modules bun.lock .turbo"
   },
   "dependencies": {},
   "devDependencies": {

@@ -1,9 +1,12 @@
 import "server-only";
+import z from "zod";
 import { db } from "@/db";
+import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
-import { eq, sql } from "drizzle-orm";
+import { headers } from "next/headers";
 import { EditBlogClient } from "./client";
 import { notFound } from "next/navigation";
+import { eq, and, sql } from "drizzle-orm";
 import { blogImages, blogs } from "@/db/schema";
 
 export const metadata: Metadata = {
@@ -17,6 +20,24 @@ export default async function EditBlog({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  try {
+    z.uuid().parse(id);
+  } catch {
+    notFound();
+  }
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  const {
+    user: { id: userId, username },
+  } = session!;
+
+  const [authorizedUser] = await db
+    .select()
+    .from(blogs)
+    .where(and(eq(blogs.id, id), eq(blogs.userId, userId)));
+  if (!authorizedUser) {
+    notFound();
+  }
 
   const [blog] = await db
     .select({
@@ -44,5 +65,5 @@ export default async function EditBlog({
     notFound();
   }
 
-  return <EditBlogClient oldBlog={blog} />;
+  return <EditBlogClient oldBlog={blog} username={username!} />;
 }

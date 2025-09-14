@@ -95,7 +95,7 @@ export const editBlog = async ({
   image: string;
   images: { url: string; publicId: string }[];
   imagesToDelete: string[];
-}): Promise<void> => {
+}): Promise<string> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     throw new Error("Unauthorized");
@@ -196,9 +196,9 @@ export const editBlog = async ({
 
   if (newSlug !== blogSlug) {
     await redis.del(`user:${username}`);
-    permanentRedirect(`/${username}/${newSlug}`, RedirectType.replace);
+    return newSlug;
   } else {
-    redirect(`/${username}/${blogSlug}`, RedirectType.replace);
+    return blogSlug;
   }
 };
 

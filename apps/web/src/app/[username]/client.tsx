@@ -52,7 +52,7 @@ export const ProfileClient = ({
                 {userRow.username}
               </h1>
               {isSelf && (
-                <Link href="/settings/profile" className="hidden md:block">
+                <Link href="/account/profile" className="hidden md:block">
                   <Button variant="secondary">Edit Profile</Button>
                 </Link>
               )}
@@ -88,7 +88,7 @@ export const ProfileClient = ({
             </div>
             <div className="flex gap-1.5">
               {isSelf && (
-                <Link href="/settings?tab=profile" className="md:hidden">
+                <Link href="/account/profile" className="md:hidden">
                   <Button>Edit Profile</Button>
                 </Link>
               )}

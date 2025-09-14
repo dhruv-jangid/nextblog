@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -10,8 +18,8 @@ import { Menu, X } from "lucide-react";
 import type { Session } from "@/lib/auth";
 import { ThemeToggle } from "./themeToggle";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { titleFont } from "@/lib/static/fonts";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const NAV_LINKS: { href: Route; label: string }[] = [
@@ -23,6 +31,7 @@ const NAV_LINKS: { href: Route; label: string }[] = [
 ];
 
 export const Navbar = ({ user }: { user: Session["user"] | null }) => {
+  const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -83,15 +92,35 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
               ))}
               <div className="mt-auto flex flex-col gap-4">
                 {user ? (
-                  <Link
-                    href={`/${user.username}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Avatar>
-                      <AvatarImage src={user.image ? user.image : undefined} />
-                      <AvatarFallback>{user.name}</AvatarFallback>
-                    </Avatar>
-                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Avatar>
+                        <AvatarImage
+                          src={user.image ? user.image : undefined}
+                        />
+                        <AvatarFallback>{user.name}</AvatarFallback>
+                      </Avatar>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => router.push(`/${user.username}`)}
+                      >
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => router.push("/account/profile")}
+                      >
+                        Settings
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => router.push("/account/liked")}
+                      >
+                        Liked Blogs
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 ) : (
                   <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
                     <Button>Get Started</Button>
@@ -125,14 +154,29 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
           </Link>
         ))}
         {user ? (
-          <Link href={`/${user.username!}`}>
-            <Avatar>
-              <AvatarImage
-                src={user.image ? user.image : "/images/account.png"}
-              />
-              <AvatarFallback>{user.name}</AvatarFallback>
-            </Avatar>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Avatar>
+                <AvatarImage src={user.image ? user.image : undefined} />
+                <AvatarFallback>{user.name}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => router.push(`/${user.username}`)}
+              >
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/account/profile")}>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/account/liked")}>
+                Liked Blogs
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : (
           <Link href="/signup">
             <Button variant="outline">Get Started</Button>
