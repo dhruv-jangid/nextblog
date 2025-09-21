@@ -1,33 +1,42 @@
 "use client";
 
+import {
+  Form,
+  FormItem,
+  FormField,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod";
 import { toast } from "sonner";
-import { ZodError } from "zod";
 import { useState } from "react";
+import { Send } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
-import { contactUser } from "@/actions/handleUser";
 import { Textarea } from "@/components/ui/textarea";
-import { contactValidator, getFirstZodError } from "@/lib/schemas/shared";
+import { contactUser } from "@/actions/handle-user";
+import { contactSchema } from "@/lib/schemas/other";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+type contact = z.infer<typeof contactSchema>;
 
 export const ContactClient = () => {
-  const [details, setDetails] = useState<{
-    subject: string;
-    message: string;
-  }>({ subject: "", message: "" });
+  const form = useForm<contact>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: { subject: "", message: "" },
+  });
   const [loading, setLoading] = useState(false);
 
-  const handleContactUser = async () => {
+  const onSubmit = async (values: contact) => {
     setLoading(true);
     try {
-      contactValidator.parse(details);
+      await contactUser(values);
 
-      await contactUser(details);
       toast.success("We've received your inquiry");
     } catch (error) {
-      if (error instanceof ZodError) {
-        toast.info(getFirstZodError(error));
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         toast.error(error.message);
       } else {
         toast.error("Something went wrong");
@@ -43,47 +52,54 @@ export const ContactClient = () => {
         <div className={`${titleFont.className} text-3xl mb-6 text-center`}>
           Talk to us
         </div>
-        <div className="flex flex-col gap-2">
-          <Input
-            type="text"
-            id="subject"
-            name="subject"
-            placeholder="Subject"
-            maxLength={50}
-            disabled={loading}
-            required
-            autoFocus
-            onChange={(e) =>
-              setDetails({
-                ...details,
-                subject: e.currentTarget.value,
-              })
-            }
-          />
-          <Textarea
-            className="min-h-52 resize-none"
-            id="message"
-            name="message"
-            placeholder="Message"
-            maxLength={255}
-            disabled={loading}
-            required
-            onChange={(e) =>
-              setDetails({
-                ...details,
-                message: e.currentTarget.value,
-              })
-            }
-          />
-          <Button
-            variant="outline"
-            disabled={loading}
-            className="self-end"
-            onClick={handleContactUser}
-          >
-            {loading ? "..." : "Send"}
-          </Button>
-        </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Subject"
+                      maxLength={255}
+                      disabled={loading}
+                      required
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea
+                      className="min-h-52 resize-none"
+                      id="message"
+                      placeholder="Message"
+                      maxLength={255}
+                      disabled={loading}
+                      required
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-center justify-end">
+              <Button type="submit" variant="outline" disabled={loading}>
+                {loading ? "..." : "Send"} <Send />
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

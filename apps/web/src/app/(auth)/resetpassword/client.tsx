@@ -1,20 +1,34 @@
 "use client";
 
+import {
+  Form,
+  FormItem,
+  FormField,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod/v3";
 import { toast } from "sonner";
-import { ZodError } from "zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeClosed } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPasswordSchema } from "@/lib/schemas/auth";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
-import { getFirstZodError, passwordValidator } from "@/lib/schemas/shared";
+
+type resetPassword = z.infer<typeof resetPasswordSchema>;
 
 export const ResetPasswordClient = () => {
+  const form = useForm<resetPassword>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { newPassword: "" },
+  });
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const token = searchParams.get("token");
@@ -22,12 +36,10 @@ export const ResetPasswordClient = () => {
     notFound();
   }
 
-  const resetPassword = async () => {
+  const resetPassword = async (values: resetPassword) => {
     setLoading(true);
     try {
-      passwordValidator.parse(newPassword);
-
-      const { error } = await authClient.resetPassword({ newPassword, token });
+      const { error } = await authClient.resetPassword({ ...values, token });
       if (error) {
         throw new Error(error.message);
       }
@@ -35,9 +47,7 @@ export const ResetPasswordClient = () => {
       toast.success("Password changed");
       router.replace("/signin");
     } catch (error) {
-      if (error instanceof ZodError) {
-        toast.info(getFirstZodError(error));
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         toast.error(error.message);
       } else {
         toast.error("Something went wrong");
@@ -48,45 +58,53 @@ export const ResetPasswordClient = () => {
   };
 
   return (
-    <div className="flex flex-col h-[92dvh] justify-center items-end gap-1 w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 mx-auto">
-      <Input
-        type={showPassword ? "text" : "password"}
-        id="password"
-        name="password"
-        placeholder="Password"
-        maxLength={255}
-        disabled={loading}
-        required
-        onChange={(e) => setNewPassword(e.currentTarget.value)}
-      />
-      <div className="relative">
-        {showPassword ? (
-          <Eye
-            size={18}
-            cursor="pointer"
-            className="absolute -top-8 translate-y-0.5 right-4 stroke-muted-foreground"
-            onClick={() => setShowPassword(!showPassword)}
-          />
-        ) : (
-          <EyeClosed
-            size={18}
-            cursor="pointer"
-            className="absolute -top-8 translate-y-0.5 right-4 stroke-muted-foreground"
-            onClick={() => setShowPassword(!showPassword)}
-          />
-        )}
-      </div>
-      <Button
-        variant="secondary"
-        className="mt-1"
-        disabled={loading || !newPassword.trim()}
-        onClick={resetPassword}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(resetPassword)}
+        className="flex flex-col gap-1.5"
       >
-        Change password
-      </Button>
-      <p className="self-center text-muted-foreground text-center mt-12 text-sm tracking-wide">
-        *Link is valid only for 1 hour*
-      </p>
-    </div>
+        <FormField
+          control={form.control}
+          name="newPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <div>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="New Password"
+                    maxLength={255}
+                    disabled={loading}
+                    required
+                    {...field}
+                  />
+                  <div className="relative">
+                    {showPassword ? (
+                      <Eye
+                        size={16}
+                        cursor="pointer"
+                        className="absolute -top-5 -translate-y-1.5 right-4 stroke-muted-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                      />
+                    ) : (
+                      <EyeClosed
+                        size={16}
+                        cursor="pointer"
+                        className="absolute -top-5 -translate-y-1.5 right-4 stroke-muted-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                      />
+                    )}
+                  </div>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="self-end" disabled={loading}>
+          {loading ? "..." : "Change"}
+        </Button>
+      </form>
+    </Form>
   );
 };

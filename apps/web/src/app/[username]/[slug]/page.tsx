@@ -6,9 +6,7 @@ import type { Metadata } from "next";
 import { BlogClient } from "./client";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import type { JSONContent } from "@tiptap/react";
 import { eq, and, desc, sql } from "drizzle-orm";
-import type { BlogType } from "@/lib/static/types";
 import { blogs, users, likes as dbLikes, comments, likes } from "@/db/schema";
 
 export const generateMetadata = async ({
@@ -29,11 +27,10 @@ export default async function Blog({
   params: Promise<{ username: string; slug: string }>;
 }) {
   const { username, slug } = await params;
-
   const blogCacheKey = `blog:${username}:${slug}`;
   const cached = await redis.get(blogCacheKey);
 
-  let blogRow: BlogType & { content: JSONContent };
+  let blogRow: Blog;
   if (cached) {
     blogRow = JSON.parse(cached);
   } else {
@@ -62,7 +59,7 @@ export default async function Blog({
       notFound();
     }
 
-    const grouped: Record<string, BlogType & { content: JSONContent }> = {};
+    const grouped: Record<string, Blog> = {};
     for (const row of blogRows) {
       const key = row.slug;
 
@@ -109,7 +106,7 @@ export default async function Blog({
       })
       .from(comments)
       .innerJoin(users, eq(users.id, comments.userId))
-      .where(eq(comments.blogId, blogRow.id))
+      .where(eq(comments.blogId, blogRow.id!))
       .orderBy(desc(comments.createdAt));
 
     await redis.set(commentsCacheKey, JSON.stringify(actualComments), {
@@ -127,27 +124,26 @@ export default async function Blog({
     const totalLikes = await db
       .select({ count: sql<number>`count(*)`.mapWith(Number) })
       .from(likes)
-      .where(eq(likes.blogId, blogRow.id))
+      .where(eq(likes.blogId, blogRow.id!))
       .then((res: Array<{ count: number }>) => res[0]?.count ?? 0);
 
     await redis.set(likesCacheKey, totalLikes);
   }
 
-  const { user } = blogRow;
   const session = await auth.api.getSession({ headers: await headers() });
-  const { id, username: sessionUsername, role } = session!.user;
-  const isUser = role === "admin" || id === user.id;
+  const { id, username: sUsername, role } = session!.user;
+  const isUser = role === "admin" || id === blogRow.user!.id;
 
   const isLiked = await db
     .select()
     .from(likes)
-    .where(and(eq(likes.userId, id), eq(likes.blogId, blogRow.id)))
+    .where(and(eq(likes.userId, id), eq(likes.blogId, blogRow.id!)))
     .then((res: { length: number }) => res.length > 0);
 
   return (
     <BlogClient
-      blog={{ ...blogRow, user, comments: actualComments }}
-      username={sessionUsername!}
+      blog={{ ...blogRow, user: blogRow.user, comments: actualComments }}
+      username={sUsername!}
       isUser={!!isUser}
       isLiked={!!isLiked}
       totalLikes={totalLikes}

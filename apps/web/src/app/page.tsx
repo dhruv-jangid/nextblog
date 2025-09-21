@@ -5,14 +5,13 @@ import { eq, desc } from "drizzle-orm";
 import { blogs, users } from "@/db/schema";
 import { titleFont } from "@/lib/static/fonts";
 import { Carousel } from "@/components/carousel";
-import { BlogGrid } from "@/components/bloggrid";
-import type { BlogType } from "@/lib/static/types";
+import { BlogGrid2 } from "@/components/bloggrid2";
 
 export default async function Home() {
   const cacheKey = "homepage:blogs";
   const cached = await redis.get(cacheKey);
 
-  let actualBlogs: BlogType[];
+  let actualBlogs: Blog[];
   if (cached) {
     actualBlogs = JSON.parse(cached);
   } else {
@@ -35,9 +34,9 @@ export default async function Home() {
       .from(blogs)
       .innerJoin(users, eq(users.id, blogs.userId))
       .orderBy(desc(blogs.createdAt))
-      .limit(17);
+      .limit(11);
 
-    const grouped: Record<string, BlogType> = {};
+    const grouped: Record<string, Blog> = {};
     for (const row of rows) {
       const key = row.slug;
 
@@ -62,14 +61,14 @@ export default async function Home() {
 
     await redis.set(cacheKey, JSON.stringify(actualBlogs), { EX: 60 });
   }
-  const [firstBlog, ...remainingBlogs] = actualBlogs;
+  const [Blog1, Blog2, Blog3, ...remainingBlogs] = actualBlogs;
 
   return (
     <>
       {actualBlogs.length > 0 ? (
         <>
-          <Carousel blog={firstBlog} />
-          <BlogGrid blogs={remainingBlogs} />
+          <Carousel blogs={[Blog1, Blog2, Blog3]} />
+          <BlogGrid2 blogs={remainingBlogs} />
         </>
       ) : (
         <div

@@ -5,29 +5,40 @@ import {
   uploadImage,
   replaceImageSrcs,
   extractImagesFromContent,
-} from "@/lib/imageUtils";
+} from "@/lib/image-utils";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerTitle,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import pLimit from "p-limit";
 import { toast } from "sonner";
 import { ZodError } from "zod";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Editor } from "@/components/editor";
 import { blogCategories } from "@/lib/utils";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/combobox";
-import type { JSONContent } from "@tiptap/react";
-import { createBlog } from "@/actions/handleBlog";
+import { Fullscreen, Upload } from "lucide-react";
+import { createBlog } from "@/actions/handle-blog";
 import { Textarea } from "@/components/ui/textarea";
-import { RichTextEditor } from "@/components/editor";
-import { getFirstZodError } from "@/lib/schemas/shared";
-import { deleteImages } from "@/actions/handleCloudinary";
-import { blogValidatorClient } from "@/lib/schemas/client";
+import { getFirstZodError } from "@/lib/schemas/other";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { deleteImages } from "@/actions/handle-cloudinary";
+import { createBlogClientSchema } from "@/lib/schemas/blog";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export const CreateBlogClient = () => {
   const [blog, setBlog] = useState<{
     title: string;
-    content: JSONContent;
+    content: BlogContent;
     category: string;
   }>({
     title: "",
@@ -40,14 +51,13 @@ export const CreateBlogClient = () => {
   const handleCreateBlog = async () => {
     setLoading(true);
 
-    let toastId1: string | number = "";
-    let toastId2: string | number = "";
+    let toastIds: (string | number)[] = [];
     try {
       const { images, base64Urls } = extractImagesFromContent({
         content: blog.content,
       });
 
-      blogValidatorClient.parse({
+      createBlogClientSchema.parse({
         title: blog.title,
         content: blog.content,
         category: blog.category,
@@ -61,12 +71,12 @@ export const CreateBlogClient = () => {
         throw new Error("Title already exists");
       }
 
-      toastId1 = toast.loading("Checking...");
+      toastIds.push(toast.loading("Checking..."));
       for (const image of images) {
         await checkNudity({ image });
       }
 
-      toastId2 = toast.loading("Uploading...");
+      toastIds.push(toast.loading("Uploading..."));
       const errorImages: string[] = [];
       const limit = pLimit(3);
       const imagesToUpload = images.map((image, index) =>
@@ -136,9 +146,10 @@ export const CreateBlogClient = () => {
         toast.error("Something went wrong");
       }
     } finally {
-      toast.dismiss(toastId1);
-      toast.dismiss(toastId2);
       setLoading(false);
+      for (const t of toastIds) {
+        toast.dismiss(t);
+      }
     }
   };
 
@@ -153,6 +164,7 @@ export const CreateBlogClient = () => {
           titleFont.className,
           "resize-none min-h-32 max-w-4/5 text-6xl md:text-6xl p-5"
         )}
+        disabled={loading}
         autoFocus
         required
       />
@@ -170,28 +182,67 @@ export const CreateBlogClient = () => {
           placeholder="Category"
           value={blog.category}
           setValue={(category) => setBlog({ ...blog, category })}
+          loading={loading}
         />
       </div>
 
-      <RichTextEditor
+      <Editor
         content={blog.content}
         readOnly={false}
         onChange={(content) => setBlog({ ...blog, content })}
         onCharactersChange={(characters) => setCharacters(characters)}
+        loading={loading}
       />
 
       <span className="place-self-end mr-0.5 -mt-8 -mb-6 text-muted-foreground">
         {characters} / 1,000 (50,000)
       </span>
 
-      <Button
-        size="lg"
-        className="self-end"
-        disabled={loading || characters < 1000}
-        onClick={handleCreateBlog}
-      >
-        {loading ? "Publishing..." : "Publish"}
-      </Button>
+      <Drawer dismissible={!loading}>
+        <DrawerTrigger asChild>
+          <Button
+            size="lg"
+            className="self-end"
+            disabled={
+              loading || characters < 1000 || !blog.category || !blog.title
+            }
+          >
+            Preview <Fullscreen />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{blog.title}</DrawerTitle>
+            <DrawerDescription>{blog.category}</DrawerDescription>
+          </DrawerHeader>
+          <ScrollArea className="flex flex-col h-[50dvh] lg:gap-12 w-11/12 lg:w-5/12 mx-auto cursor-text">
+            <Editor content={blog.content} readOnly />
+          </ScrollArea>
+          <DrawerFooter>
+            <Button
+              size="lg"
+              disabled={
+                loading || characters < 1000 || !blog.category || !blog.title
+              }
+              onClick={handleCreateBlog}
+            >
+              {loading ? (
+                "Publishing..."
+              ) : (
+                <>
+                  Publish
+                  <Upload />
+                </>
+              )}
+            </Button>
+            <DrawerClose asChild>
+              <Button variant="outline" disabled={loading}>
+                Edit Again
+              </Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };

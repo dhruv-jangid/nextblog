@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { Heart } from "lucide-react";
 import { useRef, useState } from "react";
-import { likeBlog } from "@/actions/handleBlog";
+import { likeBlog } from "@/actions/handle-blog";
 
 export const Like = ({
   blogId,

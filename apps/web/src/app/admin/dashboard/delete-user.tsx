@@ -11,10 +11,10 @@ export const DeleteUserBtn = ({ userId }: { userId: string }) => {
   const { show } = useAlertDialog();
   const [loading, setLoading] = useState(false);
 
-  const deleteUser = async () => {
+  const deleteUserAdmin = async () => {
     setLoading(true);
+    const toastId = toast.loading("Deleting...");
     try {
-      toast("Deleting...");
       const { error } = await authClient.admin.removeUser({ userId });
       if (error) {
         throw new Error(error.message);
@@ -29,6 +29,7 @@ export const DeleteUserBtn = ({ userId }: { userId: string }) => {
       }
     } finally {
       setLoading(false);
+      toast.dismiss(toastId);
     }
   };
 
@@ -42,7 +43,7 @@ export const DeleteUserBtn = ({ userId }: { userId: string }) => {
           title: "Delete user?",
           description: `ID: ${userId}`,
           actionLabel: "Delete",
-          onConfirm: deleteUser,
+          onConfirm: deleteUserAdmin,
         })
       }
     >

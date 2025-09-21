@@ -15,7 +15,6 @@ import type { Route } from "next";
 import Logo from "@/app/favicon.ico";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
-import type { Session } from "@/lib/auth";
 import { ThemeToggle } from "./themeToggle";
 import { useEffect, useState } from "react";
 import { titleFont } from "@/lib/static/fonts";
@@ -96,7 +95,7 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
                     <DropdownMenuTrigger>
                       <Avatar>
                         <AvatarImage
-                          src={user.image ? user.image : undefined}
+                          src={user.image ? user.image : "/images/account.png"}
                         />
                         <AvatarFallback>{user.name}</AvatarFallback>
                       </Avatar>
@@ -157,7 +156,9 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
-                <AvatarImage src={user.image ? user.image : undefined} />
+                <AvatarImage
+                  src={user.image ? user.image : "/images/account.png"}
+                />
                 <AvatarFallback>{user.name}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
@@ -182,7 +183,7 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
             <Button variant="outline">Get Started</Button>
           </Link>
         )}
-        <div className="-mr-3.5 -ml-3">
+        <div className="lg:-mr-3.5 lg:-ml-3">
           <ThemeToggle />
         </div>
       </div>

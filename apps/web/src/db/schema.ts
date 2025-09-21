@@ -13,7 +13,6 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import type { JSONContent } from "@tiptap/react";
 
 export const users = pgTable(
   "users",
@@ -55,7 +54,7 @@ export const blogs = pgTable(
       .notNull(),
     title: varchar("title", { length: 100 }).notNull(),
     slug: varchar("slug", { length: 100 }).notNull(),
-    content: jsonb("content").$type<JSONContent>().notNull(),
+    content: jsonb("content").$type<BlogContent>().notNull(),
     image: text("image").notNull(),
     category: varchar("category", { length: 50 }).notNull(),
     userId: uuid("user_id").notNull(),
@@ -87,7 +86,7 @@ export const blogImages = pgTable(
     blogId: uuid("blog_id").notNull(),
     url: text("url").unique().notNull(),
     publicId: varchar("public_id").unique().notNull(),
-    order: integer("order").default(0),
+    order: integer("order").notNull().default(0),
     createdAt: timestamp("created_at", { precision: 3, mode: "string" })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),

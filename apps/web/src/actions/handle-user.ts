@@ -8,10 +8,10 @@ import { auth } from "@/lib/auth";
 import { users } from "@/db/schema";
 import { headers } from "next/headers";
 import { customAlphabet } from "nanoid";
-import { sendEmail } from "@/lib/email/sendEmail";
-import { contactMessage } from "@/lib/email/emailTexts";
+import { sendEmail } from "@/lib/email/send-email";
+import { contactMessage } from "@/lib/email/texts";
 import { slugifyUsername, restrictedUsernames } from "@/lib/utils";
-import { getFirstZodError, contactValidator } from "@/lib/schemas/shared";
+import { getFirstZodError, contactSchema } from "@/lib/schemas/other";
 
 export const contactUser = async (data: {
   subject: string;
@@ -24,7 +24,7 @@ export const contactUser = async (data: {
 
   const { name, email } = session.user;
   try {
-    const { subject, message } = contactValidator.parse(data);
+    const { subject, message } = contactSchema.parse(data);
 
     await sendEmail({
       subject,

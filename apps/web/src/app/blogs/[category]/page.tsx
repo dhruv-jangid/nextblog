@@ -6,8 +6,7 @@ import { eq, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { blogs, users } from "@/db/schema";
 import { titleFont } from "@/lib/static/fonts";
-import { BlogGrid } from "@/components/bloggrid";
-import type { BlogType } from "@/lib/static/types";
+import { BlogGrid2 } from "@/components/bloggrid2";
 
 export const generateMetadata = async ({
   params,
@@ -28,11 +27,10 @@ export default async function CategoryBlogs({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
-
   const cacheKey = `category:${category}`;
   const cached = await redis.get(cacheKey);
 
-  let actualBlogs;
+  let actualBlogs: Blog[];
   if (cached) {
     actualBlogs = JSON.parse(cached);
   } else {
@@ -60,7 +58,7 @@ export default async function CategoryBlogs({
       notFound();
     }
 
-    const grouped: Record<string, BlogType> = {};
+    const grouped: Record<string, Blog> = {};
     for (const row of rows) {
       const key = row.slug;
 
@@ -87,11 +85,13 @@ export default async function CategoryBlogs({
   }
 
   return (
-    <div className="min-h-[85dvh]">
-      <div className={`${titleFont.className} text-center text-4xl my-16`}>
+    <div className="min-h-[85dvh] mx-16">
+      <div
+        className={`${titleFont.className} text-center text-4xl py-16 border-b`}
+      >
         {category} Blogs
       </div>
-      <BlogGrid blogs={actualBlogs} />
+      <BlogGrid2 blogs={actualBlogs} />
     </div>
   );
 }

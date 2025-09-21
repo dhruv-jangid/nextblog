@@ -5,9 +5,7 @@ import type { Metadata } from "next";
 import { eq, desc } from "drizzle-orm";
 import { blogs, users } from "@/db/schema";
 import { titleFont } from "@/lib/static/fonts";
-import { BlogGrid } from "@/components/bloggrid";
-import type { JSONContent } from "@tiptap/react";
-import type { BlogType } from "@/lib/static/types";
+import { BlogGrid2 } from "@/components/bloggrid2";
 
 export const metadata: Metadata = {
   title: "MetaPress | Blogs",
@@ -18,7 +16,7 @@ export default async function Blogs() {
   const cacheKey = "blogs";
   const cached = await redis.get(cacheKey);
 
-  let actualBlogs;
+  let actualBlogs: Blog[];
   if (cached) {
     actualBlogs = JSON.parse(cached);
   } else {
@@ -42,7 +40,7 @@ export default async function Blogs() {
       .innerJoin(users, eq(users.id, blogs.userId))
       .orderBy(desc(blogs.createdAt));
 
-    const grouped: Record<string, BlogType & { content: JSONContent }> = {};
+    const grouped: Record<string, Blog> = {};
     for (const row of rows) {
       const key = row.slug;
 
@@ -72,11 +70,11 @@ export default async function Blogs() {
   return (
     <>
       {actualBlogs.length > 0 ? (
-        <div className="min-h-[92dvh]">
+        <div className="min-h-[92dvh] lg:mx-16">
           <div className={`${titleFont.className} text-center text-4xl my-16`}>
             All Blogs
           </div>
-          <BlogGrid blogs={actualBlogs} />
+          <BlogGrid2 blogs={actualBlogs} />
         </div>
       ) : (
         <div

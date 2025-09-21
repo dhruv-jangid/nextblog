@@ -3,14 +3,13 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { DeleteUserBtn } from "./client";
 import { notFound } from "next/navigation";
 import { desc, eq, sql } from "drizzle-orm";
 import { Author } from "@/components/author";
+import { DeleteUserBtn } from "./delete-user";
 import { titleFont } from "@/lib/static/fonts";
-import { BlogGrid } from "@/components/bloggrid";
 import { blogs, users, likes } from "@/db/schema";
-import type { BlogType } from "@/lib/static/types";
+import { BlogGrid2 } from "@/components/bloggrid2";
 
 export const metadata: Metadata = {
   title: "Admin | Dashboard",
@@ -46,7 +45,7 @@ export default async function AdminDashboard() {
     .leftJoin(likes, eq(likes.blogId, blogs.id))
     .orderBy(desc(blogs.createdAt));
 
-  const grouped: Record<string, BlogType> = {};
+  const grouped: Record<string, Blog> = {};
   for (const row of rows) {
     const key = row.slug;
 
@@ -101,7 +100,7 @@ export default async function AdminDashboard() {
           {actualUsers.map((user) => (
             <div
               key={user.username}
-              className="rounded-4xl p-7 flex flex-col gap-4 border"
+              className="rounded-4xl p-7 flex flex-col gap-4 border overflow-hidden"
             >
               <div className="flex justify-between">
                 <Author
@@ -113,7 +112,7 @@ export default async function AdminDashboard() {
               </div>
               <div className="flex flex-col ml-1.5 gap-1">
                 <span>
-                  <span className="tracking-tight">Display Name - </span>
+                  <span className="tracking-tight">Name - </span>
                   {user.name}
                 </span>
                 <span>
@@ -146,8 +145,8 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      <h2 className="text-2xl text-end mr-16">Recent Blogs</h2>
-      <BlogGrid blogs={actualBlogs} />
+      <h2 className="text-2xl text-end mr-22">Recent Blogs</h2>
+      <BlogGrid2 blogs={actualBlogs} />
     </div>
   );
 }

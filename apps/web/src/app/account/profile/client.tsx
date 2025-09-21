@@ -1,13 +1,9 @@
 "use client";
 
 import {
-  nameValidator,
-  getFirstZodError,
-  usernameValidator,
-} from "@/lib/schemas/shared";
-import {
   Dialog,
   DialogTitle,
+  DialogDescription,
   DialogHeader,
   DialogFooter,
   DialogContent,
@@ -16,13 +12,14 @@ import {
 import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
-import type { Session } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { updateUserCache } from "@/actions/handleCache";
+import { getFirstZodError } from "@/lib/schemas/other";
+import { updateUserCache } from "@/actions/handle-cache";
+import { nameSchema, usernameSchema } from "@/lib/schemas/auth";
 import { useAlertDialog } from "@/components/providers/alertProvider";
 
 export const Profile = ({ user }: { user: Session["user"] }) => {
@@ -38,7 +35,7 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
     setLoading(true);
     try {
       if (change === "username") {
-        usernameValidator.parse(data.username);
+        usernameSchema.parse(data.username);
 
         const { available } = await authClient.isUsernameAvailable(
           { username: data.username },
@@ -60,7 +57,7 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
         router.refresh();
         toast.success("Username changed");
       } else {
-        nameValidator.parse(data.username);
+        nameSchema.parse(data.username);
 
         const { error } = await authClient.updateUser({ name: data.name });
         if (error) {
@@ -102,6 +99,7 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
       >
         Edit Profile
       </h1>
+
       <div className="flex flex-col gap-12 justify-center mx-12 lg:mx-64 text-lg pt-12 min-h-[70dvh]">
         <div className="flex flex-col gap-1.5">
           <span>Username: {user.username}</span>
@@ -112,6 +110,9 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Username</DialogTitle>
+                <DialogDescription>
+                  Note: This will change the URL for your profile
+                </DialogDescription>
               </DialogHeader>
               <Input
                 type="text"
@@ -147,6 +148,7 @@ export const Profile = ({ user }: { user: Session["user"] }) => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Name</DialogTitle>
+                <DialogDescription>Display Name</DialogDescription>
               </DialogHeader>
               <Input
                 type="text"

@@ -4,27 +4,23 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
-import { LikedBlogs } from "./client";
 import { headers } from "next/headers";
-import type { JSONContent } from "@tiptap/react";
+import { titleFont } from "@/lib/static/fonts";
+import { BlogGrid } from "@/components/bloggrid";
 import { blogs, likes, users } from "@/db/schema";
-import type { BlogType } from "@/lib/static/types";
 
 export const metadata: Metadata = {
   title: "MetaPress | Liked Blogs",
   description: "All liked blogs",
 };
 
-export default async function ProfilePage() {
+export default async function LikedBlogs() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const {
-    user: { id },
-  } = session!;
-
+  const { id } = session!.user;
   const cacheKey = `liked:${id}`;
   const cached = await redis.get(cacheKey);
 
-  let actualBlogs;
+  let actualBlogs: Blog[];
   if (cached) {
     actualBlogs = JSON.parse(cached);
   } else {
@@ -49,7 +45,7 @@ export default async function ProfilePage() {
       .innerJoin(users, eq(users.id, blogs.userId))
       .where(eq(likes.userId, id));
 
-    const grouped: Record<string, BlogType & { content: JSONContent }> = {};
+    const grouped: Record<string, Blog> = {};
     for (const row of rows) {
       const key = row.slug;
 
@@ -76,5 +72,18 @@ export default async function ProfilePage() {
     await redis.set(cacheKey, JSON.stringify(actualBlogs), { EX: 60 });
   }
 
-  return <LikedBlogs rows={actualBlogs} />;
+  return actualBlogs.length > 0 ? (
+    <div className="min-h-[92dvh]">
+      <div className={`${titleFont.className} text-center text-4xl my-16`}>
+        Liked Blogs
+      </div>
+      <BlogGrid blogs={actualBlogs} />
+    </div>
+  ) : (
+    <div
+      className={`${titleFont.className} flex justify-center items-center min-h-[92vh] text-4xl rounded-lg w-3/4 mx-auto`}
+    >
+      You dont have any liked blogs currently!
+    </div>
+  );
 }

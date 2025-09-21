@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { updateUserCache } from "@/actions/handleCache";
+import { updateUserCache } from "@/actions/handle-cache";
 
 export const Account = () => {
   const [string, setString] = useState("");
@@ -23,11 +23,13 @@ export const Account = () => {
 
   const handleDeleteUser = async () => {
     setLoading(true);
+    let toastId: string | number = "";
     try {
       if (string !== "DELETE") {
         throw new Error("Type DELETE");
       }
 
+      toastId = toast.loading("Deleting...");
       const { error } = await authClient.deleteUser({ callbackURL: "/signin" });
       if (error) {
         throw new Error(error.message);
@@ -44,6 +46,7 @@ export const Account = () => {
       }
     } finally {
       setLoading(false);
+      toast.dismiss(toastId);
     }
   };
 
@@ -54,6 +57,7 @@ export const Account = () => {
       >
         Account Settings
       </h1>
+
       <div className="flex flex-col gap-12 justify-center mx-12 lg:mx-64 text-lg pt-12 min-h-[70dvh]">
         <div className="flex flex-col gap-4">
           <span className="font-bold text-red-600 text-3xl">Danger Zone</span>

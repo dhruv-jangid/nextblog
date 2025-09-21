@@ -4,15 +4,15 @@ import {
   verificationEmailText,
   changeEmailVerificationText,
   deleteAccountVerificationText,
-} from "@/lib/email/emailTexts";
+} from "@/lib/email/texts";
 import { db } from "@/db/index";
 import { redis } from "@/lib/redis";
 import * as schema from "@/db/schema";
 import { APIError } from "better-auth/api";
-import { sendEmail } from "@/lib/email/sendEmail";
 import { nextCookies } from "better-auth/next-js";
+import { sendEmail } from "@/lib/email/send-email";
 import { admin, username } from "better-auth/plugins";
-import { generateUsername } from "@/actions/handleUser";
+import { generateUsername } from "@/actions/handle-user";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 
@@ -110,7 +110,6 @@ export const auth = betterAuth({
       },
     },
   },
-  session: { cookieCache: { enabled: true } },
   secondaryStorage: {
     get: async (key) => {
       const value = await redis.get(key);
@@ -137,8 +136,7 @@ export const auth = betterAuth({
       "/update-user": { window: 60 * 60, max: 3 },
     },
   },
+  session: { cookieCache: { enabled: true } },
   onAPIError: { errorURL: "/error" },
   telemetry: { enabled: false },
 } satisfies BetterAuthOptions);
-
-export type Session = typeof auth.$Infer.Session;

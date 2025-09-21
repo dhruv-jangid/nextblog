@@ -1,7 +1,8 @@
 import "server-only";
 import { ZodError } from "zod";
 import { createTransport } from "nodemailer";
-import { emailValidator, getFirstZodError } from "@/lib/schemas/shared";
+import { emailSchema } from "../schemas/auth";
+import { getFirstZodError } from "../schemas/other";
 
 const user = process.env.EMAIL_USER;
 const pass = process.env.EMAIL_PASS;
@@ -24,7 +25,7 @@ export const sendEmail = async ({
   text: string;
 }): Promise<void> => {
   try {
-    emailValidator.parse(to);
+    emailSchema.parse(to);
 
     const fullText = `${text.trim()}\n\nBest Regards,\nThe MetaPress`;
     await transporter.sendMail({

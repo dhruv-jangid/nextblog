@@ -1,52 +1,35 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Author } from "./author";
-import { Button } from "./ui/button";
-import type { BlogType } from "@/lib/static/types";
+import { titleFont } from "@/lib/static/fonts";
 
-export const BlogGrid = ({ blogs }: { blogs: BlogType[] }) => {
+export const BlogGrid = ({ blogs }: { blogs: Blog[] }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 outline">
-      {blogs.map(({ id, title, image, category, slug, user }) => {
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-[repeat(4,auto)] justify-center rounded-md overflow-hidden">
+      {blogs.map(({ id, title, image, slug, user }) => {
         return (
           <div
             key={id}
-            className="relative flex flex-col min-h-96 h-[50dvh] max-h-[500px] justify-end outline"
+            className="relative flex flex-col h-96 w-96 justify-end outline group overflow-hidden"
           >
-            <Link href={`/${user.username}/${slug}`}>
+            <Link
+              href={`/${user!.username}/${slug}`}
+              className="relative block h-full"
+            >
               <Image
-                src={image}
-                alt={title}
+                src={image!}
+                alt={title!}
                 fill
                 priority={false}
                 placeholder="empty"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="cursor-pointer object-cover -z-50"
+                className="cursor-pointer object-cover"
               />
+              <div
+                className={`${titleFont.className} absolute inset-0 flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 w-full text-center line-clamp-3 transition-all duration-200 translate-y-8 group-hover:translate-y-0 backdrop-blur-xl group-hover:bg-black/20 text-lg text-balance`}
+              >
+                {title}
+              </div>
             </Link>
-            <div className="flex flex-col gap-6 p-6 bg-primary-foreground border-t">
-              <div className="flex justify-between gap-6 w-3/4 overflow-visible">
-                <Link
-                  href={`/${user.username}/${slug}`}
-                  className="text-2xl text-balance cursor-pointer tracking-tight hover:animate-pulse underline-hover"
-                >
-                  <span className="line-clamp-2">{title}</span>
-                </Link>
-              </div>
-              <div className="flex justify-between items-center">
-                <Author
-                  image={user.image}
-                  name={user.name}
-                  username={user.username}
-                />
-                <Link
-                  href={`/blogs/${category}`}
-                  className="text-sm xl:text-base w-max"
-                >
-                  <Button variant="outline">{category}</Button>
-                </Link>
-              </div>
-            </div>
           </div>
         );
       })}

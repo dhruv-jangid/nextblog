@@ -1,10 +1,9 @@
+import { ZodError } from "zod";
 import * as nsfwjs from "nsfwjs";
-import { ZodError } from "zod/v4";
 import * as tf from "@tensorflow/tfjs";
-import type { JSONContent } from "@tiptap/react";
-import { getFirstZodError } from "@/lib/schemas/shared";
-import { imageValidatorClient } from "@/lib/schemas/client";
-import { getCloudinarySignature } from "@/actions/handleCloudinary";
+import { getFirstZodError } from "./schemas/other";
+import { imageClientSchema } from "./schemas/blog";
+import { getCloudinarySignature } from "@/actions/handle-cloudinary";
 
 let nsfwModel: nsfwjs.NSFWJS | null = null;
 if (process.env.NODE_ENV === "production") {
@@ -19,7 +18,7 @@ export const uploadImage = async ({
   isUser: boolean;
 }): Promise<{ url: string; publicId: string }> => {
   try {
-    imageValidatorClient.parse(image);
+    imageClientSchema.parse(image);
 
     const {
       cloudName,
@@ -125,12 +124,12 @@ export const replaceImageSrcs = ({
   content,
   replacements,
 }: {
-  content: JSONContent;
+  content: BlogContent;
   replacements: Record<string, string>;
-}): JSONContent => {
+}): BlogContent => {
   const safeContent = JSON.parse(JSON.stringify(content));
 
-  const processNode = (node: JSONContent): JSONContent => {
+  const processNode = (node: BlogContent): BlogContent => {
     if (!node || typeof node !== "object") {
       return node;
     }
@@ -184,14 +183,14 @@ const base64ToFile = ({
 export const extractImagesFromContent = ({
   content,
 }: {
-  content: JSONContent;
+  content: BlogContent;
 }): { images: File[]; base64Urls: string[] } => {
   const images: File[] = [];
   const base64Urls: string[] = [];
   const processedUrls = new Set<string>();
   let imageCounter = 0;
 
-  const processNode = (node: JSONContent) => {
+  const processNode = (node: BlogContent) => {
     if (!node || typeof node !== "object") return;
 
     if (
@@ -234,12 +233,12 @@ const isCloudinaryUrl = ({ url }: { url: string }): boolean => {
 export const extractImageUrlsFromContent = ({
   content,
 }: {
-  content: JSONContent;
+  content: BlogContent;
 }): string[] => {
   const cloudinaryUrls: string[] = [];
   const processedUrls = new Set<string>();
 
-  const processNode = (node: JSONContent) => {
+  const processNode = (node: BlogContent) => {
     if (!node || typeof node !== "object") return;
 
     if (

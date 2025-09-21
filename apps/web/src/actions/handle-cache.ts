@@ -12,7 +12,6 @@ export const updateUserCache = async (): Promise<void> => {
   }
 
   const { username } = session.user;
-
   await redis.del(`user:${username}`);
   await redis.del(`blog:${username}:*`);
 };

@@ -5,14 +5,12 @@ import { toast } from "sonner";
 import { Like } from "@/components/like";
 import { useRouter } from "next/navigation";
 import { Author } from "@/components/author";
+import { Editor } from "@/components/editor";
 import { Comment } from "@/components/comment";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
-import type { JSONContent } from "@tiptap/react";
-import { deleteBlog } from "@/actions/handleBlog";
-import { RichTextEditor } from "@/components/editor";
+import { deleteBlog } from "@/actions/handle-blog";
 import { Copy, PencilLine, Trash2 } from "lucide-react";
-import type { BlogType, CommentType } from "@/lib/static/types";
 import { useAlertDialog } from "@/components/providers/alertProvider";
 
 export const BlogClient = ({
@@ -22,7 +20,7 @@ export const BlogClient = ({
   username,
   totalLikes,
 }: {
-  blog: BlogType & { content: JSONContent; comments: CommentType[] };
+  blog: Blog & { comments: BlogComment[] };
   isUser: boolean;
   isLiked: boolean;
   username: string;
@@ -34,7 +32,7 @@ export const BlogClient = ({
   const handleDeleteBlog = async () => {
     const toastId = toast.loading("Deleting...");
     try {
-      await deleteBlog({ blogId: blog.id, blogSlug: blog.slug });
+      await deleteBlog({ blogId: blog.id!, blogSlug: blog.slug! });
 
       router.replace("/");
       toast.success("Blog deleted");
@@ -52,7 +50,7 @@ export const BlogClient = ({
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/${blog.user.username}/${blog.slug}`
+        `${window.location.origin}/${blog.user!.username}/${blog.slug}`
       );
 
       toast.success("Link copied to clipboard");
@@ -96,7 +94,6 @@ export const BlogClient = ({
           </Button>
         </div>
       )}
-
       <div className="flex justify-between">
         <h1
           className={`${titleFont.className} text-6xl text-balance lg:w-4/5 leading-16`}
@@ -133,14 +130,13 @@ export const BlogClient = ({
           </div>
         )}
       </div>
-
       <div className="flex items-center gap-4">
         <time>
           {new Intl.DateTimeFormat("en-GB", {
             month: "long",
             day: "2-digit",
             year: "numeric",
-          }).format(new Date(blog.createdAt))}
+          }).format(new Date(blog.createdAt!))}
         </time>
         <Link href={`/blogs/${blog.category}`}>
           <Button variant="outline" className="tracking-tight">
@@ -149,14 +145,14 @@ export const BlogClient = ({
         </Link>
       </div>
 
-      <RichTextEditor content={blog.content} readOnly />
+      <Editor content={blog.content} readOnly />
 
       <div className="flex justify-end items-center gap-3.5">
         <hr className="w-3.5 border-input" />
         <Author
-          image={blog.user.image}
-          name={blog.user.name}
-          username={blog.user.username}
+          image={blog.user!.image}
+          name={blog.user!.name!}
+          username={blog.user!.username!}
         />
       </div>
 
@@ -173,11 +169,11 @@ export const BlogClient = ({
       </div>
 
       <div className="flex items-start justify-between gap-8">
-        <Like blogId={blog.id} likes={totalLikes} isLiked={isLiked} />
+        <Like blogId={blog.id!} likes={totalLikes} isLiked={isLiked} />
         <div className="w-full">
           <Comment
             isUser={isUser}
-            blogId={blog.id}
+            blogId={blog.id!}
             comments={blog.comments}
             username={username}
           />

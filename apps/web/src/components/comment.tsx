@@ -9,10 +9,9 @@ import { Button } from "./ui/button";
 import { Trash2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { useRouter } from "next/navigation";
-import type { CommentType } from "@/lib/static/types";
 import { useAlertDialog } from "./providers/alertProvider";
-import { addComment, deleteComment } from "@/actions/handleBlog";
-import { commentValidator, getFirstZodError } from "@/lib/schemas/shared";
+import { addComment, deleteComment } from "@/actions/handle-blog";
+import { commentSchema, getFirstZodError } from "@/lib/schemas/other";
 
 export const Comment = ({
   blogId,
@@ -21,7 +20,7 @@ export const Comment = ({
   username,
 }: {
   blogId: string;
-  comments: CommentType[];
+  comments: BlogComment[];
   isUser: boolean;
   username: string;
 }) => {
@@ -29,6 +28,49 @@ export const Comment = ({
   const { show } = useAlertDialog();
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleAddComment = async () => {
+    setLoading(true);
+    try {
+      commentSchema.parse(comment);
+
+      setComment("");
+      await addComment({ comment, blogId });
+      router.refresh();
+      toast.success("Comment added");
+    } catch (error) {
+      if (error instanceof ZodError) {
+        toast.error(getFirstZodError(error));
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteComment = async ({
+    commentId,
+    blogId,
+  }: {
+    commentId: string;
+    blogId: string;
+  }) => {
+    try {
+      await deleteComment({ commentId, blogId });
+
+      router.refresh();
+      toast.success("Comment deleted");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 tracking-tight text-balance">
@@ -50,27 +92,7 @@ export const Comment = ({
           <Button
             size="sm"
             variant="secondary"
-            onClick={async () => {
-              setLoading(true);
-              try {
-                commentValidator.parse(comment);
-
-                setComment("");
-                await addComment({ comment, blogId });
-                router.refresh();
-                toast.success("Comment added");
-              } catch (error) {
-                if (error instanceof ZodError) {
-                  toast.error(getFirstZodError(error));
-                } else if (error instanceof Error) {
-                  toast.error(error.message);
-                } else {
-                  toast.error("Something went wrong");
-                }
-              } finally {
-                setLoading(false);
-              }
-            }}
+            onClick={handleAddComment}
             disabled={loading || !comment.trim()}
           >
             {loading ? "Adding..." : "Comment"}
@@ -85,12 +107,12 @@ export const Comment = ({
         >
           <div className="flex gap-3">
             <Link
-              href={`/${comment.user.username}`}
+              href={`/${comment.user!.username}`}
               className="relative w-8 h-8 rounded-full overflow-hidden"
             >
               <Image
-                src={comment.user.image || "/images/account.png"}
-                alt={comment.user.name}
+                src={comment.user!.image || "/images/account.png"}
+                alt={comment.user!.name!}
                 fill
                 priority
                 sizes="(min-width: 768px) 44px"
@@ -98,10 +120,10 @@ export const Comment = ({
             </Link>
             <div className="flex flex-col gap-0.5">
               <Link
-                href={`/${comment.user.username}`}
+                href={`/${comment.user!.username}`}
                 className="font-medium line-clamp-1 underline-hover hover:animate-pulse text-sm w-fit"
               >
-                {comment.user.name}
+                {comment!.user!.name}
               </Link>
               <span className="text-sm text-neutral-400">
                 {new Intl.DateTimeFormat("en-US", {
@@ -111,12 +133,12 @@ export const Comment = ({
                   hour: "numeric",
                   minute: "numeric",
                   hour12: true,
-                }).format(new Date(comment.createdAt))}
+                }).format(new Date(comment.createdAt!))}
               </span>
               <p className="mt-4">{comment.content}</p>
             </div>
           </div>
-          {(isUser || comment.user.username === username) && (
+          {(isUser || comment.user!.username === username) && (
             <Trash2
               size={16}
               className="cursor-pointer stroke-red-600 mt-0.5 mr-0.5"
@@ -125,19 +147,11 @@ export const Comment = ({
                   title: "Delete comment?",
                   description: comment.content,
                   actionLabel: "Delete",
-                  onConfirm: async () => {
-                    try {
-                      await deleteComment({ commentId: comment.id, blogId });
-                      router.refresh();
-                      toast.success("Comment deleted");
-                    } catch (error) {
-                      if (error instanceof Error) {
-                        toast.error(error.message);
-                      } else {
-                        toast.error("Something went wrong");
-                      }
-                    }
-                  },
+                  onConfirm: () =>
+                    handleDeleteComment({
+                      commentId: comment.id!,
+                      blogId,
+                    }),
                 })
               }
             />

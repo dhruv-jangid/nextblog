@@ -7,22 +7,15 @@ import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import { headers } from "next/headers";
 import { eq, and, inArray } from "drizzle-orm";
-import type { JSONContent } from "@tiptap/react";
-import { deleteImages } from "@/actions/handleCloudinary";
+import { redirect, RedirectType } from "next/navigation";
+import { deleteImages } from "@/actions/handle-cloudinary";
 import { blogs, likes, comments, blogImages } from "@/db/schema";
-import { blogValidator, editBlogValidator } from "@/lib/schemas/server";
-import { commentValidator, getFirstZodError } from "@/lib/schemas/shared";
-import { permanentRedirect, redirect, RedirectType } from "next/navigation";
+import { commentSchema, getFirstZodError } from "@/lib/schemas/other";
+import { createBlogSchema, editBlogSchema } from "@/lib/schemas/blog";
 
-export const createBlog = async ({
-  title,
-  content,
-  category,
-  image,
-  images,
-}: {
+export const createBlog = async (blog: {
   title: string;
-  content: JSONContent;
+  content: BlogContent;
   category: string;
   image: string;
   images: { url: string; publicId: string }[];
@@ -31,30 +24,39 @@ export const createBlog = async ({
   if (!session) {
     throw new Error("Unauthorized");
   }
-
   const { id: userId, username } = session.user;
-  let slug: string | undefined;
-  try {
-    const newBlog = blogValidator.parse({
-      title: title,
-      content: content,
-      category: category,
-      image: image,
-      images: images,
-    });
-    slug = newBlog.slug;
 
-    let blogId: string | undefined;
-    await db.transaction(async (tx: any) => {
+  let slug: string;
+  try {
+    const { title, content, category, image, images } = blog;
+    const newBlog = createBlogSchema.parse({
+      title,
+      content,
+      category,
+      image,
+      images,
+    });
+
+    slug = newBlog.slug;
+    if (!slug) {
+      throw new Error("Something went wrong");
+    }
+
+    let blogId: string = "";
+    await db.transaction(async (tx) => {
       const [{ id }] = await tx
         .insert(blogs)
         .values({ ...newBlog, userId })
         .returning();
+
       blogId = id;
+      if (!blogId) {
+        throw new Error("Something went wrong");
+      }
 
       await tx.insert(blogImages).values(
         images.map(({ url, publicId }, index) => ({
-          blogId: id,
+          blogId,
           url,
           publicId,
           order: index,
@@ -90,7 +92,7 @@ export const editBlog = async ({
   blogId: string;
   blogSlug: string;
   title: string;
-  content: JSONContent;
+  content: BlogContent;
   category: string;
   image: string;
   images: { url: string; publicId: string }[];
@@ -104,7 +106,7 @@ export const editBlog = async ({
   const { id, username, role } = session.user;
   let newSlug = blogSlug;
   try {
-    const { slug } = editBlogValidator.parse({
+    const { slug } = editBlogSchema.parse({
       title: title,
       content: content,
       category: category,
@@ -113,7 +115,7 @@ export const editBlog = async ({
     });
     newSlug = slug;
 
-    await db.transaction(async (tx: any) => {
+    await db.transaction(async (tx) => {
       await tx
         .update(blogs)
         .set({
@@ -149,17 +151,11 @@ export const editBlog = async ({
         .where(eq(blogImages.blogId, blogId));
 
       const existingPublicIds = new Set(
-        existingImages.map(
-          (img: { publicId: string; order: number }) => img.publicId
-        )
+        existingImages.map((img) => img.publicId)
       );
       const maxExistingOrder =
         existingImages.length > 0
-          ? Math.max(
-              ...existingImages.map(
-                (img: { publicId: string; order: number }) => img.order
-              )
-            )
+          ? Math.max(...existingImages.map((img) => img.order))
           : -1;
 
       const newImages = images.filter(
@@ -302,7 +298,7 @@ export const addComment = async ({
 
   const { id: userId } = session.user;
   try {
-    const content = commentValidator.parse(comment);
+    const content = commentSchema.parse(comment);
 
     await db.insert(comments).values({
       content,

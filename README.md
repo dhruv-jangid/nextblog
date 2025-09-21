@@ -1,15 +1,118 @@
 # MetaPress: The Pulse of Creativity
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, and more.
+A modern, full-featured blogging platform built with Next.js 15, featuring rich text editing, user authentication, content moderation, and admin management capabilities.
+
+**Version:** 1.0.0  
+**Status:** Stable
+
+## Overview
+
+MetaPress is a comprehensive blogging platform that empowers writers and creators to share their stories with the world. Built with modern web technologies, it provides a seamless experience for both content creators and readers, with advanced features like real-time collaboration, content moderation, and user management.
+
+### Key Highlights
+
+- **Modern Tech Stack**: Built with Next.js 15, React 19, and TypeScript
+- **Rich Content Creation**: Advanced editor with image support, formatting, and media embedding
+- **User-Friendly**: Intuitive interface with dark/light mode support
+- **Secure & Safe**: Built-in content moderation and user management
+- **Scalable**: Designed to handle growth with caching and optimization
+
+## Table of Contents
+
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [Available Scripts](#available-scripts)
+- [Database Setup](#database-setup)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ## Features
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
+### Content Management
+
+- **Rich Text Editor** - Powered by TipTap with support for headings, text formatting, images, emojis, and YouTube embeds
+- **Image Management** - Cloudinary integration with automatic image optimization and NSFW detection
+- **Category System** - Organized content across multiple predefined categories
+- **Content Moderation** - Automatic profanity filtering and inappropriate content detection
+- **Character Limits** - 50,000 character limit for blog posts with real-time counter
+
+### User Management
+
+- **Authentication** - Email/password and OAuth (Google, GitHub) authentication via Better Auth
+- **User Profiles** - Customizable usernames, display names, and profile images
+- **Email Verification** - Required email verification for new accounts
+- **Password Reset** - Secure password reset functionality
+- **Account Management** - Users can change email, delete accounts, and manage settings
+
+### Admin Features
+
+- **Admin Dashboard** - Comprehensive admin panel for user and content management
+- **User Management** - View all users, their activity, and manage user accounts
+- **Content Oversight** - Monitor all blog posts and user activity
+- **User Banning** - Ability to ban users with custom reasons and expiration dates
+- **Role-based Access** - Admin-only access to management features
+
+### User Experience
+
+- **Responsive Design** - Mobile-first design with Tailwind CSS
+- **Dark/Light Mode** - Theme switching with next-themes
+- **Interactive UI** - Like system, comments, and user interactions
+- **Search & Discovery** - Category-based content browsing and search
+- **Caching** - Redis-powered caching for improved performance
+- **Real-time Updates** - Live character counting and form validation
+
+### Security & Safety
+
+- **Content Safety** - NSFW detection using TensorFlow.js models
+- **Profanity Filtering** - Multi-language profanity detection
+- **Input Validation** - Comprehensive form validation with Zod schemas
+- **Secure Authentication** - JWT-based sessions with secure cookie handling
+- **Rate Limiting** - Protection against spam and abuse
+
+## Technology Stack
+
+### Frontend
+
+- **Next.js 15** - React framework with App Router and Server Components
+- **React 19** - Latest React with concurrent features
+- **TypeScript** - Type-safe JavaScript development
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **shadcn/ui** - Reusable UI components built on Radix UI
+- **TipTap** - Rich text editor with extensive extensions
+- **next-themes** - Theme management for dark/light mode
+
+### Backend & Database
+
+- **Better Auth** - Modern authentication library with OAuth support
+- **Drizzle ORM** - Type-safe database toolkit
+- **PostgreSQL** - Primary database (via Neon or local)
+- **Redis** - Caching and session storage
+- **Drizzle Kit** - Database migrations and schema management
+
+### Content & Media
+
+- **Cloudinary** - Image upload, optimization, and management
+- **TensorFlow.js** - Client-side NSFW detection
+- **NSFWJS** - Content moderation models
+- **Obscenity** - Profanity filtering library
+
+### Development & Build
+
+- **Bun** - Fast JavaScript runtime and package manager
+- **Turborepo** - Monorepo build system
 - **Husky** - Git hooks for code quality
-- **Turborepo** - Optimized monorepo build system
+- **ESLint** - Code linting and formatting
+- **Zod** - Runtime type validation
+
+### Email & Notifications
+
+- **Nodemailer** - Email sending functionality
+- **Sonner** - Toast notifications
 
 ## Getting Started
 
@@ -30,41 +133,164 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the w
 ## Project Structure
 
 ```
-nextblog/
+metapress/
 ├── apps/
-│   ├── web/         # Frontend application (Next.js)
+│   └── web/                    # Next.js application
+│       ├── src/
+│       │   ├── app/            # App Router pages and layouts
+│       │   │   ├── (auth)/     # Authentication pages (signin, signup, reset)
+│       │   │   ├── [username]/ # User profile and blog pages
+│       │   │   ├── admin/      # Admin dashboard and management
+│       │   │   ├── api/        # API routes
+│       │   │   ├── blogs/      # Blog listing and category pages
+│       │   │   ├── createblog/ # Blog creation interface
+│       │   │   └── editblog/   # Blog editing interface
+│       │   ├── components/     # Reusable UI components
+│       │   │   ├── ui/         # shadcn/ui components
+│       │   │   └── providers/  # React context providers
+│       │   ├── db/             # Database schema and migrations
+│       │   ├── lib/            # Utility functions and configurations
+│       │   │   ├── email/      # Email templates and sending
+│       │   │   ├── schemas/    # Zod validation schemas
+│       │   │   └── static/     # Static assets and fonts
+│       │   └── actions/        # Server actions for data mutations
+│       ├── public/             # Static assets
+│       │   ├── models/         # TensorFlow.js models for NSFW detection
+│       │   └── images/         # Static images and icons
+│       └── drizzle/            # Database migration files
+├── package.json                # Root package.json with workspace config
+└── turbo.json                  # Turborepo configuration
 ```
 
 ## Environment Variables
 
-At minimum, the app requires Cloudinary configuration; without it the app will throw at startup (see `apps/web/next.config.ts`). Create a `.env` file at the repo root with the following keys:
+Create a `.env` file at the repository root with the following variables:
+
+### Required Variables
 
 ```bash
-# Required
+# Cloudinary (Required for image uploads)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 
-# Optional/used by features:
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
-BETTER_AUTH_SECRET=
+# Database (Required for data persistence)
+DATABASE_URL=postgresql://username:password@localhost:5432/metapress
+# OR for Neon/other providers:
+POSTGRES_URL=postgresql://username:password@host:port/database
+
+# Authentication (Required for user management)
+BETTER_AUTH_SECRET=your-secret-key-here
 BETTER_AUTH_URL=http://localhost:3000
-POSTGRES_URL=
-DATABASE_URL=
-EMAIL_USER=
-EMAIL_PASS=
-KV_URL=
-KV_REST_API_URL=
-KV_REST_API_TOKEN=
-KV_REST_API_READ_ONLY_TOKEN=
-REDIS_URL=
 ```
+
+### Optional Variables
+
+```bash
+# OAuth Providers (Enable social login)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+
+# Email Service (Enable email notifications)
+EMAIL_USER=your_email@example.com
+EMAIL_PASS=your_email_password
+
+# Redis/Caching (Improve performance)
+REDIS_URL=redis://localhost:6379
+# OR for Upstash/other providers:
+KV_URL=your_redis_url
+KV_REST_API_URL=your_redis_rest_url
+KV_REST_API_TOKEN=your_redis_token
+KV_REST_API_READ_ONLY_TOKEN=your_readonly_token
+```
+
+### Environment Setup
+
+1. Copy `.env.example` to `.env` (if available)
+2. Fill in the required variables
+3. For development, you can use local PostgreSQL and Redis instances
+4. For production, consider using managed services like Neon (PostgreSQL) and Upstash (Redis)
 
 ## Available Scripts
 
-- `bun dev`: Start application in development mode
-- `bun build`: Build application
-- `bun check-types`: Check TypeScript types across all apps
+- `bun dev` - Start application in development mode with hot reload
+- `bun build` - Build application for production
+- `bun start` - Start production server
+- `bun check-types` - Check TypeScript types across all apps
+- `bun clean` - Clean build artifacts and dependencies
+
+## Database Setup
+
+### Local Development
+
+1. Install PostgreSQL locally
+2. Create a database named `metapress`
+3. Update your `.env` with the local database URL
+4. Run migrations:
+   ```bash
+   cd apps/web
+   bun drizzle-kit push
+   ```
+
+### Production (Neon/Other Providers)
+
+1. Create a PostgreSQL database on your preferred provider
+2. Get the connection string
+3. Update your `.env` with the production database URL
+4. Run migrations:
+   ```bash
+   cd apps/web
+   bun drizzle-kit push
+   ```
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Other Platforms
+
+- **Railway**: Supports PostgreSQL and Redis out of the box
+- **Render**: Full-stack deployment with database support
+- **DigitalOcean App Platform**: Managed hosting with database options
+
+### Environment Variables for Production
+
+Ensure all required environment variables are set in your deployment platform:
+
+- Database connection string
+- Cloudinary credentials
+- Authentication secrets
+- Redis connection (if using caching)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow TypeScript best practices
+- Use conventional commit messages
+- Ensure all tests pass before submitting PR
+- Update documentation for new features
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Better Auth](https://www.better-auth.com/) for authentication
+- [TipTap](https://tiptap.dev/) for the rich text editor
+- [shadcn/ui](https://ui.shadcn.com/) for UI components
+- [Cloudinary](https://cloudinary.com/) for image management
+- [Drizzle ORM](https://orm.drizzle.team/) for database management

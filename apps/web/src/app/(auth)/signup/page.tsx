@@ -4,7 +4,7 @@ import { SignupClient } from "./client";
 
 export const metadata: Metadata = {
   title: "MetaPress | Signup",
-  description: "Signup to MetaPress",
+  description: "Create an account on MetaPress",
 };
 
 export default function Signup() {

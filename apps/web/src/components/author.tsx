@@ -7,7 +7,7 @@ export const Author = ({
   username,
 }: {
   name: string;
-  image: string | null;
+  image: string | null | undefined;
   username: string;
 }) => {
   return (

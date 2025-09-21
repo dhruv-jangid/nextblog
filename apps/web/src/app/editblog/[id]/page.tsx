@@ -1,5 +1,5 @@
 import "server-only";
-import z from "zod";
+import { z } from "zod";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
@@ -27,16 +27,16 @@ export default async function EditBlog({
   }
 
   const session = await auth.api.getSession({ headers: await headers() });
-  const {
-    user: { id: userId, username },
-  } = session!;
+  const { id: userId, username, role } = session.user;
 
-  const [authorizedUser] = await db
-    .select()
-    .from(blogs)
-    .where(and(eq(blogs.id, id), eq(blogs.userId, userId)));
-  if (!authorizedUser) {
-    notFound();
+  if (role !== "admin") {
+    const [authorizedUser] = await db
+      .select()
+      .from(blogs)
+      .where(and(eq(blogs.id, id), eq(blogs.userId, userId)));
+    if (!authorizedUser) {
+      notFound();
+    }
   }
 
   const [blog] = await db

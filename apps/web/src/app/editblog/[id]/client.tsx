@@ -6,44 +6,54 @@ import {
   replaceImageSrcs,
   extractImagesFromContent,
   extractImageUrlsFromContent,
-} from "@/lib/imageUtils";
+} from "@/lib/image-utils";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerTitle,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerDescription,
+} from "@/components/ui/drawer";
+import Link from "next/link";
 import pLimit from "p-limit";
 import { toast } from "sonner";
 import { ZodError } from "zod";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Editor } from "@/components/editor";
 import { blogCategories } from "@/lib/utils";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
-import { editBlog } from "@/actions/handleBlog";
+import { editBlog } from "@/actions/handle-blog";
 import { Combobox } from "@/components/combobox";
-import type { JSONContent } from "@tiptap/react";
-import type { BlogType } from "@/lib/static/types";
+import { Fullscreen, Upload, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { RichTextEditor } from "@/components/editor";
-import { getFirstZodError } from "@/lib/schemas/shared";
-import { deleteImages } from "@/actions/handleCloudinary";
-import { editBlogValidatorClient } from "@/lib/schemas/client";
+import { getFirstZodError } from "@/lib/schemas/other";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { editBlogClientSchema } from "@/lib/schemas/blog";
+import { deleteImages } from "@/actions/handle-cloudinary";
 
 export const EditBlogClient = ({
   oldBlog,
   username,
 }: {
-  oldBlog: Omit<BlogType, "user" | "image"> & {
-    content: JSONContent;
+  oldBlog: Blog & {
     images: Array<{ url: string; publicId: string }>;
   };
   username: string;
 }) => {
   const [blog, setBlog] = useState<{
     title: string;
-    content: JSONContent;
+    content: BlogContent;
     category: string;
   }>({
-    title: oldBlog.title,
-    content: oldBlog.content,
-    category: oldBlog.category,
+    title: oldBlog.title!,
+    content: oldBlog.content!,
+    category: oldBlog.category!,
   });
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -52,8 +62,7 @@ export const EditBlogClient = ({
   const handleEditBlog = async () => {
     setLoading(true);
 
-    let toastId1: string | number = "";
-    let toastId2: string | number = "";
+    let toastIds: (string | number)[] = [];
     try {
       const { images: newImages, base64Urls: newBase64Urls } =
         extractImagesFromContent({
@@ -72,7 +81,7 @@ export const EditBlogClient = ({
         .filter((img) => !existingImageUrls.includes(img.url))
         .map((img) => img.publicId);
 
-      editBlogValidatorClient.parse({
+      editBlogClientSchema.parse({
         title: blog.title,
         content: blog.content,
         category: blog.category,
@@ -89,12 +98,12 @@ export const EditBlogClient = ({
         }
       }
 
-      toastId1 = toast.loading("Checking...");
+      toastIds.push(toast.loading("Checking..."));
       for (const image of newImages) {
         await checkNudity({ image });
       }
 
-      toastId2 = toast.loading("Updating...");
+      toastIds.push(toast.loading("Updating..."));
       let uploadedImages: {
         url: string;
         publicId: string;
@@ -172,8 +181,8 @@ export const EditBlogClient = ({
       });
 
       const slug = await editBlog({
-        blogId: oldBlog.id,
-        blogSlug: oldBlog.slug,
+        blogId: oldBlog.id!,
+        blogSlug: oldBlog.slug!,
         title: blog.title,
         content: finalContent,
         category: blog.category,
@@ -192,9 +201,10 @@ export const EditBlogClient = ({
         toast.error("Something went wrong");
       }
     } finally {
-      toast.dismiss(toastId1);
-      toast.dismiss(toastId2);
       setLoading(false);
+      for (const t of toastIds) {
+        toast.dismiss(t);
+      }
     }
   };
 
@@ -210,6 +220,7 @@ export const EditBlogClient = ({
           titleFont.className,
           "resize-none min-h-32 max-w-4/5 text-6xl md:text-6xl p-5"
         )}
+        disabled={loading}
         autoFocus
         required
       />
@@ -220,35 +231,79 @@ export const EditBlogClient = ({
             month: "long",
             day: "2-digit",
             year: "numeric",
-          }).format(new Date(oldBlog.createdAt))}
+          }).format(new Date(oldBlog.createdAt!))}
         </time>
         <Combobox
           array={blogCategories}
           placeholder="Category"
           value={blog.category}
           setValue={(category) => setBlog({ ...blog, category })}
+          loading={loading}
         />
       </div>
 
-      <RichTextEditor
+      <Editor
         content={blog.content}
         readOnly={false}
-        onChange={(content) => setBlog({ ...blog, content })}
-        onCharactersChange={(characters) => setCharacters(characters)}
+        onChange={(content: BlogContent) => setBlog({ ...blog, content })}
+        onCharactersChange={(characters: number) => setCharacters(characters)}
+        loading={loading}
       />
 
       <span className="place-self-end mr-0.5 -mt-8 -mb-6 text-muted-foreground">
         {characters} / 1,000 (50,000)
       </span>
 
-      <Button
-        size="lg"
-        className="self-end"
-        disabled={loading}
-        onClick={handleEditBlog}
-      >
-        {loading ? "Updating..." : "Update"}
-      </Button>
+      <div className="self-end">
+        <Link href="/" className="mr-1.5">
+          <Button variant="destructive" size="lg">
+            Cancel <X />
+          </Button>
+        </Link>
+        <Drawer dismissible={!loading}>
+          <DrawerTrigger asChild>
+            <Button
+              size="lg"
+              disabled={
+                loading || characters < 1000 || !blog.category || !blog.title
+              }
+            >
+              Preview <Fullscreen />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>{blog.title}</DrawerTitle>
+              <DrawerDescription>{blog.category}</DrawerDescription>
+            </DrawerHeader>
+            <ScrollArea className="flex flex-col h-[50dvh] lg:gap-12 w-11/12 lg:w-5/12 mx-auto cursor-text">
+              <Editor content={blog.content} readOnly />
+            </ScrollArea>
+            <DrawerFooter>
+              <Button
+                size="lg"
+                disabled={
+                  loading || characters < 1000 || !blog.category || !blog.title
+                }
+                onClick={handleEditBlog}
+              >
+                {loading ? (
+                  "Updating..."
+                ) : (
+                  <>
+                    Update <Upload />
+                  </>
+                )}
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="outline" disabled={loading}>
+                  Edit Again
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      </div>
     </div>
   );
 };
