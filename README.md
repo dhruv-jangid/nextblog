@@ -2,9 +2,6 @@
 
 A modern, full-featured blogging platform built with Next.js 15, featuring rich text editing, user authentication, content moderation, and admin management capabilities.
 
-**Version:** 1.0.0  
-**Status:** Stable
-
 ## Overview
 
 MetaPress is a comprehensive blogging platform that empowers writers and creators to share their stories with the world. Built with modern web technologies, it provides a seamless experience for both content creators and readers, with advanced features like real-time collaboration, content moderation, and user management.

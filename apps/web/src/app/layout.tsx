@@ -12,6 +12,9 @@ import { Providers } from "@/components/providers";
 export const metadata: Metadata = {
   title: "MetaPress",
   description: "MetaPress: The Pulse of Creativity",
+  applicationName: "MetaPress",
+  authors: { name: "Dhruv Jangid", url: "https://github.com/dhruv-jangid" },
+  creator: "Dhruv Jangid",
 };
 
 export default async function RootLayout({
