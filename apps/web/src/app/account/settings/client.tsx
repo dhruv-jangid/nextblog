@@ -17,7 +17,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { updateUserCache } from "@/actions/handle-cache";
 
-export const Account = () => {
+export const AccountClient = () => {
   const [string, setString] = useState("");
   const [loading, setLoading] = useState(false);
 

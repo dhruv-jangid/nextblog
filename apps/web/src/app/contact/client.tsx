@@ -7,7 +7,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Send } from "lucide-react";

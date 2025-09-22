@@ -6,13 +6,13 @@ import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 import { ProfileImage } from "./profileimg";
 import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { BlogGrid } from "@/components/bloggrid";
 import { users, blogs, likes } from "@/db/schema";
 import { SquareArrowOutUpRight } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
 
 export const generateMetadata = async ({
   params,
@@ -27,11 +27,16 @@ export const generateMetadata = async ({
   };
 };
 
-export default async function Profile({
+export default async function Username({
   params,
 }: {
   params: Promise<{ username: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect("/signin");
+  }
+
   const { username } = await params;
   const cacheKey = `user:${username}`;
   const cached = await redis.get(cacheKey);
@@ -100,15 +105,18 @@ export default async function Profile({
     });
   }
 
-  const session = await auth.api.getSession({ headers: await headers() });
-  const isSelf = session!.user.username === userRow.username;
-  const isSelfAdmin = session!.user.role === "admin" && isSelf;
+  const isSelf = session.user.username === userRow.username;
+  const isSelfAdmin = session.user.role === "admin" && isSelf;
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex justify-center gap-8 xl:gap-12 w-full py-11 lg:py-22">
         <div className="h-30 w-30 lg:h-36 lg:w-36">
-          <ProfileImage imageUrl={userRow.image} isUser={isSelf} />
+          <ProfileImage
+            imageUrl={userRow.image}
+            isUser={isSelf}
+            name={userRow.name!}
+          />
         </div>
         <div className="flex flex-col gap-3">
           <div className="flex gap-1.5 items-center">

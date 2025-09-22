@@ -1,12 +1,14 @@
 import "server-only";
 import { db } from "@/db";
+import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { eq, desc } from "drizzle-orm";
-import { notFound } from "next/navigation";
 import { blogs, users } from "@/db/schema";
 import { titleFont } from "@/lib/static/fonts";
 import { BlogGrid2 } from "@/components/bloggrid2";
+import { notFound, redirect } from "next/navigation";
 
 export const generateMetadata = async ({
   params,
@@ -21,11 +23,16 @@ export const generateMetadata = async ({
   };
 };
 
-export default async function CategoryBlogs({
+export default async function BlogCategory({
   params,
 }: {
   params: Promise<{ category: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect("/signin");
+  }
+
   const { category } = await params;
   const cacheKey = `category:${category}`;
   const cached = await redis.get(cacheKey);

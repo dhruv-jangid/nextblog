@@ -96,6 +96,7 @@ export const Navbar = ({ user }: { user: Session["user"] | null }) => {
                       <Avatar>
                         <AvatarImage
                           src={user.image ? user.image : "/images/account.png"}
+                          alt={user.name}
                         />
                         <AvatarFallback>{user.name}</AvatarFallback>
                       </Avatar>

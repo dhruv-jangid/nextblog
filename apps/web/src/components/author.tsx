@@ -13,7 +13,7 @@ export const Author = ({
   return (
     <div className="flex gap-2 items-center">
       <Avatar>
-        <AvatarImage src={image ? image : "/images/account.png"} />
+        <AvatarImage src={image ? image : "/images/account.png"} alt={name} />
         <AvatarFallback>{name}</AvatarFallback>
       </Avatar>
       <Link

@@ -22,7 +22,7 @@ import { updateUserCache } from "@/actions/handle-cache";
 import { nameSchema, usernameSchema } from "@/lib/schemas/auth";
 import { useAlertDialog } from "@/components/providers/alertProvider";
 
-export const Profile = ({ user }: { user: Session["user"] }) => {
+export const ProfileClient = ({ user }: { user: Session["user"] }) => {
   const [data, setData] = useState({
     username: user.username!,
     name: user.name,

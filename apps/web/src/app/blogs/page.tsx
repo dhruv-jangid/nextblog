@@ -1,8 +1,11 @@
 import "server-only";
 import { db } from "@/db";
+import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { eq, desc } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { blogs, users } from "@/db/schema";
 import { titleFont } from "@/lib/static/fonts";
 import { BlogGrid2 } from "@/components/bloggrid2";
@@ -13,6 +16,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Blogs() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect("/signin");
+  }
+
   const cacheKey = "blogs";
   const cached = await redis.get(cacheKey);
 

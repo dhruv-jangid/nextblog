@@ -5,9 +5,9 @@ import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { EditBlogClient } from "./client";
-import { notFound } from "next/navigation";
 import { eq, and, sql } from "drizzle-orm";
 import { blogImages, blogs } from "@/db/schema";
+import { notFound, redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "MetaPress | Edit Blog",
@@ -19,6 +19,11 @@ export default async function EditBlog({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect("/signin");
+  }
+
   const { id } = await params;
   try {
     z.uuid().parse(id);
@@ -26,9 +31,7 @@ export default async function EditBlog({
     notFound();
   }
 
-  const session = await auth.api.getSession({ headers: await headers() });
   const { id: userId, username, role } = session.user;
-
   if (role !== "admin") {
     const [authorizedUser] = await db
       .select()

@@ -5,8 +5,8 @@ import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { BlogClient } from "./client";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 import { eq, and, desc, sql } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
 import { blogs, users, likes as dbLikes, comments, likes } from "@/db/schema";
 
 export const generateMetadata = async ({
@@ -26,6 +26,11 @@ export default async function Blog({
 }: {
   params: Promise<{ username: string; slug: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect("/signin");
+  }
+
   const { username, slug } = await params;
   const blogCacheKey = `blog:${username}:${slug}`;
   const cached = await redis.get(blogCacheKey);
@@ -130,8 +135,7 @@ export default async function Blog({
     await redis.set(likesCacheKey, totalLikes);
   }
 
-  const session = await auth.api.getSession({ headers: await headers() });
-  const { id, username: sUsername, role } = session!.user;
+  const { id, username: sUsername, role } = session.user;
   const isUser = role === "admin" || id === blogRow.user!.id;
 
   const isLiked = await db

@@ -117,7 +117,12 @@ export const auth = betterAuth({
     },
     set: async (key, value, ttl) => {
       if (ttl) {
-        await redis.set(key, value, { EX: ttl });
+        const ttlSeconds = Math.floor(Number(ttl));
+        if (ttlSeconds > 0) {
+          await redis.set(key, value, { EX: ttlSeconds });
+        } else {
+          await redis.set(key, value);
+        }
       } else {
         await redis.set(key, value);
       }
@@ -130,10 +135,10 @@ export const auth = betterAuth({
     customRules: {
       "/sign-up/email": { window: 10, max: 3 },
       "/sign-in/email": { window: 10, max: 3 },
-      "/forget-password": { window: 60, max: 1 },
-      "/reset-password": { window: 10, max: 3 },
-      "/reset-password/*": { window: 10, max: 3 },
-      "/update-user": { window: 60 * 60, max: 3 },
+      "/forget-password": { window: 3600, max: 1 },
+      "/reset-password": { window: 3600, max: 1 },
+      "/reset-password/*": { window: 3600, max: 1 },
+      "/update-user": { window: 3600, max: 3 },
     },
   },
   session: { cookieCache: { enabled: true } },

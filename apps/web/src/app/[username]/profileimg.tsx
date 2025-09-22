@@ -28,9 +28,11 @@ import { deleteImage } from "@/actions/handle-cloudinary";
 export const ProfileImage = ({
   imageUrl,
   isUser,
+  name,
 }: {
   imageUrl: string | null | undefined;
   isUser: boolean;
+  name: string;
 }) => {
   const router = useRouter();
 
@@ -105,7 +107,7 @@ export const ProfileImage = ({
         <Image
           src={imageUrl || "/images/account.png"}
           fill
-          alt="Profile Image"
+          alt={name}
           className="outline rounded-full shadow-2xl"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />

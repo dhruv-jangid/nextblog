@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { titleFont } from "@/lib/static/fonts";
 import { BlogGrid } from "@/components/bloggrid";
 import { blogs, likes, users } from "@/db/schema";
@@ -16,7 +17,11 @@ export const metadata: Metadata = {
 
 export default async function LikedBlogs() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const { id } = session!.user;
+  if (!session) {
+    redirect("/signin");
+  }
+
+  const { id } = session.user;
   const cacheKey = `liked:${id}`;
   const cached = await redis.get(cacheKey);
 
