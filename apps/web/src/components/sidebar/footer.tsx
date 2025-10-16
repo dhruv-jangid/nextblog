@@ -44,6 +44,8 @@ export const Footer = ({ user }: { user: Session["user"] | undefined }) => {
       router.push("/signin");
     } catch {
       toast.error("Something went wrong");
+    } finally {
+      router.refresh();
     }
   };
 

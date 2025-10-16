@@ -67,7 +67,7 @@ export const ContactClient = () => {
                       placeholder="Enter your email address"
                       maxLength={255}
                       disabled={loading}
-                      className="border-0 shadow-none h-24 pl-4 border-b text-xl xl:text-2xl rounded-none"
+                      className="border-0 shadow-none h-24 pl-4 border-b text-xl xl:text-2xl rounded-none bg-transparent!"
                       required
                       {...field}
                     />
