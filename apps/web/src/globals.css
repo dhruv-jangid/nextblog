@@ -3,22 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-.underline-hover {
-  @apply cursor-pointer relative inline-block;
-  background-image: linear-gradient(
-    var(--muted-foreground),
-    var(--muted-foreground)
-  );
-  background-repeat: no-repeat;
-  background-size: 0% 1px;
-  background-position: 0 100%;
-  transition: background-size 0.3s ease-in-out;
-}
-
-.underline-hover:hover {
-  background-size: 100% 1px;
-}
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -59,7 +43,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.9989 0.0053 106.49);
+  --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.147 0.004 49.25);
@@ -128,17 +112,22 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-accent-foreground/20 outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background selection:bg-accent-foreground selection:text-accent min-h-screen overflow-x-hidden;
   }
+
   html {
     scrollbar-width: none;
+    scroll-behavior: smooth;
+    @apply antialiased;
   }
   html::-webkit-scrollbar {
     display: none;
   }
+
   img {
     user-select: none;
     -moz-user-select: none;
@@ -146,4 +135,7 @@
     -webkit-user-select: none;
     -ms-user-select: none;
   }
+}
+
+@layer utilities {
 }

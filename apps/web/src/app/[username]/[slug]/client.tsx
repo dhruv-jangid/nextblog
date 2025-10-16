@@ -6,8 +6,8 @@ import { Like } from "@/components/like";
 import { useRouter } from "next/navigation";
 import { Author } from "@/components/author";
 import { Editor } from "@/components/editor";
+import { Badge } from "@/components/ui/badge";
 import { Comment } from "@/components/comment";
-import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { deleteBlog } from "@/actions/handle-blog";
 import { Copy, PencilLine, Trash2 } from "lucide-react";
@@ -64,11 +64,10 @@ export const BlogClient = ({
   };
 
   return (
-    <div className="flex flex-col gap-8 lg:gap-12 my-14 lg:my-24 w-11/12 lg:w-5/12 mx-auto">
+    <div className="flex flex-col gap-8 lg:gap-12 my-14 lg:my-24 w-11/12 md:w-md lg:w-xl xl:w-3xl mx-auto">
       {isUser && (
         <div className="flex lg:hidden gap-2 -mb-3">
           <Button
-            variant="secondary"
             onClick={() => {
               show({
                 title: "Edit this blog?",
@@ -95,15 +94,12 @@ export const BlogClient = ({
         </div>
       )}
       <div className="flex justify-between">
-        <h1
-          className={`${titleFont.className} text-6xl text-balance lg:w-4/5 leading-16`}
-        >
+        <h1 className="text-6xl text-balance lg:w-4/5 leading-16 tracking-tighter">
           {blog.title}
         </h1>
         {isUser && (
           <div className="hidden lg:flex gap-2 mt-2">
             <Button
-              variant="secondary"
               onClick={() => {
                 show({
                   title: "Edit this blog?",
@@ -138,19 +134,17 @@ export const BlogClient = ({
             year: "numeric",
           }).format(new Date(blog.createdAt!))}
         </time>
-        <Link href={`/blogs/${blog.category}`}>
-          <Button variant="outline" className="tracking-tight">
-            {blog.category}
-          </Button>
-        </Link>
+        <Badge asChild>
+          <Link href={`/blogs/${blog.category}`}>{blog.category}</Link>
+        </Badge>
       </div>
 
       <Editor content={blog.content} readOnly />
 
-      <div className="flex justify-end items-center gap-3.5">
-        <hr className="w-3.5 border-input" />
+      <div className="flex justify-end items-center gap-4">
+        <hr className="w-4 border-input" />
         <Author
-          image={blog.user!.image}
+          image={blog.user!.image!}
           name={blog.user!.name!}
           username={blog.user!.username!}
         />
@@ -159,9 +153,11 @@ export const BlogClient = ({
       <div className="flex flex-col gap-4 mb-8">
         <hr className="border-input" />
         <div className="flex justify-between">
-          <h3 className="text-muted-foreground">Share this blog</h3>
+          <h3 className="text-muted-foreground tracking-tight">
+            Share this blog
+          </h3>
           <div>
-            <Button size="sm" variant="secondary" onClick={copyLink}>
+            <Button size="sm" onClick={copyLink}>
               <Copy /> Copy Link
             </Button>
           </div>

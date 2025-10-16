@@ -10,9 +10,9 @@ import {
   type ControllerProps,
 } from "react-hook-form";
 import * as React from "react";
+import { Label } from "./label";
 import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
-import { Label } from "@/components/ui/label";
 import * as LabelPrimitive from "@radix-ui/react-label";
 
 const Form = FormProvider;

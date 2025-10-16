@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { signinSchema } from "@/lib/schemas/auth";
@@ -16,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowUpRight, Eye, EyeClosed, LogIn } from "lucide-react";
 import { Form, FormItem, FormField, FormControl } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
 
 type signUp = z.infer<typeof signinSchema>;
 
@@ -80,20 +80,21 @@ export const SigninClient = () => {
   };
 
   return (
-    <div className="relative text-nowrap">
-      <Image
-        src="/images/circles.jpg"
-        alt="Background Image"
-        fill
-        className="dark:invert"
-      />
-
-      <div className="flex flex-col items-center justify-center w-full min-h-[92dvh] backdrop-blur-2xl dark:backdrop-blur-3xl">
-        <div className="w-4/5 md:w-1/2 xl:w-1/4 mx-auto">
-          <div className={`${titleFont.className} text-3xl mb-6 text-center`}>
-            Greetings
+    <div className="flex text-nowrap m-4 md:m-8 h-[96dvh] md:h-[94dvh] rounded-xl border overflow-hidden">
+      <div className="hidden lg:block relative w-5/12 h-full">
+        <Image
+          src="/images/flowers.jpg"
+          alt="Flowers Image"
+          fill
+          priority
+          className="border-r object-cover brightness-90 dark:brightness-75 sepia-50"
+        />
+      </div>
+      <div className="flex flex-col items-center justify-center w-full lg:w-7/12 bg-accent">
+        <div className="w-xs xl:w-md mx-auto">
+          <div className="text-4xl mb-8 text-center tracking-tighter">
+            Greetings!
           </div>
-
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(signinAuth)}
@@ -139,14 +140,14 @@ export const SigninClient = () => {
                             <Eye
                               size={16}
                               cursor="pointer"
-                              className="absolute -top-5 -translate-y-1.5 right-4 stroke-muted-foreground"
+                              className="absolute -top-6 -translate-y-1 right-4 stroke-muted-foreground"
                               onClick={() => setShowPassword(!showPassword)}
                             />
                           ) : (
                             <EyeClosed
                               size={16}
                               cursor="pointer"
-                              className="absolute -top-5 -translate-y-1.5 right-4 stroke-muted-foreground"
+                              className="absolute -top-6 -translate-y-1 right-4 stroke-muted-foreground"
                               onClick={() => setShowPassword(!showPassword)}
                             />
                           )}
@@ -173,23 +174,28 @@ export const SigninClient = () => {
                   />
                 </div>
               </div>
-              <div className="flex justify-between items-center mt-6">
-                <div className="flex flex-col ml-1">
-                  <span className="opacity-70 leading-tight text-xs">
+              <div className="flex justify-between items-center mt-8">
+                <div className="flex flex-col ml-1 mt-1">
+                  <span className="opacity-70 leading-none text-sm tracking-tight">
                     Don&apos;t have an account?
                   </span>
                   <Link
                     href="/signup"
-                    className="underline-hover w-fit"
+                    className="underline underline-offset-4 decoration-dotted w-max tracking-tight"
                     replace
                   >
-                    <span className="flex items-center gap-0.5 text-sm">
+                    <span className="flex items-center gap-0.5">
                       Create
-                      <ArrowUpRight size={20} />
+                      <ArrowUpRight size={16} />
                     </span>
                   </Link>
                 </div>
-                <Button type="submit" disabled={loading}>
+                <Button
+                  size="lg"
+                  type="submit"
+                  disabled={loading}
+                  className="text-base tracking-tight"
+                >
                   {loading ? (
                     "..."
                   ) : (
@@ -202,31 +208,41 @@ export const SigninClient = () => {
             </form>
           </Form>
 
-          <div className="flex items-center justify-evenly w-full my-3.5">
-            <hr className="w-2/5" />
-            <span>or</span>
-            <hr className="w-2/5" />
+          <div className="flex items-center justify-evenly w-full my-4">
+            <Separator className="max-w-2/5" />
+            <span className="text-muted-foreground">or</span>
+            <Separator className="max-w-2/5" />
           </div>
 
-          <div className="flex flex-col gap-2.5 justify-center w-full">
-            <Button disabled={loading} onClick={() => socialAuth("google")}>
+          <div className="flex gap-4 justify-center w-full">
+            <Button
+              size="lg"
+              disabled={loading}
+              onClick={() => socialAuth("google")}
+              className="text-base h-10 w-[48%]"
+            >
               <Image
                 src="/images/google.png"
                 alt="Google's icon"
-                width={16}
-                height={16}
+                width={18}
+                height={18}
               />
-              Continue with Google
+              Google
             </Button>
-            <Button disabled={loading} onClick={() => socialAuth("github")}>
+            <Button
+              size="lg"
+              disabled={loading}
+              onClick={() => socialAuth("github")}
+              className="text-base h-10 w-[48%]"
+            >
               <Image
                 src="/images/github.png"
                 alt="Github's icon"
-                width={18}
-                height={18}
+                width={20}
+                height={20}
                 className="invert dark:invert-0"
               />
-              Continue with Github
+              Github
             </Button>
           </div>
         </div>

@@ -10,12 +10,10 @@ import {
 import { z } from "zod/v3";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { titleFont } from "@/lib/static/fonts";
+import { CornerDownRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { contactUser } from "@/actions/handle-user";
 import { contactSchema } from "@/lib/schemas/other";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +23,7 @@ type contact = z.infer<typeof contactSchema>;
 export const ContactClient = () => {
   const form = useForm<contact>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { subject: "", message: "" },
+    defaultValues: { email: "" },
   });
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +32,7 @@ export const ContactClient = () => {
     try {
       await contactUser(values);
 
-      toast.success("We've received your inquiry");
+      toast.success("We will contact you back shortly.");
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -47,44 +45,29 @@ export const ContactClient = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[92dvh] backdrop-blur-2xl">
-      <div className="w-2/3 md:w-1/2 lg:w-1/3 mx-auto">
-        <div className={`${titleFont.className} text-3xl mb-6 text-center`}>
-          Talk to us
+    <div className="flex flex-col xl:flex-row gap-24 m-4 xl:m-8 p-8 pt-24 xl:pt-32 min-h-[96dvh] xl:min-h-[94dvh] backdrop-blur-2xl border rounded-2xl bg-accent">
+      <div className="space-y-4">
+        <div className="text-sm text-orange-500">TALK TO US</div>
+        <div className="text-4xl xl:text-5xl tracking-tighter w-xs xl:w-md">
+          What&apos;s an email we can reach you out?
         </div>
+      </div>
+      <div className="xl:w-md">
+        <div>EMAIL ADDRESS</div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
             <FormField
               control={form.control}
-              name="subject"
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
                       type="text"
-                      placeholder="Subject"
+                      placeholder="Enter your email address"
                       maxLength={255}
                       disabled={loading}
-                      required
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      className="min-h-52 resize-none"
-                      id="message"
-                      placeholder="Message"
-                      maxLength={255}
-                      disabled={loading}
+                      className="border-0 shadow-none h-24 pl-4 border-b text-xl xl:text-2xl rounded-none"
                       required
                       {...field}
                     />
@@ -94,8 +77,19 @@ export const ContactClient = () => {
               )}
             />
             <div className="flex items-center justify-end">
-              <Button type="submit" variant="outline" disabled={loading}>
-                {loading ? "..." : "Send"} <Send />
+              <Button
+                size="lg"
+                type="submit"
+                disabled={loading}
+                className="text-xl h-12 xl:w-36"
+              >
+                {loading ? (
+                  "..."
+                ) : (
+                  <>
+                    Submit <CornerDownRight className="size-5 xl:size-6" />
+                  </>
+                )}
               </Button>
             </div>
           </form>

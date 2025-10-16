@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { mainFont, titleFont } from "@/lib/static/fonts";
 
 export default function GlobalError({
   error,
@@ -15,9 +14,7 @@ export default function GlobalError({
 
   return (
     <html>
-      <body
-        className={`${mainFont.className} dark min-h-[92dvh] flex flex-col items-center justify-center gap-8 w-full text-center pt-48`}
-      >
+      <body className="dark min-h-[92dvh] flex flex-col items-center justify-center gap-8 w-full text-center pt-48">
         <div className="flex flex-col items-center gap-4">
           <div className="bg-rose-100 text-rose-500 rounded-full p-4">
             <svg
@@ -36,9 +33,7 @@ export default function GlobalError({
               <line x1="12" y1="17" x2="12" y2="17"></line>
             </svg>
           </div>
-          <h1
-            className={`${titleFont.className} text-3xl font-medium text-rose-500`}
-          >
+          <h1 className="text-3xl font-medium text-rose-500">
             Something went wrong
           </h1>
           <p className="text-base text-muted-foreground">

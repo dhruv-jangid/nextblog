@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Editor } from "@/components/editor";
 import { blogCategories } from "@/lib/utils";
-import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/combobox";
 import { Fullscreen, Upload } from "lucide-react";
@@ -160,10 +159,7 @@ export const CreateBlogClient = () => {
         onChange={(e) => setBlog({ ...blog, title: e.currentTarget.value })}
         placeholder="Title (10-100 characters)"
         maxLength={100}
-        className={cn(
-          titleFont.className,
-          "resize-none min-h-32 max-w-4/5 text-6xl md:text-6xl p-5"
-        )}
+        className="resize-none min-h-32 max-w-4/5 text-6xl md:text-6xl p-5"
         disabled={loading}
         autoFocus
         required

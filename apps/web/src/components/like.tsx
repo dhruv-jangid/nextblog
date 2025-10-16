@@ -56,7 +56,7 @@ export const Like = ({
             className="stroke-muted-foreground/50"
           />
         )}
-        <span className="text-lg">{tempLikes}</span>
+        <span className="text-lg tracking-tight">{tempLikes}</span>
       </div>
     </div>
   );

@@ -7,9 +7,8 @@ import type { Metadata } from "next";
 import { eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { ProfileImage } from "./profileimg";
-import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
-import { BlogGrid } from "@/components/bloggrid";
+import { Grid2 } from "@/components/grid2";
 import { users, blogs, likes } from "@/db/schema";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
@@ -113,16 +112,14 @@ export default async function Username({
       <div className="flex justify-center gap-8 xl:gap-12 w-full py-11 lg:py-22">
         <div className="h-30 w-30 lg:h-36 lg:w-36">
           <ProfileImage
-            imageUrl={userRow.image}
+            imageUrl={userRow.image ? userRow.image : undefined}
             isUser={isSelf}
             name={userRow.name!}
           />
         </div>
         <div className="flex flex-col gap-3">
           <div className="flex gap-1.5 items-center">
-            <h1 className={`${titleFont.className} text-3xl mr-2`}>
-              {userRow.username}
-            </h1>
+            <h1 className="text-3xl mr-2">{userRow.username}</h1>
             {isSelf && (
               <Link href="/account/profile" className="hidden md:block">
                 <Button variant="secondary">Edit Profile</Button>
@@ -138,7 +135,7 @@ export default async function Username({
               </Link>
             )}
           </div>
-          <div className="flex items-center gap-6 text-lg">
+          <div className="flex items-center gap-6 text-lg tracking-tight">
             <div className="flex items-center gap-2">
               {actualBlogs.length}
               <span className="text-muted-foreground">Blogs</span>
@@ -148,7 +145,7 @@ export default async function Username({
               <span className="text-muted-foreground">Likes</span>
             </div>
           </div>
-          <div className="flex gap-2 items-center text-lg opacity-85">
+          <div className="flex gap-2 items-center text-lg opacity-85 tracking-tight font-medium">
             {userRow.name}
             {userRow.role === "admin" && (
               <span className="text-lg text-red-500">
@@ -175,12 +172,10 @@ export default async function Username({
 
       {actualBlogs.length > 0 ? (
         <div className="min-h-[60dvh]">
-          <BlogGrid blogs={actualBlogs} />
+          <Grid2 blogs={actualBlogs} />
         </div>
       ) : (
-        <div
-          className={`${titleFont.className} flex justify-center items-center min-h-[59vh] text-4xl w-full border-t text-muted-foreground`}
-        >
+        <div className="flex justify-center items-center min-h-[59vh] text-4xl w-full border-t text-muted-foreground">
           {isSelf ? (
             <Link href="/createblog">
               <Button variant="secondary">Create your first blog</Button>

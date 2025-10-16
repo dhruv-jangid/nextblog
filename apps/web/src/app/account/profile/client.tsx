@@ -14,7 +14,6 @@ import { ZodError } from "zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { getFirstZodError } from "@/lib/schemas/other";
@@ -93,10 +92,8 @@ export const ProfileClient = ({ user }: { user: Session["user"] }) => {
   };
 
   return (
-    <div className="mx-auto py-16">
-      <h1
-        className={`${titleFont.className} text-3xl font-medium pb-10 text-end border-b w-full px-12 lg:px-64`}
-      >
+    <div className="mx-auto py-16 min-h-dvh">
+      <h1 className="text-3xl font-medium pb-10 text-end border-b w-full px-12 lg:px-64">
         Edit Profile
       </h1>
 

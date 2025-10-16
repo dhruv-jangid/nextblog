@@ -7,8 +7,7 @@ import { headers } from "next/headers";
 import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { blogs, users } from "@/db/schema";
-import { titleFont } from "@/lib/static/fonts";
-import { BlogGrid2 } from "@/components/bloggrid2";
+import { Grid1 } from "@/components/grid1";
 
 export const metadata: Metadata = {
   title: "MetaPress | Blogs",
@@ -78,16 +77,14 @@ export default async function Blogs() {
   return (
     <>
       {actualBlogs.length > 0 ? (
-        <div className="min-h-[92dvh] lg:mx-16">
-          <div className={`${titleFont.className} text-center text-4xl my-16`}>
-            All Blogs
+        <div className="min-h-dvh lg:mx-16">
+          <div className="mt-16 md:mt-20 ml-auto mr-6 lg:mr-12 pb-2 w-2xs lg:w-md text-end text-3xl lg:text-4xl tracking-tight border-b border-accent-foreground/50 border-dashed">
+            ... All Blogs
           </div>
-          <BlogGrid2 blogs={actualBlogs} />
+          <Grid1 blogs={actualBlogs} />
         </div>
       ) : (
-        <div
-          className={`${titleFont.className} flex justify-center items-center min-h-[92vh] text-4xl rounded-lg w-3/4 mx-auto`}
-        >
+        <div className="flex justify-center items-center min-h-dvh text-4xl rounded-lg w-3/4 mx-auto">
           There are currently no blogs to display!
         </div>
       )}

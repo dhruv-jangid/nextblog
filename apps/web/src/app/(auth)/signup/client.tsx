@@ -14,12 +14,12 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { signupSchema } from "@/lib/schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowUpRight, Eye, EyeClosed, Send } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 type signUp = z.infer<typeof signupSchema>;
 
@@ -77,17 +77,19 @@ export const SignupClient = () => {
   };
 
   return (
-    <div className="relative text-nowrap">
-      <Image
-        src="/images/circles.jpg"
-        alt="Background Image"
-        fill
-        className="dark:invert"
-      />
-
-      <div className="flex flex-col items-center justify-center w-full min-h-[92dvh] backdrop-blur-2xl dark:backdrop-blur-3xl">
-        <div className="w-4/5 md:w-1/2 xl:w-1/3 2xl:w-1/4 mx-auto">
-          <div className={`${titleFont.className} text-3xl mb-6 text-center`}>
+    <div className="flex text-nowrap m-4 md:m-8 h-[96dvh] md:h-[94dvh] rounded-xl border overflow-hidden">
+      <div className="hidden lg:block relative w-5/12 h-full">
+        <Image
+          src="/images/flowers.jpg"
+          alt="Flowers Image"
+          fill
+          priority
+          className="border-r object-cover brightness-90 dark:brightness-75 sepia-50"
+        />
+      </div>
+      <div className="flex flex-col items-center justify-center w-full lg:w-7/12 bg-accent">
+        <div className="w-xs xl:w-md mx-auto">
+          <div className="text-4xl mb-8 text-center tracking-tighter">
             Start Your Journey
           </div>
 
@@ -173,14 +175,14 @@ export const SignupClient = () => {
                         <Eye
                           size={16}
                           cursor="pointer"
-                          className="absolute -top-6 -translate-y-1 right-4 stroke-muted-foreground"
+                          className="absolute -top-6 -translate-y-1.5 right-4 stroke-muted-foreground"
                           onClick={() => setShowPassword(!showPassword)}
                         />
                       ) : (
                         <EyeClosed
                           size={16}
                           cursor="pointer"
-                          className="absolute -top-6 -translate-y-1 right-4 stroke-muted-foreground"
+                          className="absolute -top-6 -translate-y-1.5 right-4 stroke-muted-foreground"
                           onClick={() => setShowPassword(!showPassword)}
                         />
                       )}
@@ -189,23 +191,28 @@ export const SignupClient = () => {
                   </FormItem>
                 )}
               />
-              <div className="flex justify-between items-center mt-3">
-                <div className="flex flex-col ml-1">
-                  <div className="text-muted-foreground leading-tight text-xs">
+              <div className="flex justify-between items-center mt-4">
+                <div className="flex flex-col ml-1 mt-0.5">
+                  <span className="opacity-70 leading-none text-sm tracking-tight">
                     Already have an account?
-                  </div>
+                  </span>
                   <Link
                     href="/signin"
-                    className="underline-hover w-fit"
+                    className="underline underline-offset-8 decoration-dotted w-max tracking-tight"
                     replace
                   >
-                    <div className="flex items-center gap-0.5 text-sm">
+                    <span className="flex items-center gap-0.5">
                       Login
-                      <ArrowUpRight size={20} />
-                    </div>
+                      <ArrowUpRight size={16} />
+                    </span>
                   </Link>
                 </div>
-                <Button type="submit" disabled={loading}>
+                <Button
+                  size="lg"
+                  type="submit"
+                  disabled={loading}
+                  className="text-base tracking-tight"
+                >
                   {loading ? (
                     "..."
                   ) : (
@@ -218,31 +225,41 @@ export const SignupClient = () => {
             </form>
           </Form>
 
-          <div className="flex items-center justify-evenly w-full my-3.5">
-            <hr className="w-2/5" />
-            <span>or</span>
-            <hr className="w-2/5" />
+          <div className="flex items-center justify-evenly w-full my-4">
+            <Separator className="max-w-2/5" />
+            <span className="text-muted-foreground">or</span>
+            <Separator className="max-w-2/5" />
           </div>
 
-          <div className="flex flex-col gap-2.5 justify-center w-full">
-            <Button disabled={loading} onClick={() => socialAuth("google")}>
+          <div className="flex gap-4 justify-center w-full">
+            <Button
+              size="lg"
+              disabled={loading}
+              onClick={() => socialAuth("google")}
+              className="text-base h-10 w-[48%]"
+            >
               <Image
                 src="/images/google.png"
                 alt="Google's icon"
-                width={16}
-                height={16}
+                width={18}
+                height={18}
               />
-              Continue with Google
+              Google
             </Button>
-            <Button disabled={loading} onClick={() => socialAuth("github")}>
+            <Button
+              size="lg"
+              disabled={loading}
+              onClick={() => socialAuth("github")}
+              className="text-base h-10 w-[48%]"
+            >
               <Image
                 src="/images/github.png"
                 alt="Github's icon"
-                width={18}
-                height={18}
+                width={20}
+                height={20}
                 className="invert dark:invert-0"
               />
-              Continue with Github
+              Github
             </Button>
           </div>
         </div>

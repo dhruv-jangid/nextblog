@@ -90,21 +90,8 @@ If you did NOT create an account with MetaPress, please ignore this email.
 For your security, do not share this email or the verification link with anyone.`;
 };
 
-export const contactMessage = ({
-  name,
-  subject,
-  message,
-}: {
-  name: string;
-  subject: string;
-  message: string;
-}): string => {
+export const contactMessage = ({ name }: { name: string }): string => {
   return `Hi ${name},
 
-Thanks for reaching out to us. Here’s a copy of your message:
-
-Subject: ${subject}
-Message: ${message}
-
-We’ve received your inquiry and will get back to you shortly.`;
+Thanks for reaching out to us.`;
 };

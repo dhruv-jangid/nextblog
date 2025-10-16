@@ -4,10 +4,12 @@ import { cn } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { mainFont } from "@/lib/static/fonts";
+import { Sidebar } from "@/components/sidebar";
+import { Toaster } from "@/components/ui/sonner";
+import { bricolageGrotesque } from "@/lib/fonts";
 import { Providers } from "@/components/providers";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "MetaPress",
@@ -25,12 +27,20 @@ export default async function RootLayout({
   const session = await auth.api.getSession({ headers: await headers() });
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn(mainFont.className, "antialiased")}>
+    <html
+      className={cn(bricolageGrotesque.className)}
+      lang="en"
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>
         <Providers>
-          <Navbar user={session ? session.user : null} />
-          {children}
-          <Footer />
+          <Sidebar user={session?.user} />
+          <main className="w-full">
+            <SidebarTrigger />
+            {children}
+            <Footer />
+          </main>
+          <Toaster />
         </Providers>
       </body>
     </html>

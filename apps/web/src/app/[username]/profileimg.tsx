@@ -24,13 +24,14 @@ import { getFirstZodError } from "@/lib/schemas/other";
 import { imageClientSchema } from "@/lib/schemas/blog";
 import { updateUserCache } from "@/actions/handle-cache";
 import { deleteImage } from "@/actions/handle-cloudinary";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const ProfileImage = ({
   imageUrl,
   isUser,
   name,
 }: {
-  imageUrl: string | null | undefined;
+  imageUrl: string | undefined;
   isUser: boolean;
   name: string;
 }) => {
@@ -104,13 +105,16 @@ export const ProfileImage = ({
   return (
     <div className="flex flex-col">
       <div className="relative h-30 w-30 lg:h-36 lg:w-36">
-        <Image
-          src={imageUrl || "/images/account.png"}
-          fill
-          alt={name}
-          className="outline rounded-full shadow-2xl"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+        <Avatar className="w-full h-full">
+          <AvatarImage
+            src={imageUrl}
+            alt={name}
+            className="outline rounded-xl shadow-2xl"
+          />
+          <AvatarFallback className="text-3xl">
+            {name[0].toUpperCase() || "M"}
+          </AvatarFallback>
+        </Avatar>
         {isUser && (
           <Dialog>
             <DialogTrigger className="text-sm opacity-70 underline cursor-pointer">

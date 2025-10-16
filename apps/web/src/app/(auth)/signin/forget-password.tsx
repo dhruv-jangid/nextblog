@@ -58,7 +58,7 @@ export const ForgetPassword = ({
 
   return (
     <Dialog>
-      <DialogTrigger className="text-sm text-muted-foreground underline underline-offset-4 cursor-pointer">
+      <DialogTrigger className="text-sm opacity-70 underline underline-offset-6 decoration-dashed cursor-pointer tracking-tight">
         Forget password?
       </DialogTrigger>
       <DialogContent>

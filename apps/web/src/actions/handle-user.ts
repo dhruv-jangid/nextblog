@@ -13,23 +13,20 @@ import { contactMessage } from "@/lib/email/texts";
 import { slugifyUsername, restrictedUsernames } from "@/lib/utils";
 import { getFirstZodError, contactSchema } from "@/lib/schemas/other";
 
-export const contactUser = async (data: {
-  subject: string;
-  message: string;
-}): Promise<void> => {
+export const contactUser = async (data: { email: string }): Promise<void> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     throw new Error("Unauthorized");
   }
 
-  const { name, email } = session.user;
+  const { name } = session.user;
   try {
-    const { subject, message } = contactSchema.parse(data);
+    const { email } = contactSchema.parse(data);
 
     await sendEmail({
-      subject,
+      subject: "MetaPress Team",
       to: email,
-      text: contactMessage({ name, subject, message }),
+      text: contactMessage({ name }),
     });
   } catch (error) {
     if (error instanceof ZodError) {

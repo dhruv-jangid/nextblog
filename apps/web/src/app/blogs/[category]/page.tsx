@@ -5,9 +5,8 @@ import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { eq, desc } from "drizzle-orm";
+import { Grid1 } from "@/components/grid1";
 import { blogs, users } from "@/db/schema";
-import { titleFont } from "@/lib/static/fonts";
-import { BlogGrid2 } from "@/components/bloggrid2";
 import { notFound, redirect } from "next/navigation";
 
 export const generateMetadata = async ({
@@ -93,12 +92,10 @@ export default async function BlogCategory({
 
   return (
     <div className="min-h-[85dvh] mx-16">
-      <div
-        className={`${titleFont.className} text-center text-4xl py-16 border-b`}
-      >
+      <div className="text-center text-4xl py-16 border-b">
         {category} Blogs
       </div>
-      <BlogGrid2 blogs={actualBlogs} />
+      <Grid1 blogs={actualBlogs} />
     </div>
   );
 }

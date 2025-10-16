@@ -20,7 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         style: {
-          fontFamily: "Instrument Sans, Instrument Sans Fallback",
+          fontFamily: "Bricolage Grotesque",
           borderRadius: "calc(var(--radius-2xl)",
           fontSize: "var(--text-sm)",
           padding: "calc(var(--spacing) * 3.5) calc(var(--spacing) * 5)",

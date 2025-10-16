@@ -7,18 +7,18 @@ export const Author = ({
   username,
 }: {
   name: string;
-  image: string | null | undefined;
+  image: string | undefined;
   username: string;
 }) => {
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex gap-2.5 items-center">
       <Avatar>
-        <AvatarImage src={image ? image : "/images/account.png"} alt={name} />
-        <AvatarFallback>{name}</AvatarFallback>
+        <AvatarImage src={image} alt={name} />
+        <AvatarFallback>{name[0].toUpperCase() || "M"}</AvatarFallback>
       </Avatar>
       <Link
         href={`/${username}`}
-        className="font-medium line-clamp-1 underline-hover hover:animate-pulse"
+        className="font-medium max-w-3xs truncate tracking-tight hover:animate-pulse"
       >
         {name}
       </Link>

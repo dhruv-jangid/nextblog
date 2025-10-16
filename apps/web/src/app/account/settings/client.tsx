@@ -12,7 +12,6 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { titleFont } from "@/lib/static/fonts";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { updateUserCache } from "@/actions/handle-cache";
@@ -52,9 +51,7 @@ export const AccountClient = () => {
 
   return (
     <div className="mx-auto py-16">
-      <h1
-        className={`${titleFont.className} text-3xl font-medium pb-10 text-end border-b w-full px-12 lg:px-64`}
-      >
+      <h1 className="text-3xl font-medium pb-10 text-end border-b w-full px-12 lg:px-64">
         Account Settings
       </h1>
 

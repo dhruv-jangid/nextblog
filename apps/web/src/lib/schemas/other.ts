@@ -7,19 +7,15 @@ export const imageSchema = z
   .includes("cloudinary", { message: "Invalid Image" });
 
 export const contactSchema = z3.object({
-  subject: z3
+  email: z3
     .string()
-    .min(5, "Subject must be atleast 5 characters")
-    .max(20, "Subject must be under 20 characters")
-    .trim()
-    .refine((text) => !checkProfanity({ text }), "Inappropriate Subject"),
-
-  message: z3
-    .string()
-    .min(50, "Message must be atleast 50 characters")
-    .max(200, "Message must be under 200 characters")
-    .trim()
-    .refine((text) => !checkProfanity({ text }), "Inappropriate Message"),
+    .refine(
+      (email) =>
+        /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i.test(
+          email
+        ),
+      { message: "Invalid email address" }
+    ),
 });
 
 export const commentSchema = z

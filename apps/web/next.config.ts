@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       static: 30,
       dynamic: 180,
     },
+    scrollRestoration: true,
   },
   images: {
     remotePatterns: [

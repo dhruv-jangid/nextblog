@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { titleFont } from "@/lib/static/fonts";
 import { Button } from "@/components/ui/button";
 
 export default function ErrorBoundary({
@@ -34,7 +33,7 @@ export default function ErrorBoundary({
           </svg>
         </div>
         <h1
-          className={`${titleFont.className} text-3xl font-medium text-rose-500`}
+          className="text-3xl font-medium text-rose-500"
         >
           Something went wrong
         </h1>

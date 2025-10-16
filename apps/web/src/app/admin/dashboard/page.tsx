@@ -3,13 +3,12 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Grid1 } from "@/components/grid1";
 import { notFound } from "next/navigation";
 import { desc, eq, sql } from "drizzle-orm";
 import { Author } from "@/components/author";
 import { DeleteUserBtn } from "./delete-user";
-import { titleFont } from "@/lib/static/fonts";
 import { blogs, users, likes } from "@/db/schema";
-import { BlogGrid2 } from "@/components/bloggrid2";
 
 export const metadata: Metadata = {
   title: "Admin | Dashboard",
@@ -88,9 +87,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-10">
-      <h1
-        className={`${titleFont.className} text-4xl font-medium text-end border-b pb-12 p-16`}
-      >
+      <h1 className="text-4xl font-medium text-end border-b pb-12 p-16">
         Admin Dashboard
       </h1>
 
@@ -104,7 +101,7 @@ export default async function AdminDashboard() {
             >
               <div className="flex justify-between">
                 <Author
-                  image={user.image}
+                  image={user?.image || undefined}
                   name={user.name}
                   username={user.username}
                 />
@@ -146,7 +143,7 @@ export default async function AdminDashboard() {
       </div>
 
       <h2 className="text-2xl text-end mr-22">Recent Blogs</h2>
-      <BlogGrid2 blogs={actualBlogs} />
+      <Grid1 blogs={actualBlogs} />
     </div>
   );
 }

@@ -5,9 +5,8 @@ import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Grid2 } from "@/components/grid2";
 import { redirect } from "next/navigation";
-import { titleFont } from "@/lib/static/fonts";
-import { BlogGrid } from "@/components/bloggrid";
 import { blogs, likes, users } from "@/db/schema";
 
 export const metadata: Metadata = {
@@ -79,15 +78,11 @@ export default async function LikedBlogs() {
 
   return actualBlogs.length > 0 ? (
     <div className="min-h-[92dvh]">
-      <div className={`${titleFont.className} text-center text-4xl my-16`}>
-        Liked Blogs
-      </div>
-      <BlogGrid blogs={actualBlogs} />
+      <div className="text-center text-4xl my-16">Liked Blogs</div>
+      <Grid2 blogs={actualBlogs} />
     </div>
   ) : (
-    <div
-      className={`${titleFont.className} flex justify-center items-center min-h-[92vh] text-4xl rounded-lg w-3/4 mx-auto`}
-    >
+    <div className="flex justify-center items-center min-h-[92vh] text-4xl rounded-lg w-3/4 mx-auto">
       You dont have any liked blogs currently!
     </div>
   );

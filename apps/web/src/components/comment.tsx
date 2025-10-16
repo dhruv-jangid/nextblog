@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ZodError } from "zod";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Trash2 } from "lucide-react";
+import { MessageSquareText, Trash2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { useRouter } from "next/navigation";
 import { useAlertDialog } from "./providers/alertProvider";
@@ -85,17 +85,22 @@ export const Comment = ({
           onChange={(e) => setComment(e.target.value)}
           value={comment}
         />
-        <span className="absolute bottom-12 right-4 text-xs text-muted-foreground">
+        <span className="absolute bottom-12 right-4 text-xs tracking-tight text-muted-foreground">
           {comment.length}/100
         </span>
         <div className="flex justify-end gap-2.5 sm:gap-4">
           <Button
             size="sm"
-            variant="secondary"
             onClick={handleAddComment}
             disabled={loading || !comment.trim()}
           >
-            {loading ? "Adding..." : "Comment"}
+            {loading ? (
+              "..."
+            ) : (
+              <>
+                Comment <MessageSquareText />
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -121,7 +126,7 @@ export const Comment = ({
             <div className="flex flex-col gap-0.5">
               <Link
                 href={`/${comment.user!.username}`}
-                className="font-medium line-clamp-1 underline-hover hover:animate-pulse text-sm w-fit"
+                className="font-medium line-clamp-1 hover:animate-pulse text-sm w-fit"
               >
                 {comment!.user!.name}
               </Link>

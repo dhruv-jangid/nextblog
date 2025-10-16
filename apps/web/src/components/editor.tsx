@@ -319,9 +319,9 @@ export const Editor = ({
           className={`prose prose-slate dark:prose-invert max-w-none bg-transparent text-foreground 
             [&_.ProseMirror]:outline-none [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:h-64
             sm:[&_.ProseMirror_iframe]:h-80 md:[&_.ProseMirror_iframe]:aspect-video [&_.ProseMirror_iframe]:rounded-lg
-            [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:mb-2
-            [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h2]:mb-1.5
-            [&_.ProseMirror_h3]:text-2xl [&_.ProseMirror_h3]:font-medium [&_.ProseMirror_h3]:mb-1
+            [&_.ProseMirror_h1]:text-4xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:mb-2 [&_.ProseMirror_h1]:tracking-tight
+            [&_.ProseMirror_h2]:text-3xl [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h2]:mb-1.5 [&_.ProseMirror_h2]:tracking-tight
+            [&_.ProseMirror_h3]:text-2xl [&_.ProseMirror_h3]:font-medium [&_.ProseMirror_h3]:mb-1 [&_.ProseMirror_h3]:tracking-tight
             [&_.ProseMirror_p]:text-xl [&_.ProseMirror_p]:mb-1 [&_.ProseMirror_p]:leading-normal
             [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:ml-6 [&_.ProseMirror_ul]:mb-2
             [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:ml-6 [&_.ProseMirror_ol]:mb-2
