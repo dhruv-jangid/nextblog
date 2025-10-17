@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useAlertDialog } from "./providers/alertProvider";
 import { addComment, deleteComment } from "@/actions/handle-blog";
 import { commentSchema, getFirstZodError } from "@/lib/schemas/other";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export const Comment = ({
   blogId,
@@ -115,13 +116,10 @@ export const Comment = ({
               href={`/${comment.user!.username}`}
               className="relative w-8 h-8 rounded-full overflow-hidden"
             >
-              <Image
-                src={comment.user!.image || "/images/account.png"}
-                alt={comment.user!.name!}
-                fill
-                priority
-                sizes="(min-width: 768px) 44px"
-              />
+              <Avatar>
+                <AvatarImage src={comment.user?.image || undefined} alt={comment.user!.name!} />
+                <AvatarFallback>{comment.user!.name![0].toUpperCase() || "M"}</AvatarFallback>
+              </Avatar>
             </Link>
             <div className="flex flex-col gap-0.5">
               <Link
