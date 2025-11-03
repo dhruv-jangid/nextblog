@@ -31,9 +31,7 @@ export const Grid = ({ blogs }: { blogs: Blog[] }) => {
                       year: "2-digit",
                     }).format(new Date(createdAt))}
                   </time>
-                  <Badge asChild>
-                    <Link href={`/category/${category}`}>{category}</Link>
-                  </Badge>
+                  <Badge>{category}</Badge>
                 </div>
 
                 <span className="line-clamp-2 text-2xl max-w-xs font-medium tracking-tighter">

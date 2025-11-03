@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { Author } from "./author";
@@ -36,9 +34,7 @@ export const VerticalList = ({ blogs }: { blogs: Blog[] }) => {
                     year: "numeric",
                   }).format(new Date(createdAt))}
                 </time>
-                <Badge asChild>
-                  <Link href={`/category/${category}`}>{category}</Link>
-                </Badge>
+                <Badge>{category}</Badge>
               </div>
 
               <div className="text-3xl lg:text-4xl font-medium tracking-tighter text-balance line-clamp-3 truncate max-w-2xs md:max-w-xs">
