@@ -1,11 +1,10 @@
 import "server-only";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SquareArrowOutUpRight } from "lucide-react";
+import { AuthService } from "@/core/auth/auth.service";
 
 export const metadata: Metadata = {
   title: "Admin | Panel",
@@ -13,18 +12,18 @@ export const metadata: Metadata = {
 };
 
 export default async function Admin() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") {
+  const session = await AuthService.getUserSession();
+  if (!session || session.role !== "admin") {
     notFound();
   }
 
   return (
-    <div className="flex items-center justify-center h-[92dvh]">
-      <Link href="/admin/dashboard">
-        <Button>
+    <div className="flex items-center justify-center h-dvh">
+      <Button asChild>
+        <Link href="/admin/dashboard">
           Dashboard <SquareArrowOutUpRight size={18} />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

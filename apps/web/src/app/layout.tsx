@@ -1,15 +1,19 @@
 import "server-only";
 import "@/globals.css";
 import { cn } from "@/lib/utils";
-import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Footer } from "@/components/footer";
-import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { bricolageGrotesque } from "@/lib/fonts";
-import { Providers } from "@/components/providers";
+import { Sidebar } from "@/components/sidebar/sidebar";
+import { Bricolage_Grotesque } from "next/font/google";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Providers } from "@/components/providers/providers";
+
+const bricolageGrotesque = Bricolage_Grotesque({
+  adjustFontFallback: true,
+  subsets: ["latin"],
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: "MetaPress",
@@ -24,22 +28,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth.api.getSession({ headers: await headers() });
-
   return (
     <html
-      className={cn(bricolageGrotesque.className)}
       lang="en"
+      className={cn(bricolageGrotesque.className)}
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>
         <Providers>
-          <Sidebar user={session?.user} />
+          <Sidebar />
+
           <main className="w-full">
             <SidebarTrigger />
             {children}
             <Footer />
           </main>
+
           <Toaster />
         </Providers>
       </body>

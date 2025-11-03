@@ -7,13 +7,13 @@ export const Author = ({
   username,
 }: {
   name: string;
-  image: string | undefined;
+  image: string | null | undefined;
   username: string;
 }) => {
   return (
     <div className="flex gap-2.5 items-center">
       <Avatar>
-        <AvatarImage src={image} alt={name} />
+        <AvatarImage src={image ?? undefined} alt={name} />
         <AvatarFallback>{name[0].toUpperCase() || "M"}</AvatarFallback>
       </Avatar>
       <Link

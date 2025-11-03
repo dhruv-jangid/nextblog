@@ -1,6 +1,6 @@
 import "server-only";
 import { getUserInfoTool } from "./tools";
-import { usernameValidator } from "@/lib/schemas/mcp";
+import { usernameSchema } from "@/core/mcp/mcp.schema";
 import { createMcpHandler } from "@vercel/mcp-adapter";
 
 const handler = createMcpHandler(
@@ -10,7 +10,7 @@ const handler = createMcpHandler(
       "getUserInfo",
       "Give user's info based on username",
       {
-        username: usernameValidator,
+        username: usernameSchema,
       },
       getUserInfoTool
     );

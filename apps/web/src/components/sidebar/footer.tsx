@@ -30,14 +30,14 @@ import { Button } from "../ui/button";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-export const Footer = ({ user }: { user: Session["user"] | undefined }) => {
+export const Footer = ({ user }: { user: UserSession | null }) => {
   const router = useRouter();
   const { isMobile } = useSidebar();
   const { theme, setTheme } = useTheme();
 
-  const signOut = async () => {
+  const handleSignOut = async () => {
     try {
       await authClient.signOut({}, { throw: true });
 
@@ -60,24 +60,25 @@ export const Footer = ({ user }: { user: Session["user"] | undefined }) => {
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src={user?.image || undefined}
-                  alt={user?.name || "M"}
+                  src={user?.image ?? undefined}
+                  alt={user?.name ?? "M"}
                 />
                 <AvatarFallback>
-                  {user?.name[0].toUpperCase() || "M"}
+                  {user?.name[0].toUpperCase() ?? "M"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {user?.name || "Guest"}
+                  {user?.name ?? "Guest"}
                 </span>
                 <span className="truncate text-xs">
-                  {user?.email || "Login to get started"}
+                  {user?.email ?? "Login to get started"}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -89,27 +90,29 @@ export const Footer = ({ user }: { user: Session["user"] | undefined }) => {
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage
-                      src={user?.image || undefined}
-                      alt={user?.name}
+                      src={user.image ?? undefined}
+                      alt={user.name}
                     />
                     <AvatarFallback className="rounded-lg">
                       {user?.name[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user?.name}</span>
-                    <span className="truncate text-xs">{user?.email}</span>
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs">{user.email}</span>
                   </div>
                 </div>
               ) : (
-                <Link href="/signup">
+                <Link href="/sign-up">
                   <Button size="lg" className="w-full">
                     Get Started <Fingerprint />
                   </Button>
                 </Link>
               )}
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onClick={() => setTheme(theme === "light" ? "dark" : "light")}
@@ -118,9 +121,11 @@ export const Footer = ({ user }: { user: Session["user"] | undefined }) => {
                 Toggle Theme
               </DropdownMenuItem>
             </DropdownMenuGroup>
+
             {user && (
               <>
                 <DropdownMenuSeparator />
+
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     onClick={() => router.push(`/${user.username}`)}
@@ -141,8 +146,10 @@ export const Footer = ({ user }: { user: Session["user"] | undefined }) => {
                     Liked Blogs
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
+
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut}>
+
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut />
                   Log out
                 </DropdownMenuItem>

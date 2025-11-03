@@ -1,5 +1,4 @@
 import {
-  uuid,
   text,
   jsonb,
   index,
@@ -11,31 +10,90 @@ import {
   primaryKey,
   foreignKey,
   uniqueIndex,
+  type PgTimestampConfig,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { dbDefaults } from "./defaults";
+import { generateSnowflake } from "@/db/snowflake";
+
+const {
+  // Users
+  DEFAULT_NAME,
+  NAME_LENGTH,
+  USERNAME_LENGTH,
+  EMAIL_LENGTH,
+  EMAIL_VERIFIED_DEFAULT,
+  ROLE_LENGTH,
+  DEFAULT_ROLE,
+  BANNED_DEFAULT,
+  // Blogs
+  TITLE_LENGTH,
+  CATEGORY_LENGTH,
+  LIKES_DEFAULT,
+  // BlogImages
+  ORDER_DEFAULT,
+  IP_ADDRESS_LENGTH,
+  // Accounts
+  ACCOUNT_ID_LENGTH,
+  PROVIDER_ID_LENGTH,
+  SCOPE_LENGTH,
+  PASSWORD_LENGTH,
+  USER_AGENT_LENGTH,
+  // Sessions
+  TOKEN_LENGTH,
+  // Verifications
+  IDENTIFIER_LENGTH,
+  VALUE_LENGTH,
+} = dbDefaults;
+
+// Defaults
+const ID_LENGTH = 20;
+const id = varchar("id", { length: ID_LENGTH })
+  .primaryKey()
+  .$defaultFn(() => generateSnowflake())
+  .notNull();
+const timestampConfig: PgTimestampConfig = {
+  precision: 3,
+  mode: "string",
+  withTimezone: true,
+};
+const createdAt = timestamp("created_at", timestampConfig)
+  .$type<string>()
+  .defaultNow()
+  .notNull();
+const updatedAt = timestamp("updated_at", timestampConfig)
+  .$type<string>()
+  .defaultNow()
+  .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+  .notNull();
+const authorName = varchar("author_name", { length: NAME_LENGTH }).notNull();
+const authorUsername = varchar("author_username", {
+  length: USERNAME_LENGTH,
+}).notNull();
+const authorImage = text("author_image");
 
 export const users = pgTable(
   "users",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`)
+    id,
+    name: varchar("name", { length: NAME_LENGTH })
+      .default(DEFAULT_NAME)
       .notNull(),
-    name: varchar("name", { length: 50 }).notNull(),
-    displayUsername: varchar("display_username", { length: 50 }),
-    username: varchar("username", { length: 30 }).notNull(),
-    email: varchar("email", { length: 255 }).notNull(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
+    displayUsername: varchar("display_username", { length: NAME_LENGTH }),
+    username: varchar("username", { length: USERNAME_LENGTH })
+      .unique()
+      .notNull(),
+    email: varchar("email", { length: EMAIL_LENGTH }).notNull(),
+    emailVerified: boolean("email_verified")
+      .default(EMAIL_VERIFIED_DEFAULT)
+      .notNull(),
     image: text("image"),
-    createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
+    createdAt,
+    updatedAt,
+    role: varchar("role", { length: ROLE_LENGTH })
+      .default(DEFAULT_ROLE)
       .notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    role: varchar("role", { length: 10 }).default("user").notNull(),
-    banned: boolean("banned").default(false).notNull(),
+    banned: boolean("banned").default(BANNED_DEFAULT).notNull(),
     banReason: text("ban_reason"),
     banExpires: timestamp("ban_expires"),
   },
@@ -48,28 +106,23 @@ export const users = pgTable(
 export const blogs = pgTable(
   "blogs",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`)
-      .notNull(),
-    title: varchar("title", { length: 100 }).notNull(),
-    slug: varchar("slug", { length: 100 }).notNull(),
+    id,
+    title: varchar("title", { length: TITLE_LENGTH }).notNull(),
     content: jsonb("content").$type<BlogContent>().notNull(),
-    image: text("image").notNull(),
-    category: varchar("category", { length: 50 }).notNull(),
-    userId: uuid("user_id").notNull(),
-    createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    cover: text("cover").notNull(),
+    category: varchar("category", { length: CATEGORY_LENGTH }).notNull(),
+    authorName,
+    authorUsername,
+    authorImage,
+    likes: integer("likes").default(LIKES_DEFAULT).notNull(),
+    userId: varchar("user_id", { length: ID_LENGTH }).notNull(),
+    createdAt,
+    updatedAt,
   },
   (table) => [
-    uniqueIndex("blogs_slug_key").on(table.slug),
     index("blogs_user_idx").on(table.userId),
     index("blogs_category_idx").on(table.category),
+    index("blogs_created_at_idx").on(table.createdAt),
     foreignKey({ columns: [table.userId], foreignColumns: [users.id] })
       .onUpdate("cascade")
       .onDelete("cascade"),
@@ -79,19 +132,15 @@ export const blogs = pgTable(
 export const blogImages = pgTable(
   "blog_images",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`)
-      .notNull(),
-    blogId: uuid("blog_id").notNull(),
-    url: text("url").unique().notNull(),
-    publicId: varchar("public_id").unique().notNull(),
-    order: integer("order").notNull().default(0),
-    createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    id,
+    blogId: varchar("blog_id", { length: ID_LENGTH }).notNull(),
+    url: text("url").notNull(),
+    publicId: varchar("public_id").notNull(),
+    order: integer("order").notNull().default(ORDER_DEFAULT),
+    createdAt,
   },
   (table) => [
+    uniqueIndex("blog_images_order_key").on(table.blogId, table.order),
     foreignKey({ columns: [table.blogId], foreignColumns: [blogs.id] })
       .onUpdate("cascade")
       .onDelete("cascade"),
@@ -101,11 +150,10 @@ export const blogImages = pgTable(
 export const likes = pgTable(
   "likes",
   {
-    userId: uuid("user_id").notNull(),
-    blogId: uuid("blog_id").notNull(),
-    likedAt: timestamp("liked_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    userId: varchar("user_id", { length: ID_LENGTH }).notNull(),
+    blogId: varchar("blog_id", { length: ID_LENGTH }).notNull(),
+    createdAt,
+    updatedAt,
   },
   (table) => [
     primaryKey({ columns: [table.userId, table.blogId] }),
@@ -123,24 +171,20 @@ export const likes = pgTable(
 export const comments = pgTable(
   "comments",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`)
-      .notNull(),
+    id,
     content: text("content").notNull(),
-    userId: uuid("user_id").notNull(),
-    blogId: uuid("blog_id").notNull(),
-    createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    blogId: varchar("blog_id", { length: ID_LENGTH }).notNull(),
+    userId: varchar("user_id", { length: ID_LENGTH }).notNull(),
+    authorName,
+    authorUsername,
+    authorImage,
+    createdAt,
+    updatedAt,
   },
   (table) => [
     index("comments_user_idx").on(table.userId),
     index("comments_blog_idx").on(table.blogId),
+    index("comments_created_at_idx").on(table.createdAt),
     foreignKey({ columns: [table.userId], foreignColumns: [users.id] })
       .onUpdate("cascade")
       .onDelete("cascade"),
@@ -153,33 +197,24 @@ export const comments = pgTable(
 export const accounts = pgTable(
   "accounts",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`)
-      .notNull(),
-    accountId: varchar("account_id", { length: 255 }).notNull(),
-    providerId: varchar("provider_id", { length: 50 }).notNull(),
-    userId: uuid("user_id").notNull(),
+    id,
+    accountId: varchar("account_id", { length: ACCOUNT_ID_LENGTH }).notNull(),
+    providerId: varchar("provider_id", {
+      length: PROVIDER_ID_LENGTH,
+    }).notNull(),
+    userId: varchar("user_id", { length: ID_LENGTH }).notNull(),
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at", {
-      precision: 3,
-      mode: "string",
-    }),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
-      precision: 3,
-      mode: "string",
-    }),
-    scope: varchar("scope", { length: 255 }),
-    password: varchar("password", { length: 255 }),
-    createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", timestampConfig),
+    refreshTokenExpiresAt: timestamp(
+      "refresh_token_expires_at",
+      timestampConfig
+    ),
+    scope: varchar("scope", { length: SCOPE_LENGTH }),
+    password: varchar("password", { length: PASSWORD_LENGTH }),
+    createdAt,
+    updatedAt,
   },
   (table) => [
     uniqueIndex("accounts_provider_key").on(table.providerId, table.accountId),
@@ -193,25 +228,14 @@ export const accounts = pgTable(
 export const sessions = pgTable(
   "sessions",
   {
-    id: uuid("id")
-      .primaryKey()
-      .default(sql`gen_random_uuid()`)
-      .notNull(),
-    userId: uuid("user_id").notNull(),
-    token: varchar("token", { length: 255 }).notNull(),
-    expiresAt: timestamp("expires_at", {
-      precision: 3,
-      mode: "string",
-    }).notNull(),
-    createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    ipAddress: varchar("ip_address", { length: 45 }),
-    userAgent: varchar("user_agent", { length: 512 }),
+    id,
+    userId: varchar("user_id", { length: ID_LENGTH }).notNull(),
+    token: varchar("token", { length: TOKEN_LENGTH }).notNull(),
+    expiresAt: timestamp("expires_at", timestampConfig).notNull(),
+    createdAt,
+    updatedAt,
+    ipAddress: varchar("ip_address", { length: IP_ADDRESS_LENGTH }),
+    userAgent: varchar("user_agent", { length: USER_AGENT_LENGTH }),
     impersonatedBy: text("impersonated_by"),
   },
   (table) => [
@@ -224,21 +248,10 @@ export const sessions = pgTable(
 );
 
 export const verifications = pgTable("verifications", {
-  id: uuid("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`)
-    .notNull(),
-  identifier: varchar("identifier", { length: 255 }).notNull(),
-  value: varchar("value", { length: 255 }).notNull(),
-  expiresAt: timestamp("expires_at", {
-    precision: 3,
-    mode: "string",
-  }).notNull(),
-  createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { precision: 3, mode: "string" })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
-    .notNull(),
+  id,
+  identifier: varchar("identifier", { length: IDENTIFIER_LENGTH }).notNull(),
+  value: varchar("value", { length: VALUE_LENGTH }).notNull(),
+  expiresAt: timestamp("expires_at", timestampConfig).notNull(),
+  createdAt,
+  updatedAt,
 });

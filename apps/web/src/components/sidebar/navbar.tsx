@@ -2,11 +2,11 @@
 
 import {
   Rss,
-  Library,
   BookText,
   PencilRuler,
-  MessageCircleMore,
   type LucideIcon,
+  MessageCircleMore,
+  House,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
   SidebarGroupLabel,
   SidebarMenuButton,
-} from "@/components/ui/sidebar";
+} from "../ui/sidebar";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
@@ -23,12 +23,12 @@ const navLinks: { title: string; url: Route; icon: LucideIcon }[] = [
   {
     title: "Home",
     url: "/",
-    icon: Rss,
+    icon: House,
   },
   {
-    title: "Blogs",
-    url: "/blogs",
-    icon: Library,
+    title: "Feed",
+    url: "/feed",
+    icon: Rss,
   },
   {
     title: "About",
@@ -42,12 +42,12 @@ const navLinks: { title: string; url: Route; icon: LucideIcon }[] = [
   },
   {
     title: "Create",
-    url: "/createblog",
+    url: "/create-blog",
     icon: PencilRuler,
   },
 ];
 
-export function Navbar() {
+export const Navbar = () => {
   const pathname = usePathname();
 
   return (
@@ -58,8 +58,8 @@ export function Navbar() {
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
               tooltip={item.title}
-              asChild
               isActive={item.url === pathname}
+              asChild
             >
               <Link href={item.url}>
                 {item.icon && <item.icon />}
@@ -71,4 +71,4 @@ export function Navbar() {
       </SidebarMenu>
     </SidebarGroup>
   );
-}
+};

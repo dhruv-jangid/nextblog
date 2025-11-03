@@ -4,16 +4,16 @@ import {
   verificationEmailText,
   changeEmailVerificationText,
   deleteAccountVerificationText,
-} from "@/lib/email/texts";
+} from "@/core/mail/mail.constants";
 import { db } from "@/db/index";
-import { redis } from "@/lib/redis";
 import * as schema from "@/db/schema";
-import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { sendEmail } from "@/lib/email/send-email";
 import { admin, username } from "better-auth/plugins";
-import { generateUsername } from "@/actions/handle-user";
+import { MailService } from "@/core/mail/mail.service";
+import { usernameBFCK } from "@/core/cache/cache.keys";
+import { CacheService } from "@/core/cache/cache.service";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 
 export const auth = betterAuth({
@@ -28,7 +28,10 @@ export const auth = betterAuth({
   ],
   appName: "MetaPress",
   account: { encryptOAuthTokens: true },
-  advanced: { cookiePrefix: "metapress", database: { generateId: false } },
+  advanced: {
+    cookiePrefix: "metapress",
+    database: { generateId: false },
+  },
   user: {
     changeEmail: {
       enabled: true,
@@ -37,7 +40,7 @@ export const auth = betterAuth({
         url,
         newEmail,
       }) => {
-        await sendEmail({
+        await MailService.send({
           subject: "Confirm your new email address",
           to: email,
           text: changeEmailVerificationText({ name, newEmail, url }),
@@ -58,13 +61,31 @@ export const auth = betterAuth({
           throw new APIError("TOO_EARLY", { message: "Try again later" });
         }
 
-        await sendEmail({
+        await MailService.send({
           to: email,
           subject: "Delete your MetaPress account",
           text: deleteAccountVerificationText({ name, url }),
         });
       },
     },
+    additionalFields: {
+      username: { type: "string" },
+      role: { type: "string" },
+      banned: { type: "boolean" },
+    },
+  },
+  hooks: {
+    after: createAuthMiddleware(async ({ path, body }) => {
+      if (path.startsWith("/sign-up")) {
+        try {
+          if (body.username) {
+            await CacheService.sAdd(usernameBFCK, body.username.toLowerCase());
+          }
+        } catch (error) {
+          console.error("Failed to add username to cache:", error);
+        }
+      }
+    }),
   },
   emailAndPassword: {
     enabled: true,
@@ -72,7 +93,7 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user: { name, email }, url }) => {
-      await sendEmail({
+      await MailService.send({
         to: email,
         subject: "Reset your MetaPress password",
         text: resetPasswordText({ name, url }),
@@ -83,7 +104,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user: { name, email }, url }) => {
-      await sendEmail({
+      await MailService.send({
         to: email,
         subject: "Verify your MetaPress email",
         text: verificationEmailText({ name, url }),
@@ -94,41 +115,35 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      mapProfileToUser: async ({ login: name }) => {
+      mapProfileToUser: async ({ id }) => {
         return {
-          username: await generateUsername({ name }),
+          username: id + "_gb",
         };
       },
     },
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      mapProfileToUser: async ({ name }) => {
+      mapProfileToUser: async ({ sub }) => {
         return {
-          username: await generateUsername({ name }),
+          username: sub + "_gl",
         };
       },
     },
   },
   secondaryStorage: {
     get: async (key) => {
-      const value = await redis.get(key);
-      return value;
+      return await CacheService.get(key);
     },
     set: async (key, value, ttl) => {
-      if (ttl) {
-        const ttlSeconds = Math.floor(Number(ttl));
-        if (ttlSeconds > 0) {
-          await redis.set(key, value, { EX: ttlSeconds });
-        } else {
-          await redis.set(key, value);
-        }
+      if (ttl && ttl > 0) {
+        await CacheService.set(key, value, ttl);
       } else {
-        await redis.set(key, value);
+        await CacheService.set(key, value);
       }
     },
     delete: async (key) => {
-      await redis.del(key);
+      await CacheService.del(key);
     },
   },
   rateLimit: {
@@ -142,6 +157,6 @@ export const auth = betterAuth({
     },
   },
   session: { cookieCache: { enabled: true } },
-  onAPIError: { errorURL: "/error" },
+  onAPIError: { throw: true },
   telemetry: { enabled: false },
 } satisfies BetterAuthOptions);

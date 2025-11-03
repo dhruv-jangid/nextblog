@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 export default function NotFound() {
@@ -10,22 +8,25 @@ export default function NotFound() {
           return (
             <span
               key={i}
-              className="tracking-tight text-sm text-muted-foreground"
+              className="tracking-tighter text-sm text-muted-foreground"
             >
               NOT FOUND
             </span>
           );
         })}
       </div>
+
       <div className="h-full">
         <div className="text-8xl w-fit ml-12 lg:ml-32 xl:ml-48 leading-20 font-medium">
           <div className="tracking-tighter">NOT</div>
           <div className="tracking-tighter">FOUND</div>
         </div>
-        <div className="text-end text-[14rem] xl:text-[28rem] leading-64 text-input -mr-4 tracking-tighter">
+
+        <div className="text-end text-[14rem] xl:text-[28rem] leading-64 text-input -mr-4 -tracking-widest">
           404
         </div>
-        <div className="text-2xl lg:text-xl xl:text-5xl text-muted-foreground mt-14">
+
+        <div className="text-2xl lg:text-xl xl:text-5xl text-muted-foreground mt-24 tracking-tight">
           YOU DIDN&apos;T DESTROY ANY INJECTION MOULDS, BUT IT LOOKS LIKE
           YOU&apos;RE LOST. DON&apos;T WORRY. YOU CAN HEAD OVER TO THE{" "}
           <Link

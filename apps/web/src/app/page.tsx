@@ -1,81 +1,15 @@
 import "server-only";
-import { db } from "@/db";
-import { redis } from "@/lib/redis";
-import { Grid1 } from "@/components/grid1";
-import { eq, desc, count } from "drizzle-orm";
-import { blogs, users, likes } from "@/db/schema";
+import { Grid } from "@/components/grid";
 import { VerticalList } from "@/components/v-list";
-import { Separator } from "@/components/ui/separator";
+import { CommonService } from "@/core/common/common.service";
 
 export default async function Home() {
-  const cacheKey = "homepage:blogs";
-  const cached = await redis.get(cacheKey);
-
-  let actualBlogs: Blog[];
-  if (cached) {
-    actualBlogs = JSON.parse(cached);
-  } else {
-    const rows = await db
-      .select({
-        id: blogs.id,
-        title: blogs.title,
-        slug: blogs.slug,
-        content: blogs.content,
-        category: blogs.category,
-        image: blogs.image,
-        createdAt: blogs.createdAt,
-        likeCount: count(likes.blogId).as("likeCount"),
-        user: {
-          id: users.id,
-          name: users.name,
-          username: users.username,
-          image: users.image,
-        },
-      })
-      .from(blogs)
-      .innerJoin(users, eq(users.id, blogs.userId))
-      .leftJoin(likes, eq(likes.blogId, blogs.id))
-      .groupBy(blogs.id, users.id)
-      .orderBy(desc(blogs.createdAt))
-      .limit(10);
-
-    const grouped: Record<string, Blog> = {};
-    for (const row of rows) {
-      const key = row.slug;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          id: row.id,
-          title: row.title,
-          slug: row.slug,
-          image: row.image,
-          category: row.category,
-          createdAt: row.createdAt,
-          likeCount: row.likeCount,
-          user: {
-            id: row.user.id,
-            name: row.user.name,
-            username: row.user.username,
-            image: row.user.image,
-          },
-        };
-      }
-    }
-    actualBlogs = Object.values(grouped);
-
-    await redis.set(cacheKey, JSON.stringify(actualBlogs), { EX: 60 });
-  }
-
-  const [Blog1, Blog2, ...remainingBlogs] = actualBlogs;
-
-  const lovedOnes = [...actualBlogs].sort(
-    (a, b) => (b.likeCount || 0) - (a.likeCount || 0)
-  );
+  const [blog1, blog2, ...blogs] = await CommonService.getBlogsFeed();
 
   return (
     <>
-      {actualBlogs.length > 0 ? (
-        <>
+      {blogs.length > 0 ? (
+        <div>
           <section className="flex flex-col xl:flex-row lg:m-8 lg:p-6 bg-accent rounded-b-none lg:rounded-xl lg:border">
             <div className="w-1/2 text-9xl lg:text-[10rem] leading-24 lg:leading-30 pl-8 pt-16 pb-8 lg:pb-16 lg:pl-12 tracking-tight">
               <div>BL</div>
@@ -91,22 +25,15 @@ export default async function Home() {
                 </span>
               </div>
             </div>
-            <VerticalList blogs={[Blog1, Blog2]} />
+
+            <VerticalList blogs={[blog1, blog2]} />
           </section>
-          <div className="text-3xl lg:text-4xl ml-auto text-end tracking-tighter w-xs lg:w-lg border-b border-dashed mt-16 mr-8 lg:mr-16">
-            ... Recent Blogs
-          </div>
-          <Grid1 blogs={remainingBlogs} />
-          <Separator />
-          <div className="text-3xl lg:text-4xl ml-auto text-end tracking-tighter w-xs lg:w-lg border-b border-dashed mt-16 mr-8 lg:mr-16">
-            ... Loved Ones
-          </div>
-          <Grid1 blogs={lovedOnes} />
-        </>
+
+          <Grid blogs={blogs} />
+        </div>
       ) : (
-        <div className="flex justify-center items-center min-h-dvh text-4xl mx-auto">
-          Oops! There are no blogs to display currently, please check back
-          later.
+        <div className="flex justify-center items-center w-xs sm:w-sm lg:w-lg xl:w-4xl text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-balance min-h-dvh tracking-tighter mx-auto">
+          Oops! There are no blogs to display currently, please come back later.
         </div>
       )}
     </>

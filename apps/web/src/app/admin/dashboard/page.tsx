@@ -1,89 +1,33 @@
 import "server-only";
-import { db } from "@/db";
-import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { Grid1 } from "@/components/grid1";
 import { notFound } from "next/navigation";
-import { desc, eq, sql } from "drizzle-orm";
 import { Author } from "@/components/author";
-import { DeleteUserBtn } from "./delete-user";
-import { blogs, users, likes } from "@/db/schema";
+import { AuthService } from "@/core/auth/auth.service";
+import { DeleteUser } from "./_components/delete-user";
 
 export const metadata: Metadata = {
   title: "Admin | Dashboard",
 };
 
 export default async function AdminDashboard() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") {
+  const session = await AuthService.getUserSession();
+  if (!session || session.role !== "admin") {
     notFound();
   }
 
-  const rows = await db
-    .select({
-      id: blogs.id,
-      title: blogs.title,
-      slug: blogs.slug,
-      image: blogs.image,
-      category: blogs.category,
-      createdAt: blogs.createdAt,
-      user: {
-        id: users.id,
-        name: users.name,
-        username: users.username,
-        image: users.image,
-      },
-      likes: {
-        userId: likes.userId,
-        blogId: likes.blogId,
-      },
-    })
-    .from(blogs)
-    .innerJoin(users, eq(users.id, blogs.userId))
-    .leftJoin(likes, eq(likes.blogId, blogs.id))
-    .orderBy(desc(blogs.createdAt));
-
-  const grouped: Record<string, Blog> = {};
-  for (const row of rows) {
-    const key = row.slug;
-
-    if (!grouped[key]) {
-      grouped[key] = {
-        id: row.id,
-        title: row.title,
-        slug: row.slug,
-        image: row.image,
-        category: row.category,
-        createdAt: row.createdAt,
-        user: {
-          id: row.user.id,
-          name: row.user.name,
-          username: row.user.username,
-          image: row.user.image,
-        },
-      };
-    }
-  }
-  const actualBlogs = Object.values(grouped);
-
-  const actualUsers = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      username: users.username,
-      image: users.image,
-      email: users.email,
-      role: users.role,
-      createdAt: users.createdAt,
-      totalBlogs: sql<number>`count(${blogs.id})`,
-      totalLikes: sql<number>`count(distinct ${likes})`,
-    })
-    .from(users)
-    .leftJoin(blogs, eq(users.id, blogs.userId))
-    .leftJoin(likes, eq(likes.blogId, blogs.id))
-    .groupBy(users.id)
-    .orderBy(desc(users.createdAt));
+  const actualUsers = [
+    {
+      id: "demo",
+      name: "demo",
+      username: "demo",
+      image: "demo",
+      email: "demo",
+      role: "demo",
+      createdAt: "demo",
+      totalBlogs: 1,
+      totalLikes: 1,
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-10">
@@ -105,7 +49,7 @@ export default async function AdminDashboard() {
                   name={user.name}
                   username={user.username}
                 />
-                {!(user.role === "admin") && <DeleteUserBtn userId={user.id} />}
+                {!(user.role === "admin") && <DeleteUser userId={user.id} />}
               </div>
               <div className="flex flex-col ml-1.5 gap-1">
                 <span>
@@ -143,7 +87,7 @@ export default async function AdminDashboard() {
       </div>
 
       <h2 className="text-2xl text-end mr-22">Recent Blogs</h2>
-      <Grid1 blogs={actualBlogs} />
+      {/* <Grid blogs={actualBlogs} /> */}
     </div>
   );
 }

@@ -4,7 +4,8 @@
   "tasks": {
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["^dev"]
     },
     "build": {
       "cache": false,
@@ -12,11 +13,16 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
-    "start": { "cache": false },
+    "start": { "cache": false, "dependsOn": ["^start"] },
     "check-types": { "dependsOn": ["^check-types"] },
-    "lint": { "dependsOn": ["^lint"] }
+    "lint": { "dependsOn": ["^lint"] },
+    "in": { "cache": false, "dependsOn": ["^in"] }
   },
   "globalEnv": [
+    "CRON_SECRET",
+    "SNOWFLAKE_WORKER_ID",
+    "SNOWFLAKE_EPOCH",
+    "HASHIDS_SALT",
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",

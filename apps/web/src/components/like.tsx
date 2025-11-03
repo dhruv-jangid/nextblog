@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { Heart } from "lucide-react";
 import { useRef, useState } from "react";
-import { likeBlog } from "@/actions/handle-blog";
+import { likeBlog, unlikeBlog } from "@/core/blog/blog.actions";
 
 export const Like = ({
   blogId,
@@ -15,30 +15,49 @@ export const Like = ({
   isLiked: boolean;
 }) => {
   const [tempLikes, setTempLikes] = useState(likes);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [tempIsLiked, setTempIsLiked] = useState(isLiked);
+  const isRequestInFlight = useRef(false);
+
+  const handleLikeUnlike = async () => {
+    if (isRequestInFlight.current) {
+      return;
+    }
+
+    const newLikedState = !tempIsLiked;
+    const newLikesCount = newLikedState ? tempLikes + 1 : tempLikes - 1;
+
+    const prevLiked = tempIsLiked;
+    const prevLikes = tempLikes;
+
+    setTempIsLiked(newLikedState);
+    setTempLikes(newLikesCount);
+
+    isRequestInFlight.current = true;
+
+    try {
+      if (newLikedState) {
+        await likeBlog({ blogId: blogId });
+      } else {
+        await unlikeBlog({ blogId: blogId });
+      }
+    } catch (error) {
+      setTempIsLiked(prevLiked);
+      setTempLikes(prevLikes);
+
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      isRequestInFlight.current = false;
+    }
+  };
 
   return (
     <div className="flex items-center gap-1 antialiased">
       <div
-        onClick={() => {
-          try {
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-            timeoutRef.current = setTimeout(async () => {
-              await likeBlog({ blogId });
-            }, 300);
-            setTempIsLiked(!tempIsLiked);
-            setTempLikes(tempIsLiked ? tempLikes - 1 : tempLikes + 1);
-          } catch (error) {
-            if (error instanceof Error) {
-              toast.error(error.message);
-            } else {
-              toast.error("Something went wrong");
-            }
-          }
-        }}
+        onClick={handleLikeUnlike}
         className="flex items-center gap-1 text-pretty"
       >
         {tempIsLiked ? (

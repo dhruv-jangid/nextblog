@@ -4,76 +4,117 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { CornerDownRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HorizontalList } from "@/components/h-list";
+import { HorizontalList } from "./_components/list";
 
 export const metadata: Metadata = {
-  title: "MetaPress | About",
+  title: "About",
   description: "About MetaPress",
 };
 
+const myStepsList = [
+  {
+    image: "/images/creative-writing.jpg",
+    tag: "STORYTELLING FIRST",
+    title: "Writing & Creativity",
+    content:
+      "Every great blog begins with an idea. I focus on crafting authentic stories, thoughtful insights, and creative perspectives that connect with readers. From brainstorming to publishing — every word matters here.",
+  },
+  {
+    image: "/images/content-strategy.jpg",
+    tag: "STRATEGY MATTERS",
+    title: "Content Planning",
+    content:
+      "Behind every post is a plan. I create content that’s not only engaging but also meaningful — blending SEO strategy, readability, and originality to reach the right audience at the right time.",
+  },
+  {
+    image: "/images/testing-feedback.jpg",
+    tag: "RESEARCH & FEEDBACK",
+    title: "Testing & Refining",
+    content:
+      "Before hitting publish, every piece goes through feedback loops and fine-tuning. I listen to our readers, analyze what works, and continuously evolve to keep our content valuable and relevant.",
+  },
+  {
+    image: "/images/community.jpg",
+    tag: "READERS FIRST",
+    title: "Community",
+    content:
+      "A blog is more than posts — it’s people. I aim to build a community of readers and writers who share ideas, stories, and support. Your comments and voices are what keep this space alive.",
+  },
+  {
+    image: "/images/growth-analytics.jpg",
+    tag: "CONTINUOUS GROWTH",
+    title: "Learning & Evolving",
+    content:
+      "The digital world changes fast, and so do I. I experiment, learn from analytics, and adapt to trends without losing our voice. Growth isn’t just numbers — it’s improvement in every post we share.",
+  },
+];
+
+const myTakesList = [
+  {
+    image: "/images/nextjs.webp",
+    title: "Next.js",
+  },
+  {
+    image: "/images/vercel.png",
+    title: "Vercel",
+  },
+  {
+    image: "/images/redis.png",
+    title: "Redis",
+  },
+  {
+    image: "/images/docker.png",
+    title: "Docker",
+  },
+  {
+    image: "/images/cloudinary.png",
+    title: "Cloudinary",
+  },
+  {
+    image: "/images/better-auth.webp",
+    title: "Better Auth",
+  },
+  {
+    image: "/images/neondb.webp",
+    title: "Neon Database",
+  },
+  {
+    image: "/images/drizzleorm.jpeg",
+    title: "Drizzle ORM",
+  },
+  {
+    image: "/images/shadcnui.webp",
+    title: "Shadcn UI",
+  },
+];
+
 export default function About() {
   return (
-    <section className=" space-y-4 m-4 lg:m-8">
-      <div className="flex flex-col gap-16 py-6 xl:py-12 bg-accent rounded-xl border">
+    <section className="space-y-4 m-4 lg:m-8">
+      <div className="space-y-16 py-6 xl:py-12 bg-accent rounded-xl border">
         <div className="flex flex-col lg:flex-row justify-between gap-16 lg:gap-0 p-6 md:p-12">
           <div className="space-y-2 font-medium">
             <span className="text-sm tracking-tight text-orange-500">
-              OUR STEPS
+              MY STEPS
             </span>
             <div className="text-5xl xl:text-6xl tracking-tighter">
-              Our creative workflow
+              My creative workflow
               <br />
               it&apos;s not just a vision.
             </div>
           </div>
           <div className="space-y-4 md:space-y-8">
             <div className="w-3xs xl:w-xs text-balance tracking-tight text-orange-500">
-              "We find our work fulfilling when insight, timing, and
-              authenticity come together"
+              "I find my work fulfilling when insight, timing, and authenticity
+              come together"
             </div>
             <span className="text-sm font-semibold">DHRUV JANGID</span>
           </div>
         </div>
-        <HorizontalList
-          data={[
-            {
-              image: "/images/creative-writing.jpg",
-              tag: "STORYTELLING FIRST",
-              title: "Writing & Creativity",
-              content:
-                "Every great blog begins with an idea. We focus on crafting authentic stories, thoughtful insights, and creative perspectives that connect with readers. From brainstorming to publishing — every word matters here.",
-            },
-            {
-              image: "/images/content-strategy.jpg",
-              tag: "STRATEGY MATTERS",
-              title: "Content Planning",
-              content:
-                "Behind every post is a plan. We create content that’s not only engaging but also meaningful — blending SEO strategy, readability, and originality to reach the right audience at the right time.",
-            },
-            {
-              image: "/images/testing-feedback.jpg",
-              tag: "RESEARCH & FEEDBACK",
-              title: "Testing & Refining",
-              content:
-                "Before hitting publish, every piece goes through feedback loops and fine-tuning. We listen to our readers, analyze what works, and continuously evolve to keep our content valuable and relevant.",
-            },
-            {
-              image: "/images/community.jpg",
-              tag: "READERS FIRST",
-              title: "Community",
-              content:
-                "A blog is more than posts — it’s people. We aim to build a community of readers and writers who share ideas, stories, and support. Your comments and voices are what keep this space alive.",
-            },
-            {
-              image: "/images/growth-analytics.jpg",
-              tag: "CONTINUOUS GROWTH",
-              title: "Learning & Evolving",
-              content:
-                "The digital world changes fast, and so do we. We experiment, learn from analytics, and adapt to trends without losing our voice. Growth isn’t just numbers — it’s improvement in every post we share.",
-            },
-          ]}
-        />
+
+        <HorizontalList data={myStepsList} />
       </div>
+
       <div className="flex flex-col lg:flex-row overflow-hidden px-4 lg:px-8 -mt-4">
         <div className="relative aspect-square w-full lg:w-1/2 border border-t-0 rounded-xl rounded-t-none overflow-hidden">
           <Image
@@ -95,26 +136,28 @@ export default function About() {
           </div>
           <div className="leading-snug max-w-sm my-2">
             From the first spark of an idea to the final published piece,
-            creativity drives everything we do. Each blog post is crafted
-            through exploration, design, and a touch of innovation — blending
-            storytelling with modern digital tools. We believe in experimenting,
-            learning, and evolving with every article we write.
+            creativity drives everything I do. Each blog post is crafted through
+            exploration, design, and a touch of innovation — blending
+            storytelling with modern digital tools. I believe in experimenting,
+            learning, and evolving with every article I write.
           </div>
-          <Link href="/contact">
-            <Button size="lg">
-              Contact Us <CornerDownRight />
-            </Button>
-          </Link>
+          <Button size="lg" className="w-max" asChild>
+            <Link href="/contact">
+              Contact Us
+              <CornerDownRight />
+            </Link>
+          </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-16 py-6 xl:py-12 bg-accent rounded-xl rounded-b-none -mb-8 border border-b-0">
+
+      <div className="space-y-16 py-6 xl:py-12 bg-accent rounded-xl rounded-b-none -mb-8 border border-b-0">
         <div className="flex flex-col lg:flex-row justify-between gap-16 lg:gap-0 p-6 md:p-12">
           <div className="space-y-2 font-medium">
             <span className="text-sm tracking-tight text-orange-500">
-              OUR COMMUNITY
+              MY TAKES
             </span>
             <div className="text-5xl xl:text-6xl tracking-tighter">
-              Not just a team,
+              Not just an IDE,
               <br />
               but a big family.
             </div>
@@ -122,44 +165,14 @@ export default function About() {
           <div className="space-y-4 md:space-y-8">
             <div className="w-3xs xl:w-xs text-balance tracking-tight text-orange-500">
               "The real magic happens when insight meets timing — and everything
-              feels true to who we are"
+              feels true to who I am"
             </div>
             <span className="text-sm font-semibold">DHRUV JANGID</span>
           </div>
         </div>
-        <HorizontalList
-          data={[
-            {
-              image: "/images/me.png",
-              title: "Me",
-            },
-            {
-              image: "/images/mark-zuckerberg.jpg",
-              title: "Zuckerberg",
-            },
-            {
-              image: "/images/tim-cook.jpg",
-              title: "Tim Cook",
-            },
-            {
-              image: "/images/elon-musk.jpg",
-              title: "Elon Musk",
-            },
-            {
-              image: "/images/jeff-bezos.jpg",
-              title: "Jeff Bezos",
-            },
-            {
-              image: "/images/sundar-pichai.jpg",
-              title: "Sundar Pichai",
-            },
-            {
-              image: "/images/satya-nadella.jpg",
-              title: "Satya Nadella",
-            },
-          ]}
-          imageOnly
-        />
+
+        <HorizontalList data={myTakesList} imageOnly />
+
         <div className="flex flex-col lg:flex-row items-end gap-4 w-full overflow-hidden">
           <div className="relative w-full h-96 xl:h-132 2xl:h-172 xl:w-7/12">
             <Image
@@ -182,6 +195,7 @@ export default function About() {
             />
           </div>
         </div>
+
         <div className="flex flex-col xl:flex-row justify-between gap-16 xl:gap-0 p-4 xl:px-12 xl:py-36">
           <div className="space-y-36 xl:space-y-24">
             <div className="relative">
@@ -197,7 +211,7 @@ export default function About() {
               </span>
             </div>
             <div className="inline-flex">
-              <div className="relative aspect-[3/4] w-24">
+              <div className="relative aspect-3/4 w-24">
                 <Image
                   src="/images/me.png"
                   alt="Me"

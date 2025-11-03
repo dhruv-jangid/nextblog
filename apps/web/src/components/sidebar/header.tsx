@@ -1,14 +1,8 @@
-"use client";
-
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "../ui/sidebar";
 
-export function Header() {
+export const Header = () => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -22,16 +16,14 @@ export function Header() {
               src="/images/logo.png"
               alt="MetaPress Logo"
               className="dark:invert aspect-square"
-              width={24}
-              height={24}
+              width={18}
+              height={18}
               priority
             />
-            <span className="text-lg tracking-tight font-medium mt-0.5">
-              MetaPress
-            </span>
+            <span className="text-base tracking-tight mt-0.5">MetaPress</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );
-}
+};
